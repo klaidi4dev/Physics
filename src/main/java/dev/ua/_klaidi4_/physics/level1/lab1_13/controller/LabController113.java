@@ -306,7 +306,10 @@ public class LabController113 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         Map<Double, List<Double>> groupedF = new TreeMap<>(Collections.reverseOrder());
         double totalSumF = 0;
 

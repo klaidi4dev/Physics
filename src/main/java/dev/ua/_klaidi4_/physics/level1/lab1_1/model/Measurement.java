@@ -14,6 +14,5 @@ public class Measurement {
     private double s1;
     private double s2;
     private double time;
-    private double accel;
     private double gravity;
 }

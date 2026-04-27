@@ -24,11 +24,13 @@ public class LabController17 extends BaseLabController {
     private ObservableList<Measurement> data;
     private int idCounter = 1;
     private TextField mField;
-    private TextField m1Field;
-    private TextField bigRField;
-    private TextField rField;
     private TextField hField;
-    private TextField i0Field;
+    private TextField rField;
+    private TextField lField;
+    private TextField dField;
+    private TextField m1Field;
+    private TextField l0Field;
+    private TextField r0Field;
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
@@ -36,10 +38,11 @@ public class LabController17 extends BaseLabController {
     private Label liveTimeLabel;
     private Queue<AutoTestParam> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
+
     private static class AutoTestParam {
-        double m, bigR;
-        AutoTestParam(double m, double bigR) {
-            this.m = m; this.bigR = bigR;
+        double m, r;
+        AutoTestParam(double m, double r) {
+            this.m = m; this.r = r;
         }
     }
 
@@ -65,48 +68,59 @@ public class LabController17 extends BaseLabController {
         Label title = new Label("Система управління (Лаб 1-7)");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
-        TitledPane labPane = new TitledPane();
-        labPane.setText("Параметри маятника");
-        labPane.setCollapsible(true);
-        labPane.setExpanded(true);
+        TitledPane labPane1 = new TitledPane();
+        labPane1.setText("Таблиця 1: Падіння вантажу");
+        labPane1.setCollapsible(true);
+        labPane1.setExpanded(true);
+        VBox paramsBox1 = new VBox(12);
+        paramsBox1.setPadding(new Insets(5));
 
-        VBox paramsBox = new VBox(12);
-        paramsBox.setPadding(new Insets(5));
+        mField = new TextField("0.045");
+        hField = new TextField("0.45");
+        rField = new TextField("0.042");
 
-        mField = new TextField("0.050");
-        m1Field = new TextField("0.150");
-        bigRField = new TextField("0.10");
-        rField = new TextField("0.02");
-        hField = new TextField("1.0");
-        i0Field = new TextField("0.001");
+        paramsBox1.getChildren().addAll(
+                createInputGroup("Маса вантажу m (кг):", mField),
+                createInputGroup("Висота падіння H (м):", hField),
+                createInputGroup("Радіус диска r (м):", rField)
+        );
+        labPane1.setContent(paramsBox1);
+
+        TitledPane labPane2 = new TitledPane();
+        labPane2.setText("Таблиця 2: Геометрія хрестовини");
+        labPane2.setCollapsible(true);
+        labPane2.setExpanded(false);
+        VBox paramsBox2 = new VBox(12);
+        paramsBox2.setPadding(new Insets(5));
+
+        lField = new TextField("0.25");
+        dField = new TextField("0.005");
+        m1Field = new TextField("0.2");
+        l0Field = new TextField("0.035");
+        r0Field = new TextField("0.215");
+
+        paramsBox2.getChildren().addAll(
+                createInputGroup("Довжина стержня l (м):", lField),
+                createInputGroup("Діаметр стержня D (м):", dField),
+                createInputGroup("Маса тягарця m1 (кг):", m1Field),
+                createInputGroup("Довжина тягарця l0 (м):", l0Field),
+                createInputGroup("Відстань R0 (м):", r0Field)
+        );
+        labPane2.setContent(paramsBox2);
 
         mField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-        m1Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-        bigRField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-        rField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         hField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-
-        paramsBox.getChildren().addAll(
-                createInputGroup("Маса падаючого вантажу m (кг):", mField),
-                createInputGroup("Маса 1 тягарця на хрестовині m1 (кг):", m1Field),
-                createInputGroup("Відстань тягарців від осі R (м):", bigRField),
-                createInputGroup("Радіус шківа r (м):", rField),
-                createInputGroup("Висота падіння h (м):", hField),
-                createInputGroup("Момент інерції порожнього I0 (кг·м²):", i0Field)
-        );
-
-        ScrollPane scrollParams = new ScrollPane(paramsBox);
-        scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(280);
-        scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
-        labPane.setContent(scrollParams);
+        rField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        lField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        r0Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        l0Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
 
         startBtn = new Button("▶ ВІДПУСТИТИ ВАНТАЖ");
         startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
         startBtn.setOnAction(e -> startManual());
 
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (5 дослідів)");
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (6 дослідів)");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
         autoBtn.setMaxWidth(Double.MAX_VALUE);
         autoBtn.setOnAction(e -> startAuto());
@@ -121,7 +135,11 @@ public class LabController17 extends BaseLabController {
             liveTimeLabel.setText("t = 0.000 с");
         });
 
-        leftPanel.getChildren().addAll(title, labPane, startBtn, autoBtn, clearBtn);
+        ScrollPane leftScroll = new ScrollPane(new VBox(8, title, labPane1, labPane2, startBtn, autoBtn, clearBtn));
+        leftScroll.setFitToWidth(true);
+        leftScroll.setStyle("-fx-background-color: transparent;");
+
+        leftPanel.getChildren().add(leftScroll);
 
         canvas = new OberbeckCanvas(600, 440);
 
@@ -159,20 +177,20 @@ public class LabController17 extends BaseLabController {
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         TableColumn<Measurement, Double> mCol = new TableColumn<>("m (кг)");
         mCol.setCellValueFactory(new PropertyValueFactory<>("m"));
-        TableColumn<Measurement, Double> rCol = new TableColumn<>("R (м)");
-        rCol.setCellValueFactory(new PropertyValueFactory<>("bigR"));
+        TableColumn<Measurement, Double> rCol = new TableColumn<>("r (м)");
+        rCol.setCellValueFactory(new PropertyValueFactory<>("r"));
+        TableColumn<Measurement, Double> hCol = new TableColumn<>("H (м)");
+        hCol.setCellValueFactory(new PropertyValueFactory<>("h"));
         TableColumn<Measurement, Double> tCol = new TableColumn<>("t (с)");
         tCol.setCellValueFactory(new PropertyValueFactory<>("time"));
-        TableColumn<Measurement, Double> aCol = new TableColumn<>("a (м/с²)");
-        aCol.setCellValueFactory(new PropertyValueFactory<>("accel"));
         TableColumn<Measurement, Double> expCol = new TableColumn<>("I експ (кг·м²)");
         expCol.setCellValueFactory(new PropertyValueFactory<>("expI"));
         TableColumn<Measurement, Double> theoCol = new TableColumn<>("I теор (кг·м²)");
         theoCol.setCellValueFactory(new PropertyValueFactory<>("theoI"));
 
-        table.getColumns().addAll(idCol, mCol, rCol, tCol, aCol, expCol, theoCol);
+        table.getColumns().addAll(idCol, mCol, rCol, hCol, tCol, expCol, theoCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setPrefHeight(130);
+        table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
         VBox bottomPanel = new VBox(5, table, statsBox);
@@ -188,7 +206,9 @@ public class LabController17 extends BaseLabController {
     private void applyPhysicsSettings() {
         try {
             double r = Double.parseDouble(rField.getText());
-            double bigR = Double.parseDouble(bigRField.getText());
+            double R0 = Double.parseDouble(r0Field.getText());
+            double l0 = Double.parseDouble(l0Field.getText());
+            double bigR = R0 + l0/2; // Формула 9
             double h = Double.parseDouble(hField.getText());
             canvas.setParameters(r, bigR, h);
         } catch (NumberFormatException ignored) {}
@@ -199,17 +219,20 @@ public class LabController17 extends BaseLabController {
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
         mField.setDisable(disable);
-        m1Field.setDisable(disable);
-        bigRField.setDisable(disable);
-        rField.setDisable(disable);
         hField.setDisable(disable);
-        i0Field.setDisable(disable);
+        rField.setDisable(disable);
+        lField.setDisable(disable);
+        dField.setDisable(disable);
+        m1Field.setDisable(disable);
+        l0Field.setDisable(disable);
+        r0Field.setDisable(disable);
     }
 
     private void startManual() {
         try {
             Double.parseDouble(mField.getText());
-            Double.parseDouble(bigRField.getText());
+            Double.parseDouble(hField.getText());
+            Double.parseDouble(rField.getText());
             isAutoRunning = false;
             runSimulation();
         } catch (Exception e) {
@@ -222,12 +245,12 @@ public class LabController17 extends BaseLabController {
         idCounter = 1;
         updateStats();
         autoQueue.clear();
-
-        autoQueue.add(new AutoTestParam(0.05, 0.10));
-        autoQueue.add(new AutoTestParam(0.05, 0.15));
-        autoQueue.add(new AutoTestParam(0.08, 0.15));
-        autoQueue.add(new AutoTestParam(0.10, 0.15));
-        autoQueue.add(new AutoTestParam(0.10, 0.20));
+        autoQueue.add(new AutoTestParam(0.045, 0.042));
+        autoQueue.add(new AutoTestParam(0.045, 0.042));
+        autoQueue.add(new AutoTestParam(0.045, 0.042));
+        autoQueue.add(new AutoTestParam(0.065, 0.021));
+        autoQueue.add(new AutoTestParam(0.065, 0.021));
+        autoQueue.add(new AutoTestParam(0.065, 0.021));
 
         isAutoRunning = true;
         processNextAuto();
@@ -243,7 +266,7 @@ public class LabController17 extends BaseLabController {
         }
         AutoTestParam param = autoQueue.poll();
         mField.setText(String.valueOf(param.m));
-        bigRField.setText(String.valueOf(param.bigR));
+        rField.setText(String.valueOf(param.r));
         applyPhysicsSettings();
         runSimulation();
     }
@@ -257,26 +280,37 @@ public class LabController17 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: cyan;");
 
         double m = Double.parseDouble(mField.getText());
-        double m1 = Double.parseDouble(m1Field.getText());
-        double R = Double.parseDouble(bigRField.getText());
-        double r = Double.parseDouble(rField.getText());
         double h = Double.parseDouble(hField.getText());
-        double I0 = Double.parseDouble(i0Field.getText());
+        double r = Double.parseDouble(rField.getText());
+        double l = Double.parseDouble(lField.getText());
+        double D = Double.parseDouble(dField.getText());
+        double m1 = Double.parseDouble(m1Field.getText());
+        double l0 = Double.parseDouble(l0Field.getText());
+        double R0 = Double.parseDouble(r0Field.getText());
+        double rho = 7800;
+        double V = (Math.PI * D * D * l) / 4.0;
+        double m2 = rho * V;
 
-        currentTheoI = I0 + 4 * m1 * R * R;
+        double R_dist = R0 + l0 / 2.0;
+
+        currentTheoI = 4 * (m2 * l * l / 3.0) + 4 * (m1 * R_dist * R_dist);
         double a = (m * 9.81) / (m + currentTheoI / (r * r));
-
         currentExactTime = Math.sqrt(2 * h / a);
-        canvas.startSimulation(currentExactTime);
+
+        double speedMult = 1.0;
+        if(currentExactTime > 5.0) speedMult = currentExactTime / 3.0;
+
+        canvas.startSimulation(currentExactTime, speedMult);
 
         final double exactFinalTime = currentExactTime;
+        final double mult = speedMult;
         new Thread(() -> {
             long start = System.currentTimeMillis();
-            long targetMs = (long) (exactFinalTime * 1000);
+            long targetMs = (long) ((exactFinalTime / mult) * 1000);
 
             while (System.currentTimeMillis() - start < targetMs) {
                 long elapsed = System.currentTimeMillis() - start;
-                double seconds = elapsed / 1000.0;
+                double seconds = (elapsed / 1000.0) * mult;
                 Platform.runLater(() -> liveTimeLabel.setText(String.format("t = %.3f с", seconds)));
                 try { Thread.sleep(30); } catch (InterruptedException ignored) {}
             }
@@ -285,23 +319,20 @@ public class LabController17 extends BaseLabController {
 
     private void finishMeasurement() {
         double m = Double.parseDouble(mField.getText());
-        double R = Double.parseDouble(bigRField.getText());
-        double r = Double.parseDouble(rField.getText());
         double h = Double.parseDouble(hField.getText());
-        double measuredTime = currentExactTime + (Math.random() - 0.5) * 0.08;
+        double r = Double.parseDouble(rField.getText());
+        double measuredTime = currentExactTime + (Math.random() - 0.5) * 0.16;
         if (measuredTime <= 0) measuredTime = 0.001;
 
         liveTimeLabel.setText(String.format("t = %.3f с", measuredTime));
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
 
-        double expA = (2 * h) / (measuredTime * measuredTime);
-        double expI = m * r * r * ((9.81 / expA) - 1);
+        double expI = m * r * r * ((9.81 * measuredTime * measuredTime) / (2 * h) - 1);
 
         Measurement meas = new Measurement(
-                idCounter++, m, R,
-                Math.round(measuredTime * 1000.0) / 1000.0,
-                Math.round(expA * 1000.0) / 1000.0,
+                idCounter++, m, r, h,
+                Math.round(measuredTime * 100.0) / 100.0,
                 Math.round(expI * 100000.0) / 100000.0,
                 Math.round(currentTheoI * 100000.0) / 100000.0
         );
@@ -323,7 +354,10 @@ public class LabController17 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         double sumEps = 0;
         double sumDelta = 0;
 
@@ -338,10 +372,11 @@ public class LabController17 extends BaseLabController {
 
         String conclusion = String.format(
                 "ОБРОБКА РЕЗУЛЬТАТІВ ЕКСПЕРИМЕНТУ ТА ЇХ АНАЛІЗ:\n" +
-                        "1. Експериментальні моменти інерції маятника I_експ для різних мас m та відстаней R розраховані за формулою (4) і занесені до таблиці.\n" +
-                        "2. Середня абсолютна похибка експерименту: ΔI = %.5f кг·м². Відносна похибка: ε = %.1f %%.\n" +
-                        "3. Теоретичні значення моменту інерції I_теор розраховані за формулою (7) і подані в останній колонці таблиці.\n" +
-                        "4. ПОРІВНЯННЯ ТА ВИСНОВОК: Результати, одержані експериментальним та теоретичним шляхом, збігаються. Незначні відхилення зумовлені тертям у підшипниках осі та опором повітря, якими нехтує ідеальна модель.",
+                        "1. Експериментальні моменти інерції I_експ розраховані за формулою (4) і занесені до таблиці.\n" +
+                        "2. Теоретичний момент інерції маятника I_теор розрахований за формулою (7).\n" +
+                        "3. Середня абсолютна похибка: ΔI = %.5f кг·м². Середня відносна похибка: ε = %.1f %%.\n\n" +
+                        "ПОРІВНЯННЯ ТА ВИСНОВОК: Результати, одержані експериментальним та теоретичним шляхами, " +
+                        "збігаються в межах похибки. Відхилення зумовлені тертям у підшипниках осі хрестовини, тертям нитки та опором повітря.",
                 avgDelta, avgEps
         );
 

@@ -346,7 +346,10 @@ public class LabController12 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         List<Measurement> mathData = new ArrayList<>();
         List<Measurement> physData = new ArrayList<>();
 

@@ -1,3 +1,7 @@
+// ============================================================================
+// Файл: src/main/java/dev/ua/_klaidi4_/physics/core/controller/BaseLabController.java
+// ============================================================================
+
 package dev.ua._klaidi4_.physics.core.controller;
 
 import dev.ua._klaidi4_.physics.core.LabModule;
@@ -7,6 +11,7 @@ import javafx.animation.Timeline;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -17,7 +22,8 @@ import javafx.util.Duration;
 public abstract class BaseLabController extends BorderPane implements LabModule {
 
     protected VBox leftPanel;
-    protected Label finalResultLabel;
+    protected Label finalResultLabel = new Label("Обробка результатів: -");
+    protected boolean showCalculations = true;
 
     @Override
     public Pane getRoot() {
@@ -56,13 +62,36 @@ public abstract class BaseLabController extends BorderPane implements LabModule 
         VBox statsBox = new VBox(8);
         statsBox.setStyle("-fx-background-color: #e3f2fd; -fx-padding: 12; -fx-border-color: #90caf9; -fx-border-width: 2; -fx-border-radius: 5;");
 
-        finalResultLabel = new Label("Обробка результатів: -");
-        finalResultLabel.setFont(Font.font("System", FontWeight.BOLD, 13));
-        finalResultLabel.setWrapText(true);
-        finalResultLabel.setMaxWidth(Double.MAX_VALUE);
+        Button showResultsBtn = new Button("📊 Показати результати обробки");
+        showResultsBtn.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        showResultsBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 6; -fx-padding: 8;");
+        showResultsBtn.setMaxWidth(Double.MAX_VALUE);
 
-        statsBox.getChildren().add(finalResultLabel);
+        showResultsBtn.setOnMouseEntered(e -> showResultsBtn.setStyle("-fx-background-color: #2563eb; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 6; -fx-padding: 8;"));
+        showResultsBtn.setOnMouseExited(e -> showResultsBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 6; -fx-padding: 8;"));
+
+        showResultsBtn.setOnAction(e -> showResultsWindow());
+
+        statsBox.getChildren().add(showResultsBtn);
         return statsBox;
+    }
+
+    private void showResultsWindow() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Статистика та розрахунки");
+        alert.setHeaderText("Результати обробки експерименту");
+
+        TextArea textArea = new TextArea(finalResultLabel.getText());
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setFont(Font.font("Consolas", 14));
+
+        textArea.setPrefHeight(400);
+        textArea.setPrefWidth(700);
+        textArea.setFocusTraversable(false);
+
+        alert.getDialogPane().setContent(textArea);
+        alert.showAndWait();
     }
 
     protected VBox createInputGroup(String labelText, javafx.scene.control.Control control) {
@@ -79,6 +108,7 @@ public abstract class BaseLabController extends BorderPane implements LabModule 
 
         return new VBox(4, label, control);
     }
+
     protected void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);

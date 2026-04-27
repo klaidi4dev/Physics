@@ -26,15 +26,27 @@ public class LabController110 extends BaseLabController {
     private ComboBox<String> bodyCombo;
     private TextField mField;
     private TextField rField;
+    private TextField hField;
     private TextField sField;
-    private Slider angleSlider;
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
     private Label liveStatusLabel;
     private Label liveTimeLabel;
-    private Queue<Integer> autoQueue = new LinkedList<>();
+    private Queue<AutoTestParam> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
+
+    private static class AutoTestParam {
+        int bodyIdx;
+        double m, r, h, s;
+        AutoTestParam(int bodyIdx, double m, double r, double h, double s) {
+            this.bodyIdx = bodyIdx;
+            this.m = m;
+            this.r = r;
+            this.h = h;
+            this.s = s;
+        }
+    }
 
     public LabController110() {
         initUI();
@@ -66,56 +78,43 @@ public class LabController110 extends BaseLabController {
         paramsBox.setPadding(new Insets(5));
 
         bodyCombo = new ComboBox<>(FXCollections.observableArrayList(
-                "Суцільний циліндр (Диск)",
+                "Суцільний циліндр",
                 "Суцільна куля",
-                "Порожнистий циліндр (Кільце)"
+                "Порожнистий циліндр"
         ));
-        bodyCombo.getSelectionModel().selectFirst();
+        bodyCombo.getSelectionModel().select(1);
 
-        mField = new TextField("0.400");
-        rField = new TextField("0.05");
-        sField = new TextField("1.0");
+        mField = new TextField("0.080");
+        hField = new TextField("0.24");
+        sField = new TextField("1.21");
+        rField = new TextField("0.0212");
 
         bodyCombo.setOnAction(e -> applyPhysicsSettings());
         mField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         rField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        hField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         sField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
 
         paramsBox.getChildren().addAll(
                 createInputGroup("Досліджуване тіло:", bodyCombo),
                 createInputGroup("Маса тіла m (кг):", mField),
                 createInputGroup("Радіус тіла R (м):", rField),
+                createInputGroup("Висота площини h (м):", hField),
                 createInputGroup("Шлях скочування S (м):", sField)
         );
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
         scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(220);
+        scrollParams.setPrefViewportHeight(280);
         scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         labPane.setContent(scrollParams);
-
-        TitledPane physicsPane = new TitledPane();
-        physicsPane.setText("Налаштування площини");
-        VBox physBox = new VBox(5);
-        physBox.setPadding(new Insets(5));
-
-        Label angleLabel = new Label("Кут нахилу α: 15.0°");
-        angleSlider = new Slider(5, 45, 15);
-        angleSlider.setShowTickMarks(true);
-        angleSlider.setShowTickLabels(true);
-        angleSlider.valueProperty().addListener((o, ov, nv) -> {
-            angleLabel.setText(String.format("Кут нахилу α: %.1f°", nv.doubleValue()));
-            applyPhysicsSettings();
-        });
-        physBox.getChildren().addAll(angleLabel, angleSlider);
-        physicsPane.setContent(physBox);
 
         startBtn = new Button("▶ ВІДПУСТИТИ ТІЛО");
         startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
         startBtn.setOnAction(e -> startManual());
 
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (Всі 3 тіла)");
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (По таблиці)");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
         autoBtn.setMaxWidth(Double.MAX_VALUE);
         autoBtn.setOnAction(e -> startAuto());
@@ -129,7 +128,7 @@ public class LabController110 extends BaseLabController {
             updateStats();
         });
 
-        leftPanel.getChildren().addAll(title, labPane, physicsPane, startBtn, autoBtn, clearBtn);
+        leftPanel.getChildren().addAll(title, labPane, startBtn, autoBtn, clearBtn);
 
         canvas = new RollingCanvas(600, 440);
 
@@ -165,22 +164,26 @@ public class LabController110 extends BaseLabController {
 
         TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        TableColumn<Measurement, String> bodyCol = new TableColumn<>("Досліджуване тіло");
+        TableColumn<Measurement, String> bodyCol = new TableColumn<>("Тіло");
         bodyCol.setCellValueFactory(new PropertyValueFactory<>("bodyType"));
-        TableColumn<Measurement, Double> mCol = new TableColumn<>("m (кг)");
-        mCol.setCellValueFactory(new PropertyValueFactory<>("m"));
-        TableColumn<Measurement, Double> rCol = new TableColumn<>("R (м)");
-        rCol.setCellValueFactory(new PropertyValueFactory<>("r"));
         TableColumn<Measurement, Double> tCol = new TableColumn<>("t (с)");
         tCol.setCellValueFactory(new PropertyValueFactory<>("time"));
-        TableColumn<Measurement, Double> eCol = new TableColumn<>("I експ (кг·м²)");
+        TableColumn<Measurement, Double> mCol = new TableColumn<>("m (кг)");
+        mCol.setCellValueFactory(new PropertyValueFactory<>("m"));
+        TableColumn<Measurement, Double> hCol = new TableColumn<>("h (м)");
+        hCol.setCellValueFactory(new PropertyValueFactory<>("h"));
+        TableColumn<Measurement, Double> sCol = new TableColumn<>("S (м)");
+        sCol.setCellValueFactory(new PropertyValueFactory<>("s"));
+        TableColumn<Measurement, Double> rCol = new TableColumn<>("R (м)");
+        rCol.setCellValueFactory(new PropertyValueFactory<>("r"));
+        TableColumn<Measurement, Double> eCol = new TableColumn<>("I експ");
         eCol.setCellValueFactory(new PropertyValueFactory<>("expI"));
-        TableColumn<Measurement, Double> tICol = new TableColumn<>("I теор (кг·м²)");
+        TableColumn<Measurement, Double> tICol = new TableColumn<>("I теор");
         tICol.setCellValueFactory(new PropertyValueFactory<>("theoI"));
 
-        table.getColumns().addAll(idCol, bodyCol, mCol, rCol, tCol, eCol, tICol);
+        table.getColumns().addAll(idCol, bodyCol, tCol, mCol, hCol, sCol, rCol, eCol, tICol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setPrefHeight(140);
+        table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
         VBox bottomPanel = new VBox(5, table, statsBox);
@@ -194,8 +197,9 @@ public class LabController110 extends BaseLabController {
     private void applyPhysicsSettings() {
         try {
             int bodyIndex = bodyCombo.getSelectionModel().getSelectedIndex();
-            double angle = angleSlider.getValue();
-            canvas.setParameters(bodyIndex, angle);
+            double h = Double.parseDouble(hField.getText());
+            double s = Double.parseDouble(sField.getText());
+            canvas.setParameters(bodyIndex, h, s);
         } catch (Exception ignored) {}
     }
 
@@ -206,13 +210,16 @@ public class LabController110 extends BaseLabController {
         bodyCombo.setDisable(disable);
         mField.setDisable(disable);
         rField.setDisable(disable);
+        hField.setDisable(disable);
         sField.setDisable(disable);
-        angleSlider.setDisable(disable);
     }
 
     private void startManual() {
         try {
             Double.parseDouble(mField.getText());
+            Double.parseDouble(rField.getText());
+            Double.parseDouble(hField.getText());
+            Double.parseDouble(sField.getText());
             isAutoRunning = false;
             runSimulation(bodyCombo.getSelectionModel().getSelectedIndex());
         } catch (Exception e) {
@@ -225,9 +232,13 @@ public class LabController110 extends BaseLabController {
         idCounter = 1;
         updateStats();
         autoQueue.clear();
-        autoQueue.add(0);
-        autoQueue.add(1);
-        autoQueue.add(2);
+
+        autoQueue.add(new AutoTestParam(1, 0.080, 0.0212, 0.24, 1.21));
+        autoQueue.add(new AutoTestParam(1, 0.080, 0.0212, 0.24, 1.21));
+        autoQueue.add(new AutoTestParam(1, 0.080, 0.0212, 0.24, 1.21));
+        autoQueue.add(new AutoTestParam(0, 0.089, 0.0113, 0.24, 1.21));
+        autoQueue.add(new AutoTestParam(0, 0.089, 0.0113, 0.24, 1.21));
+        autoQueue.add(new AutoTestParam(0, 0.089, 0.0113, 0.24, 1.21));
 
         isAutoRunning = true;
         processNextAuto();
@@ -241,10 +252,15 @@ public class LabController110 extends BaseLabController {
             setControlsDisable(false);
             return;
         }
-        int nextBody = autoQueue.poll();
-        bodyCombo.getSelectionModel().select(nextBody);
+        AutoTestParam param = autoQueue.poll();
+        bodyCombo.getSelectionModel().select(param.bodyIdx);
+        mField.setText(String.valueOf(param.m));
+        rField.setText(String.valueOf(param.r));
+        hField.setText(String.valueOf(param.h));
+        sField.setText(String.valueOf(param.s));
+
         applyPhysicsSettings();
-        runSimulation(nextBody);
+        runSimulation(param.bodyIdx);
     }
 
     private void runSimulation(int bodyIndex) {
@@ -254,22 +270,21 @@ public class LabController110 extends BaseLabController {
 
         double m = Double.parseDouble(mField.getText());
         double R = Double.parseDouble(rField.getText());
+        double h = Double.parseDouble(hField.getText());
         double S = Double.parseDouble(sField.getText());
-        double angleRad = Math.toRadians(angleSlider.getValue());
 
         double iTheory = 0;
         if (bodyIndex == 0) iTheory = 0.5 * m * R * R;
         else if (bodyIndex == 1) iTheory = 0.4 * m * R * R;
         else if (bodyIndex == 2) iTheory = 1.0 * m * R * R;
 
-        double a = (9.81 * Math.sin(angleRad)) / (1 + iTheory / (m * R * R));
-
+        double a = (9.81 * (h / S)) / (1 + iTheory / (m * R * R));
         final double exactTime = Math.sqrt(2 * S / a);
-
-        final double finalMeasuredTime = exactTime + (Math.random() - 0.5) * 0.06;
+        final double finalMeasuredTime = exactTime + (Math.random() - 0.5) * 0.04;
         final double finalITheory = iTheory;
 
-        canvas.setOnFinishCallback(() -> Platform.runLater(() -> finishMeasurement(bodyIndex, finalMeasuredTime, finalITheory)));        canvas.startSimulation(finalMeasuredTime);
+        canvas.setOnFinishCallback(() -> Platform.runLater(() -> finishMeasurement(bodyIndex, finalMeasuredTime, finalITheory)));
+        canvas.startSimulation(finalMeasuredTime);
 
         new Thread(() -> {
             long start = System.currentTimeMillis();
@@ -291,17 +306,17 @@ public class LabController110 extends BaseLabController {
 
         double m = Double.parseDouble(mField.getText());
         double R = Double.parseDouble(rField.getText());
+        double h = Double.parseDouble(hField.getText());
         double S = Double.parseDouble(sField.getText());
-        double angleRad = Math.toRadians(angleSlider.getValue());
-        double iExp = m * R * R * ((9.81 * measuredTime * measuredTime * Math.sin(angleRad)) / (2 * S) - 1);
+        double iExp = m * R * R * ((9.81 * h * measuredTime * measuredTime) / (2 * S * S) - 1);
 
         String bodyName = bodyCombo.getItems().get(bodyIndex);
 
         Measurement meas = new Measurement(
-                idCounter++, bodyName, m, R,
-                Math.round(measuredTime * 1000.0) / 1000.0,
-                Math.round(iExp * 100000.0) / 100000.0,
-                Math.round(iTheory * 100000.0) / 100000.0
+                idCounter++, bodyName, m, h, S, R,
+                Math.round(measuredTime * 100.0) / 100.0,
+                Math.round(iExp * 1000000.0) / 1000000.0,
+                Math.round(iTheory * 1000000.0) / 1000000.0
         );
         data.add(meas);
         updateStats();
@@ -321,7 +336,10 @@ public class LabController110 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         double sumEps = 0;
         double sumDelta = 0;
 
@@ -336,12 +354,12 @@ public class LabController110 extends BaseLabController {
 
         String conclusion = String.format(
                 "ОБРОБКА РЕЗУЛЬТАТІВ ЕКСПЕРИМЕНТУ ТА ЇХ АНАЛІЗ:\n" +
-                        "1. За формулою (9) вирахувано експериментальний момент інерції I_експ для кожного тіла.\n" +
-                        "2. За формулами з Таблиці 1 вирахувано теоретичний момент інерції I_теор (Циліндр: 1/2 mR², Куля: 2/5 mR², Кільце: mR²).\n" +
-                        "3. СПІВСТАВЛЕННЯ ТА ВИСНОВКИ: Результати експерименту підтверджують, що розподіл маси впливає на момент інерції. " +
-                        "Найбільший момент інерції (і найменше прискорення) має порожнистий циліндр, а найменший — суцільна куля.\n" +
-                        "4. Похибки експерименту: Середня абсолютна похибка ΔI = %.5f кг·м², відносна похибка ε = %.1f %%.\n" +
-                        "   (Похибка зумовлена нехтуванням тертям кочення та опором повітря).",
+                        "1. За робочою формулою (9) I = m*R²*(g*h*t² / (2*S²) - 1) вирахувано експериментальний момент інерції I_експ.\n" +
+                        "2. За формулами з Таблиці 1 вирахувано теоретичний момент інерції I_теор (Циліндр: 1/2 mR², Куля: 2/5 mR²).\n" +
+                        "3. СПІВСТАВЛЕННЯ ТА ВИСНОВКИ: Результати експерименту підтверджують закон збереження механічної енергії. " +
+                        "Момент інерції залежить від розподілу маси тіла. Суцільна куля має менший момент інерції (і більшу швидкість скочування), ніж циліндр.\n" +
+                        "4. Похибки експерименту: Середня абсолютна похибка ΔI = %.6f кг·м², відносна похибка ε = %.1f %%.\n" +
+                        "   (Похибка зумовлена втратою енергії на подолання тертя кочення та опору повітря, якими знехтували у формулі 1).",
                 avgDelta, avgEps
         );
 

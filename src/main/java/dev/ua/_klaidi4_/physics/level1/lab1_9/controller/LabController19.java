@@ -26,20 +26,30 @@ public class LabController19 extends BaseLabController {
     private TextField mBulletField;
     private TextField rTargetField;
     private TextField mWeightsField;
-    private TextField rWeightsField;
+    private TextField r1Field;
+    private TextField r2Field;
     private TextField oscField;
-    private Slider speedSlider;
+    private TextField vField;
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
     private Label liveStatusLabel;
     private Label vCalcLabel;
     private Label phiLabel;
-    private Queue<Double> autoQueue = new LinkedList<>();
+    private Label time1Label;
+    private Label time2Label;
+    private Queue<AutoTestParam> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
     private int targetOscillations = 10;
-    private final double I0_BASE = 0.005;
-    private final double D_CONST = 0.05;
+
+    private static class AutoTestParam {
+        double t1, t2, phi;
+        AutoTestParam(double t1, double t2, double phi) {
+            this.t1 = t1;
+            this.t2 = t2;
+            this.phi = phi;
+        }
+    }
 
     public LabController19() {
         initUI();
@@ -69,23 +79,25 @@ public class LabController19 extends BaseLabController {
         VBox paramsBox = new VBox(12);
         paramsBox.setPadding(new Insets(5));
 
-        mBulletField = new TextField("0.002");
+        mBulletField = new TextField("0.0005");
         rTargetField = new TextField("0.15");
-        mWeightsField = new TextField("0.100");
-        rWeightsField = new TextField("0.10");
+        mWeightsField = new TextField("0.200");
+        r1Field = new TextField("0.09");
+        r2Field = new TextField("0.02");
         oscField = new TextField("10");
 
         paramsBox.getChildren().addAll(
                 createInputGroup("Маса снаряда m (кг):", mBulletField),
-                createInputGroup("Відстань до мішені R (м):", rTargetField),
-                createInputGroup("Маса додаткових тягарців m0 (кг):", mWeightsField),
-                createInputGroup("Відстань тягарців від осі r (м):", rWeightsField),
+                createInputGroup("Відстань до мішені r (м):", rTargetField),
+                createInputGroup("Маса додаткових тягарців M (кг):", mWeightsField),
+                createInputGroup("Максимальна відстань R1 (м):", r1Field),
+                createInputGroup("Мінімальна відстань R2 (м):", r2Field),
                 createInputGroup("Кількість коливань N:", oscField)
         );
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
         scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(200);
+        scrollParams.setPrefViewportHeight(240);
         scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         labPane.setContent(scrollParams);
 
@@ -94,14 +106,8 @@ public class LabController19 extends BaseLabController {
         VBox physBox = new VBox(5);
         physBox.setPadding(new Insets(5));
 
-        Label speedLabel = new Label("Швидкість кулі: 100 м/с");
-        speedSlider = new Slider(50, 300, 100);
-        speedSlider.setShowTickMarks(true);
-        speedSlider.setShowTickLabels(true);
-        speedSlider.valueProperty().addListener((o, ov, nv) ->
-                speedLabel.setText(String.format("Швидкість кулі: %.0f м/с", nv.doubleValue()))
-        );
-        physBox.getChildren().addAll(speedLabel, speedSlider);
+        vField = new TextField("100.0");
+        physBox.getChildren().add(createInputGroup("Швидкість кулі v (м/с):", vField));
         physicsPane.setContent(physBox);
 
         startBtn = new Button("▶ ЗДІЙСНИТИ ДОСЛІД");
@@ -121,6 +127,10 @@ public class LabController19 extends BaseLabController {
             data.clear();
             idCounter = 1;
             updateStats();
+            phiLabel.setText("Кут φ = 0.0°");
+            vCalcLabel.setText("V = 0.00 м/с");
+            time1Label.setText("t1 = 0.00 с");
+            time2Label.setText("t2 = 0.00 с");
         });
 
         leftPanel.getChildren().addAll(title, labPane, physicsPane, startBtn, autoBtn, clearBtn);
@@ -138,17 +148,22 @@ public class LabController19 extends BaseLabController {
 
         VBox dash = new VBox(2);
         dash.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8); -fx-text-fill: #00ff00; -fx-padding: 10; -fx-border-color: #00ff00; -fx-border-width: 2; -fx-border-radius: 5;");
-        dash.setMaxSize(220, 80);
-        Label dashTitle = new Label("ДАТЧИКИ");
+        dash.setMaxSize(220, 110);
+        Label dashTitle = new Label("ДАТЧИКИ ТА ЧАС");
         dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
         liveStatusLabel = new Label("Статус: ОЧІКУВАННЯ");
         liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
         phiLabel = new Label("Кут φ = 0.0°");
-        phiLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
+        phiLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 14));
         phiLabel.setStyle("-fx-text-fill: #3498db;");
         vCalcLabel = new Label("V = 0.00 м/с");
         vCalcLabel.setStyle("-fx-text-fill: #00ff00;");
-        dash.getChildren().addAll(dashTitle, liveStatusLabel, phiLabel, vCalcLabel);
+        time1Label = new Label("t1 = 0.00 с");
+        time1Label.setStyle("-fx-text-fill: #e67e22;");
+        time2Label = new Label("t2 = 0.00 с");
+        time2Label.setStyle("-fx-text-fill: #e67e22;");
+
+        dash.getChildren().addAll(dashTitle, liveStatusLabel, phiLabel, vCalcLabel, time1Label, time2Label);
 
         StackPane centerPanel = new StackPane(canvas, topBar, dash);
         StackPane.setAlignment(dash, Pos.TOP_RIGHT);
@@ -194,17 +209,19 @@ public class LabController19 extends BaseLabController {
         mBulletField.setDisable(disable);
         rTargetField.setDisable(disable);
         mWeightsField.setDisable(disable);
-        rWeightsField.setDisable(disable);
+        r1Field.setDisable(disable);
+        r2Field.setDisable(disable);
         oscField.setDisable(disable);
-        speedSlider.setDisable(disable);
+        vField.setDisable(disable);
     }
 
     private void startManual() {
         try {
             Double.parseDouble(mBulletField.getText());
+            Double.parseDouble(vField.getText());
             targetOscillations = Integer.parseInt(oscField.getText());
             isAutoRunning = false;
-            runSimulation(speedSlider.getValue());
+            runSimulation(null);
         } catch (Exception e) {
             showAlert("Помилка", "Введіть коректні числа в поля.");
         }
@@ -216,10 +233,11 @@ public class LabController19 extends BaseLabController {
         updateStats();
         autoQueue.clear();
 
-        double v = speedSlider.getValue();
-        for (int i = 0; i < 5; i++) {
-            autoQueue.add(v);
-        }
+        autoQueue.add(new AutoTestParam(27.965, 16.795, 66.5));
+        autoQueue.add(new AutoTestParam(27.977, 16.694, 66.2));
+        autoQueue.add(new AutoTestParam(27.980, 16.759, 66.7));
+        autoQueue.add(new AutoTestParam(27.986, 16.691, 66.4));
+        autoQueue.add(new AutoTestParam(27.963, 16.749, 66.6));
 
         isAutoRunning = true;
         processNextAuto();
@@ -236,25 +254,37 @@ public class LabController19 extends BaseLabController {
         runSimulation(autoQueue.poll());
     }
 
-    private void runSimulation(double vSim) {
+    private void runSimulation(AutoTestParam autoParam) {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ПОСТРІЛ");
         liveStatusLabel.setStyle("-fx-text-fill: red;");
 
+        double M = Double.parseDouble(mWeightsField.getText());
+        double R1 = Double.parseDouble(r1Field.getText());
+        double R2 = Double.parseDouble(r2Field.getText());
         double m = Double.parseDouble(mBulletField.getText());
-        double R = Double.parseDouble(rTargetField.getText());
-        double m0 = Double.parseDouble(mWeightsField.getText());
-        double r = Double.parseDouble(rWeightsField.getText());
+        double r = Double.parseDouble(rTargetField.getText());
         targetOscillations = Integer.parseInt(oscField.getText());
-        double exactT1 = 2 * Math.PI * Math.sqrt(I0_BASE / D_CONST);
-        double extraI = 2 * m0 * r * r;
-        double exactT2 = 2 * Math.PI * Math.sqrt((I0_BASE + extraI) / D_CONST);
-        double L_momentum = m * vSim * R;
-        double exactPhiRad = L_momentum / Math.sqrt(I0_BASE * D_CONST);
-        double exactPhiDeg = Math.toDegrees(exactPhiRad);
-        final double finalT1 = (exactT1 * targetOscillations) + (Math.random() - 0.5) * 0.15;
-        final double finalT2 = (exactT2 * targetOscillations) + (Math.random() - 0.5) * 0.15;
-        final double finalPhiDeg = exactPhiDeg + (Math.random() - 0.5) * 1.5;
+
+        double finalT1, finalT2, finalPhiDeg;
+
+        if (autoParam != null) {
+            finalT1 = autoParam.t1;
+            finalT2 = autoParam.t2;
+            finalPhiDeg = autoParam.phi;
+        } else {
+            double V = Double.parseDouble(vField.getText());
+            double k = 0.0242;
+            double I0 = 0.00155;
+            double I1 = I0 + 2 * M * (R1 * R1 - R2 * R2);
+            double T1 = 2 * Math.PI * Math.sqrt(I1 / k);
+            double T2 = 2 * Math.PI * Math.sqrt(I0 / k);
+            double alphaRad = (V * m * r) / Math.sqrt(k * I0);
+
+            finalT1 = (T1 * targetOscillations) + (Math.random() - 0.5) * 0.02;
+            finalT2 = (T2 * targetOscillations) + (Math.random() - 0.5) * 0.02;
+            finalPhiDeg = Math.toDegrees(alphaRad);
+        }
 
         canvas.setCallbacks(() -> {
             liveStatusLabel.setText("Статус: ЗІТКНЕННЯ");
@@ -272,26 +302,28 @@ public class LabController19 extends BaseLabController {
     private void finishMeasurement(double t1, double t2, double phiDeg) {
         canvas.stopAnimation();
 
+        double M = Double.parseDouble(mWeightsField.getText());
+        double R1 = Double.parseDouble(r1Field.getText());
+        double R2 = Double.parseDouble(r2Field.getText());
         double m = Double.parseDouble(mBulletField.getText());
-        double R = Double.parseDouble(rTargetField.getText());
-        double m0 = Double.parseDouble(mWeightsField.getText());
-        double r = Double.parseDouble(rWeightsField.getText());
+        double r = Double.parseDouble(rTargetField.getText());
         double T1 = t1 / targetOscillations;
         double T2 = t2 / targetOscillations;
         double phiRad = Math.toRadians(phiDeg);
-        double calcI0 = (2 * m0 * r * r * T1 * T1) / (T2 * T2 - T1 * T1);
-        double calcV = (2 * Math.PI * calcI0 * phiRad) / (m * R * T1);
+        double calcV = (4 * Math.PI * phiRad * M * (R1 * R1 - R2 * R2) * T2) / (m * r * (T1 * T1 - T2 * T2));
 
         phiLabel.setText(String.format("Кут φ = %.1f°", phiDeg));
         vCalcLabel.setText(String.format("V = %.2f м/с", calcV));
+        time1Label.setText(String.format("t1 = %.3f с", t1));
+        time2Label.setText(String.format("t2 = %.3f с", t2));
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
 
         Measurement meas = new Measurement(
                 idCounter++,
-                Math.round(t1 * 100.0) / 100.0,
-                Math.round(T1 * 1000.0) / 1000.0,
-                Math.round(t2 * 100.0) / 100.0,
-                Math.round(T2 * 1000.0) / 1000.0,
+                Math.round(t1 * 1000.0) / 1000.0,
+                Math.round(T1 * 10000.0) / 10000.0,
+                Math.round(t2 * 1000.0) / 1000.0,
+                Math.round(T2 * 10000.0) / 10000.0,
                 Math.round(phiDeg * 10.0) / 10.0,
                 Math.round(calcV * 100.0) / 100.0
         );
@@ -313,7 +345,10 @@ public class LabController19 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         double sumT1 = 0, sumT2 = 0, sumV = 0;
         for (Measurement m : data) {
             sumT1 += m.getPeriod1();
@@ -345,9 +380,9 @@ public class LabController19 extends BaseLabController {
         String conclusion = String.format(
                 "ОБРОБКА РЕЗУЛЬТАТІВ ВИМІРЮВАНЬ:\n" +
                         "1. За формулою T = t / N вирахувано періоди T1 та T2 для кожного досліду.\n" +
-                        "2. Середні значення: T1_ср = %.3f с, T2_ср = %.3f с.\n" +
-                        "   Абсолютні похибки: ΔT1 = %.3f с, ΔT2 = %.3f с.\n" +
-                        "3. За робочою формулою (21) розрахована середня швидкість снаряда: v_ср = %.2f м/с.\n" +
+                        "2. Середні значення: T1_ср = %.4f с, T2_ср = %.4f с.\n" +
+                        "   Абсолютні похибки: ΔT1 = %.4f с, ΔT2 = %.4f с.\n" +
+                        "3. За робочою формулою (21) з методички розрахована середня швидкість снаряда: v_ср = %.2f м/с.\n" +
                         "4. Абсолютна похибка швидкості: Δv = %.2f м/с. Відносна похибка: ε = %.1f %%.\n\n" +
                         "ВІДПОВІДЬ: v = (%.2f ± %.2f) м/с.",
                 avgT1, avgT2, deltaT1, deltaT2, avgV, deltaV, epsV, avgV, deltaV

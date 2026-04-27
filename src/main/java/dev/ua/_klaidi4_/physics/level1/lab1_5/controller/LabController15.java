@@ -23,20 +23,30 @@ public class LabController15 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-    private TextField mField;
-    private TextField lField;
-    private Slider angleSlider;
+    private TextField cField;
+    private TextField rField;
+    private TextField n0Field;
+    private TextField dhField;
+    private TextField radiusField;
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
     private Label liveStatusLabel;
-    private Label vLabel;
-    private Label tauLabel;
-    private Queue<Double> autoQueue = new LinkedList<>();
+    private Label liveN0Label;
+    private Label liveNLabel;
+    private Label liveTauLabel;
+    private Queue<AutoTestParam> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
-    private double currentV;
-    private double currentTau;
-    private double currentForce;
+    private double currentSimN0 = 0;
+    private double currentSimN = 0;
+
+    private static class AutoTestParam {
+        double n0, n;
+        AutoTestParam(double n0, double n) {
+            this.n0 = n0;
+            this.n = n;
+        }
+    }
 
     public LabController15() {
         initUI();
@@ -65,41 +75,32 @@ public class LabController15 extends BaseLabController {
         VBox paramsBox = new VBox(12);
         paramsBox.setPadding(new Insets(5));
 
-        mField = new TextField("0.150");
-        lField = new TextField("0.5");
+        cField = new TextField("6.9");
+        rField = new TextField("147");
+        n0Field = new TextField("100");
+        dhField = new TextField("0.02");
+        radiusField = new TextField("1.51");
 
         paramsBox.getChildren().addAll(
-                createInputGroup("Маса кулі m (кг):", mField),
-                createInputGroup("Довжина підвісу L (м):", lField)
+                createInputGroup("Ємність конденсатора C (мкФ):", cField),
+                createInputGroup("Опір кола R (Ом):", rField),
+                createInputGroup("Початковий показ n0 (под):", n0Field),
+                createInputGroup("Висота піднімання Δh (м):", dhField),
+                createInputGroup("Радіус кулі r (см):", radiusField)
         );
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
         scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(150);
+        scrollParams.setPrefViewportHeight(280);
         scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         labPane.setContent(scrollParams);
 
-        TitledPane physicsPane = new TitledPane();
-        physicsPane.setText("Кінематика");
-        VBox physBox = new VBox(5);
-        physBox.setPadding(new Insets(5));
-
-        Label angleLabel = new Label("Кут відхилення α: 30°");
-        angleSlider = new Slider(10, 60, 30);
-        angleSlider.setShowTickMarks(true);
-        angleSlider.setShowTickLabels(true);
-        angleSlider.valueProperty().addListener((o, ov, nv) ->
-                angleLabel.setText(String.format("Кут відхилення α: %.1f°", nv.doubleValue()))
-        );
-        physBox.getChildren().addAll(angleLabel, angleSlider);
-        physicsPane.setContent(physBox);
-
-        startBtn = new Button("▶ СИМУЛЮВАТИ УДАР");
+        startBtn = new Button("▶ ЗІТКНЕННЯ");
         startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
         startBtn.setOnAction(e -> startManual());
 
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (5 дослідів)");
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (10 дослідів)");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
         autoBtn.setMaxWidth(Double.MAX_VALUE);
         autoBtn.setOnAction(e -> startAuto());
@@ -111,11 +112,12 @@ public class LabController15 extends BaseLabController {
             data.clear();
             idCounter = 1;
             updateStats();
-            tauLabel.setText("τ = 0.0 мкс");
-            vLabel.setText("V = 0.00 м/с");
+            liveN0Label.setText("n0 = 0");
+            liveNLabel.setText("n = 0");
+            liveTauLabel.setText("τ = 0.0 мкс");
         });
 
-        leftPanel.getChildren().addAll(title, labPane, physicsPane, startBtn, autoBtn, clearBtn);
+        leftPanel.getChildren().addAll(title, labPane, startBtn, autoBtn, clearBtn);
 
         canvas = new ChronometerCanvas(600, 440);
 
@@ -130,17 +132,19 @@ public class LabController15 extends BaseLabController {
 
         VBox dash = new VBox(2);
         dash.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8); -fx-text-fill: #00ff00; -fx-padding: 10; -fx-border-color: #00ff00; -fx-border-width: 2; -fx-border-radius: 5;");
-        dash.setMaxSize(220, 80);
-        Label dashTitle = new Label("ЕЛЕКТРОННИЙ БЛОК");
+        dash.setMaxSize(220, 100);
+        Label dashTitle = new Label("ХРОНОМЕТР");
         dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
         liveStatusLabel = new Label("Статус: ОЧІКУВАННЯ");
         liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
-        tauLabel = new Label("τ = 0.0 мкс");
-        tauLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
-        tauLabel.setStyle("-fx-text-fill: #e74c3c;");
-        vLabel = new Label("V = 0.00 м/с");
-        vLabel.setStyle("-fx-text-fill: #3498db;");
-        dash.getChildren().addAll(dashTitle, liveStatusLabel, tauLabel, vLabel);
+        liveN0Label = new Label("n0 = 0");
+        liveN0Label.setStyle("-fx-text-fill: #3498db;");
+        liveNLabel = new Label("n = 0");
+        liveNLabel.setStyle("-fx-text-fill: #e74c3c;");
+        liveTauLabel = new Label("τ = 0.0 мкс");
+        liveTauLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
+        liveTauLabel.setStyle("-fx-text-fill: #00ff00;");
+        dash.getChildren().addAll(dashTitle, liveStatusLabel, liveN0Label, liveNLabel, liveTauLabel);
 
         StackPane centerPanel = new StackPane(canvas, topBar, dash);
         StackPane.setAlignment(dash, Pos.TOP_RIGHT);
@@ -153,25 +157,24 @@ public class LabController15 extends BaseLabController {
 
         TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        TableColumn<Measurement, Double> mCol = new TableColumn<>("m (кг)");
-        mCol.setCellValueFactory(new PropertyValueFactory<>("m"));
-        TableColumn<Measurement, Double> lCol = new TableColumn<>("L (м)");
-        lCol.setCellValueFactory(new PropertyValueFactory<>("l"));
-        TableColumn<Measurement, Double> angCol = new TableColumn<>("Кут (°)");
-        angCol.setCellValueFactory(new PropertyValueFactory<>("angle"));
-        TableColumn<Measurement, Double> vCol = new TableColumn<>("V (м/с)");
-        vCol.setCellValueFactory(new PropertyValueFactory<>("v"));
+        TableColumn<Measurement, Double> cCol = new TableColumn<>("C (мкФ)");
+        cCol.setCellValueFactory(new PropertyValueFactory<>("c"));
+        TableColumn<Measurement, Double> rCol = new TableColumn<>("R (Ом)");
+        rCol.setCellValueFactory(new PropertyValueFactory<>("r"));
+        TableColumn<Measurement, Double> n0Col = new TableColumn<>("n0");
+        n0Col.setCellValueFactory(new PropertyValueFactory<>("n0"));
+        TableColumn<Measurement, Double> nCol = new TableColumn<>("n");
+        nCol.setCellValueFactory(new PropertyValueFactory<>("n"));
         TableColumn<Measurement, Double> tauCol = new TableColumn<>("τ (мкс)");
         tauCol.setCellValueFactory(new PropertyValueFactory<>("tau"));
         TableColumn<Measurement, Double> fCol = new TableColumn<>("F (Н)");
         fCol.setCellValueFactory(new PropertyValueFactory<>("force"));
 
-        table.getColumns().addAll(idCol, mCol, lCol, angCol, vCol, tauCol, fCol);
+        table.getColumns().addAll(idCol, cCol, rCol, n0Col, nCol, tauCol, fCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setPrefHeight(140);
+        table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
-
         VBox bottomPanel = new VBox(5, table, statsBox);
         bottomPanel.setPadding(new Insets(5));
 
@@ -179,26 +182,39 @@ public class LabController15 extends BaseLabController {
         this.setCenter(centerPanel);
         this.setBottom(bottomPanel);
 
-        canvas.setCallbacks(() -> Platform.runLater(this::processHit));
+        canvas.setCallbacks(
+                () -> Platform.runLater(() -> {
+                    liveStatusLabel.setText("Статус: РОЗРЯДЖЕННЯ");
+                    liveStatusLabel.setStyle("-fx-text-fill: red;");
+                }),
+                () -> Platform.runLater(this::finishMeasurement)
+        );
     }
 
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
-        mField.setDisable(disable);
-        lField.setDisable(disable);
-        angleSlider.setDisable(disable);
+        cField.setDisable(disable);
+        rField.setDisable(disable);
+        n0Field.setDisable(disable);
+        dhField.setDisable(disable);
+        radiusField.setDisable(disable);
     }
 
     private void startManual() {
         try {
-            Double.parseDouble(mField.getText());
-            Double.parseDouble(lField.getText());
+            double C = Double.parseDouble(cField.getText()) * 1e-6;
+            double R = Double.parseDouble(rField.getText());
+            double n0 = Double.parseDouble(n0Field.getText());
+            double dh = Double.parseDouble(dhField.getText());
+            Double.parseDouble(radiusField.getText());
             isAutoRunning = false;
-            runSimulation(angleSlider.getValue());
+            double typicalTau = (376.0 + (Math.random() - 0.5) * 10) * 1e-6;
+            double targetN = n0 / Math.exp(typicalTau / (C * R));
+            runSimulation(dh, n0, Math.round(targetN));
         } catch (Exception e) {
-            showAlert("Помилка", "Введіть коректні числа в поля маси та довжини.");
+            showAlert("Помилка", "Введіть коректні числа в поля.");
         }
     }
 
@@ -208,8 +224,16 @@ public class LabController15 extends BaseLabController {
         updateStats();
         autoQueue.clear();
 
-        autoQueue.add(20.0); autoQueue.add(25.0); autoQueue.add(30.0);
-        autoQueue.add(35.0); autoQueue.add(40.0);
+        autoQueue.add(new AutoTestParam(100, 69));
+        autoQueue.add(new AutoTestParam(110, 75));
+        autoQueue.add(new AutoTestParam(106, 73));
+        autoQueue.add(new AutoTestParam(101, 69));
+        autoQueue.add(new AutoTestParam(107, 73));
+        autoQueue.add(new AutoTestParam(100, 69));
+        autoQueue.add(new AutoTestParam(108, 69));
+        autoQueue.add(new AutoTestParam(102, 68));
+        autoQueue.add(new AutoTestParam(109, 70));
+        autoQueue.add(new AutoTestParam(108, 74));
 
         isAutoRunning = true;
         processNextAuto();
@@ -223,60 +247,70 @@ public class LabController15 extends BaseLabController {
             setControlsDisable(false);
             return;
         }
-        double nextAngle = autoQueue.poll();
-        angleSlider.setValue(nextAngle);
-        runSimulation(nextAngle);
-    }
 
-    private void runSimulation(double angle) {
         setControlsDisable(true);
-        liveStatusLabel.setText("Статус: РУХ");
-        liveStatusLabel.setStyle("-fx-text-fill: yellow;");
+        AutoTestParam param = autoQueue.poll();
+        n0Field.setText(String.valueOf(param.n0));
 
-        double m = Double.parseDouble(mField.getText());
-        double L = Double.parseDouble(lField.getText());
-        double angleRad = Math.toRadians(angle);
-        currentV = Math.sqrt(2 * 9.81 * L * (1 - Math.cos(angleRad)));
-        double baseTau = 150.0 * Math.pow(currentV, -0.2);
-        currentTau = baseTau + (Math.random() - 0.5) * 6.0;
-        currentForce = (m * currentV) / (currentTau * 1e-6);
-        canvas.startSimulation(angle);
+        try {
+            double dh = Double.parseDouble(dhField.getText());
+            runSimulation(dh, param.n0, param.n);
+        } catch (Exception ignored) {}
     }
 
-    private void processHit() {
-        double m = Double.parseDouble(mField.getText());
-        double L = Double.parseDouble(lField.getText());
-        double angle = angleSlider.getValue();
+    private void runSimulation(double dh, double n0, double n) {
+        setControlsDisable(true);
+        liveStatusLabel.setText("Статус: РУХ КУЛІ");
+        liveStatusLabel.setStyle("-fx-text-fill: cyan;");
 
-        liveStatusLabel.setText("Статус: КОНТАКТ!");
-        liveStatusLabel.setStyle("-fx-text-fill: #e74c3c;");
-        vLabel.setText(String.format("V = %.2f м/с", currentV));
-        tauLabel.setText(String.format("τ = %.1f мкс", currentTau));
+        currentSimN0 = n0;
+        currentSimN = n;
 
-        Measurement meas = new Measurement(
-                idCounter++, m, L, Math.round(angle * 10.0) / 10.0,
-                Math.round(currentV * 100.0) / 100.0,
-                Math.round(currentTau * 10.0) / 10.0,
-                Math.round(currentForce)
-        );
-        data.add(meas);
-        updateStats();
+        liveN0Label.setText(String.format("n0 = %.1f", n0));
+        liveNLabel.setText("n = ?");
+        liveTauLabel.setText("τ = ?");
 
-        if (isAutoRunning) {
-            new Thread(() -> {
-                try { Thread.sleep(1500); Platform.runLater(this::processNextAuto); }
-                catch (InterruptedException ignored) {}
-            }).start();
-        } else {
-            new Thread(() -> {
-                try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
-                Platform.runLater(() -> {
-                    setControlsDisable(false);
-                    liveStatusLabel.setText("Статус: ГОТОВО");
-                    liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
-                });
-            }).start();
-        }
+        canvas.startSimulation(dh, n0, n);
+    }
+
+    private void finishMeasurement() {
+        try {
+            double C_mkF = Double.parseDouble(cField.getText());
+            double C = C_mkF * 1e-6;
+            double R = Double.parseDouble(rField.getText());
+            double dh = Double.parseDouble(dhField.getText());
+            double r_cm = Double.parseDouble(radiusField.getText());
+            double tau_seconds = C * R * Math.log(currentSimN0 / currentSimN);
+            double tau_mks = tau_seconds * 1e6;
+            double v = Math.sqrt(2 * 9.81 * dh);
+            double r_m = r_cm / 100.0;
+            double m = (4.0 / 3.0) * Math.PI * Math.pow(r_m, 3) * 7800;
+            double force = (m * v) / tau_seconds;
+
+            liveStatusLabel.setText("Статус: ВИМІРЯНО");
+            liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
+            liveNLabel.setText(String.format("n = %.1f", currentSimN));
+            liveTauLabel.setText(String.format("τ = %.1f мкс", tau_mks));
+
+            Measurement meas = new Measurement(
+                    idCounter++, C_mkF, R,
+                    currentSimN0, currentSimN, dh, r_cm,
+                    Math.round(tau_mks * 10.0) / 10.0,
+                    Math.round(v * 100.0) / 100.0,
+                    Math.round(force * 10.0) / 10.0
+            );
+            data.add(meas);
+            updateStats();
+
+            if (isAutoRunning) {
+                new Thread(() -> {
+                    try { Thread.sleep(1500); Platform.runLater(this::processNextAuto); }
+                    catch (InterruptedException ignored) {}
+                }).start();
+            } else {
+                setControlsDisable(false);
+            }
+        } catch (Exception ignored) {}
     }
 
     private void updateStats() {
@@ -284,34 +318,41 @@ public class LabController15 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
-        double sumV = 0, sumTau = 0, sumF = 0;
-        for (Measurement m : data) {
-            sumV += m.getV();
-            sumTau += m.getTau();
-            sumF += m.getForce();
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
         }
 
-        double avgV = sumV / data.size();
-        double avgTau = sumTau / data.size();
-        double avgF = sumF / data.size();
+        double sumTau = 0;
+        double sumF = 0;
+        for (Measurement meas : data) {
+            sumTau += meas.getTau();
+            sumF += meas.getForce();
+        }
+
+        double tauAvg = sumTau / data.size();
+        double fAvg = sumF / data.size();
 
         double sumDeltaTau = 0;
-        for (Measurement m : data) {
-            sumDeltaTau += Math.abs(m.getTau() - avgTau);
+        for (Measurement meas : data) {
+            sumDeltaTau += Math.abs(meas.getTau() - tauAvg);
         }
         double deltaTau = sumDeltaTau / data.size();
-        double epsTau = (deltaTau / avgTau) * 100;
+        double epsTau = (deltaTau / tauAvg) * 100;
 
-        double m = Double.parseDouble(mField.getText());
+        Measurement last = data.get(data.size() - 1);
 
         String conclusion = String.format(
                 "ОБРОБКА РЕЗУЛЬТАТІВ ТА АНАЛІЗ:\n" +
-                        "1. Середня швидкість кулі перед ударом: v_ср = %.2f м/с.\n" +
-                        "2. Середній час зіткнення куль: τ_ср = %.1f мкс. Абсолютна похибка: Δτ = %.1f мкс. Відносна похибка: ε = %.1f %%.\n" +
-                        "3. Маса кулі m = %.3f кг. Розрахована середня сила удару: F_ср = %.0f Н.\n\n" +
-                        "ПОЯСНЕННЯ: Оскільки зіткнення сталевих куль є абсолютно пружним, час їхнього електричного контакту (τ) надзвичайно малий (мікросекунди). За законом збереження імпульсу це призводить до виникнення величезної імпульсної сили удару (тисячі Ньютонів).",
-                avgV, avgTau, deltaTau, epsTau, m, avgF
+                        "1. Час зіткнення розраховано за формулою: τ = C*R*ln(n0/n).\n" +
+                        "   Середній час зіткнення: τ_ср = %.1f мкс.\n" +
+                        "2. Швидкість кулі при ударі: v = √(2gΔh) = %.2f м/с.\n" +
+                        "3. Середня сила удару: F_ср = %.1f Н.\n" +
+                        "4. Похибки вимірювання часу: Абсолютна Δτ = %.1f мкс, Відносна ε = %.1f %%.\n\n" +
+                        "ВИСНОВОК: Метод конденсаторного хронометра дозволяє ефективно вимірювати дуже малі " +
+                        "проміжки часу удару (порядку сотень мікросекунд), що підтверджується стабільними " +
+                        "результатами серії дослідів.",
+                tauAvg, last.getV(), fAvg, deltaTau, epsTau
         );
 
         finalResultLabel.setText(conclusion);

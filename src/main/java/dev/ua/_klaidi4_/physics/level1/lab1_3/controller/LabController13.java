@@ -30,7 +30,7 @@ public class LabController13 extends BaseLabController {
     private TextField m1Field;
     private TextField m2Field;
     private TextField lengthField;
-    private Slider angleSlider;
+    private TextField angleField;
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
@@ -83,9 +83,9 @@ public class LabController13 extends BaseLabController {
         typeComboBox.getSelectionModel().selectFirst();
         typeComboBox.setOnAction(e -> applyPhysicsSettings());
 
-        m1Field = new TextField("0.2");
-        m2Field = new TextField("0.2");
-        lengthField = new TextField("0.5");
+        m1Field = new TextField("0.169");
+        m2Field = new TextField("0.169");
+        lengthField = new TextField("0.41");
 
         m1Field.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
         m2Field.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
@@ -109,15 +109,9 @@ public class LabController13 extends BaseLabController {
         VBox physBox = new VBox(5);
         physBox.setPadding(new Insets(5));
 
-        Label angleLabel = new Label("Кут відхилення кулі 1: 45.0°");
-        angleSlider = new Slider(10, 90, 45);
-        angleSlider.setShowTickMarks(true);
-        angleSlider.setShowTickLabels(true);
-        angleSlider.valueProperty().addListener((o, oldVal, newVal) -> {
-            angleLabel.setText(String.format("Кут відхилення кулі 1: %.1f°", newVal.doubleValue()));
-            applyPhysicsSettings();
-        });
-        physBox.getChildren().addAll(angleLabel, angleSlider);
+        angleField = new TextField("15.0");
+        angleField.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
+        physBox.getChildren().addAll(createInputGroup("Кут відхилення кулі 1 (°):", angleField));
         physicsPane.setContent(physBox);
 
         startBtn = new Button("▶ СИМУЛЮВАТИ УДАР");
@@ -178,14 +172,14 @@ public class LabController13 extends BaseLabController {
 
         TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        TableColumn<Measurement, String> typeCol = new TableColumn<>("Тип");
-        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-        TableColumn<Measurement, Double> m1Col = new TableColumn<>("m1 (кг)");
-        m1Col.setCellValueFactory(new PropertyValueFactory<>("m1"));
-        TableColumn<Measurement, Double> m2Col = new TableColumn<>("m2 (кг)");
-        m2Col.setCellValueFactory(new PropertyValueFactory<>("m2"));
-        TableColumn<Measurement, Double> v1Col = new TableColumn<>("v1 (м/с)");
-        v1Col.setCellValueFactory(new PropertyValueFactory<>("v1"));
+        TableColumn<Measurement, Double> a1Col = new TableColumn<>("α1 (°)");
+        a1Col.setCellValueFactory(new PropertyValueFactory<>("alpha1"));
+        TableColumn<Measurement, Double> a1pCol = new TableColumn<>("α1' (°)");
+        a1pCol.setCellValueFactory(new PropertyValueFactory<>("alpha1Prime"));
+        TableColumn<Measurement, Double> a2pCol = new TableColumn<>("α2' (°)");
+        a2pCol.setCellValueFactory(new PropertyValueFactory<>("alpha2Prime"));
+        TableColumn<Measurement, Double> tauCol = new TableColumn<>("τ (мкс)");
+        tauCol.setCellValueFactory(new PropertyValueFactory<>("tau"));
         TableColumn<Measurement, Double> u1Col = new TableColumn<>("u1 (м/с)");
         u1Col.setCellValueFactory(new PropertyValueFactory<>("u1"));
         TableColumn<Measurement, Double> u2Col = new TableColumn<>("u2 (м/с)");
@@ -193,7 +187,7 @@ public class LabController13 extends BaseLabController {
         TableColumn<Measurement, Double> dwCol = new TableColumn<>("ΔW (Дж)");
         dwCol.setCellValueFactory(new PropertyValueFactory<>("deltaW"));
 
-        table.getColumns().addAll(idCol, typeCol, m1Col, m2Col, v1Col, u1Col, u2Col, dwCol);
+        table.getColumns().addAll(idCol, a1Col, a1pCol, a2pCol, tauCol, u1Col, u2Col, dwCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefHeight(130);
 
@@ -216,7 +210,7 @@ public class LabController13 extends BaseLabController {
             double m1 = Double.parseDouble(m1Field.getText());
             double m2 = Double.parseDouble(m2Field.getText());
             double l = Double.parseDouble(lengthField.getText());
-            double angle = angleSlider.getValue();
+            double angle = Double.parseDouble(angleField.getText());
 
             canvas.setPhysicsParameters(type, l, 9.81, m1, m2, angle);
 
@@ -237,7 +231,7 @@ public class LabController13 extends BaseLabController {
         m1Field.setDisable(disable);
         m2Field.setDisable(disable);
         lengthField.setDisable(disable);
-        angleSlider.setDisable(disable);
+        angleField.setDisable(disable);
     }
 
     private void startManual() {
@@ -245,6 +239,7 @@ public class LabController13 extends BaseLabController {
             Double.parseDouble(m1Field.getText());
             Double.parseDouble(m2Field.getText());
             Double.parseDouble(lengthField.getText());
+            Double.parseDouble(angleField.getText());
 
             isAutoRunning = false;
             applyPhysicsSettings();
@@ -253,7 +248,7 @@ public class LabController13 extends BaseLabController {
             liveStatusLabel.setStyle("-fx-text-fill: red;");
             setControlsDisable(true);
         } catch (Exception e) {
-            showAlert("Помилка", "Введіть коректні числа в поля маси та довжини.");
+            showAlert("Помилка", "Введіть коректні числа в поля маси, довжини та кута.");
         }
     }
 
@@ -262,10 +257,10 @@ public class LabController13 extends BaseLabController {
         idCounter = 1;
         updateStats();
         autoQueue.clear();
-        autoQueue.add(new AutoTestParam(CollisionType.ELASTIC, 0.2, 0.2, 45));
-        autoQueue.add(new AutoTestParam(CollisionType.ELASTIC, 0.3, 0.1, 60));
-        autoQueue.add(new AutoTestParam(CollisionType.INELASTIC, 0.2, 0.2, 45));
-        autoQueue.add(new AutoTestParam(CollisionType.INELASTIC, 0.1, 0.3, 50));
+
+        for (int i = 0; i < 10; i++) {
+            autoQueue.add(new AutoTestParam(CollisionType.ELASTIC, 0.169, 0.169, 15));
+        }
 
         isAutoRunning = true;
         processNextAuto();
@@ -287,7 +282,7 @@ public class LabController13 extends BaseLabController {
         typeComboBox.getSelectionModel().select(param.type == CollisionType.ELASTIC ? 0 : 1);
         m1Field.setText(String.valueOf(param.m1));
         m2Field.setText(String.valueOf(param.m2));
-        angleSlider.setValue(param.angle);
+        angleField.setText(String.valueOf(param.angle));
 
         double l = Double.parseDouble(lengthField.getText());
         canvas.setPhysicsParameters(param.type, l, 9.81, param.m1, param.m2, param.angle);
@@ -314,23 +309,32 @@ public class LabController13 extends BaseLabController {
             double m1 = Double.parseDouble(m1Field.getText());
             double m2 = Double.parseDouble(m2Field.getText());
             double l = Double.parseDouble(lengthField.getText());
-            double angle = angleSlider.getValue();
+            double angle = Double.parseDouble(angleField.getText());
 
             double v1 = Math.sqrt(2 * 9.81 * l * (1 - Math.cos(Math.toRadians(angle))));
-
             double u1, u2;
+
             if (type == CollisionType.ELASTIC) {
-                u1 = ((m1 - m2) * v1) / (m1 + m2);
-                u2 = (2 * m1 * v1) / (m1 + m2);
+                double eCoef = 0.72;
+                u1 = (m1 * v1 - m2 * eCoef * v1) / (m1 + m2);
+                u2 = (m1 * v1 + m1 * eCoef * v1) / (m1 + m2);
             } else {
                 u1 = (m1 * v1) / (m1 + m2);
                 u2 = u1;
             }
 
-            double errorFactor = 1.0 + (Math.random() - 0.5) * 0.02;
-            u1 *= errorFactor;
-            u2 *= errorFactor;
+            double a1p = 0.0;
+            if (u1 > 0) a1p = Math.toDegrees(Math.acos(Math.max(0, 1 - (u1 * u1) / (2 * 9.81 * l))));
+            double a2p = Math.toDegrees(Math.acos(Math.max(0, 1 - (u2 * u2) / (2 * 9.81 * l))));
 
+            a1p += (Math.random() - 0.5) * 0.5;
+            a2p += (Math.random() - 0.5) * 1.0;
+            if (a1p < 0) a1p = 0;
+
+            u1 = Math.sqrt(2 * 9.81 * l * (1 - Math.cos(Math.toRadians(a1p))));
+            u2 = Math.sqrt(2 * 9.81 * l * (1 - Math.cos(Math.toRadians(a2p))));
+
+            double tau = 18 + Math.random() * 47;
             double wBefore = (m1 * v1 * v1) / 2.0;
             double wAfter = (m1 * u1 * u1) / 2.0 + (m2 * u2 * u2) / 2.0;
             double dw = Math.abs(wBefore - wAfter);
@@ -340,11 +344,15 @@ public class LabController13 extends BaseLabController {
 
             Measurement m = new Measurement(
                     idCounter++, typeStr,
-                    Math.round(m1 * 100.0) / 100.0,
-                    Math.round(m2 * 100.0) / 100.0,
+                    Math.round(m1 * 1000.0) / 1000.0,
+                    Math.round(m2 * 1000.0) / 1000.0,
+                    Math.round(angle * 10.0) / 10.0,
+                    Math.round(a1p * 10.0) / 10.0,
+                    Math.round(a2p * 10.0) / 10.0,
                     Math.round(v1 * 100.0) / 100.0,
                     Math.round(u1 * 100.0) / 100.0,
                     Math.round(u2 * 100.0) / 100.0,
+                    Math.round(tau),
                     Math.round(dw * 10000.0) / 10000.0
             );
             data.add(m);
@@ -372,7 +380,10 @@ public class LabController13 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         List<Measurement> elasticData = new ArrayList<>();
         List<Measurement> inelasticData = new ArrayList<>();
 
@@ -389,13 +400,12 @@ public class LabController13 extends BaseLabController {
             double pAfter = last.getM1() * last.getU1() + last.getM2() * last.getU2();
             double dp = Math.abs(pBefore - pAfter);
             double epsP = (dp / pBefore) * 100;
-            double dt = 0.001;
-            double force = (last.getM1() * Math.abs(last.getV1() - last.getU1())) / dt;
+            double force = (last.getM1() * Math.abs(last.getV1() - last.getU1())) / (last.getTau() / 1_000_000.0);
 
             resultText.append("А. ПРУЖНИЙ УДАР:\n");
             resultText.append(String.format("1. Швидкості: v1 = %.2f м/с, u1 = %.2f м/с, u2 = %.2f м/с.\n", last.getV1(), last.getU1(), last.getU2()));
-            resultText.append(String.format("2. Збереження: Імпульс (ΔP = %.4f кг·м/с), Енергія збережена (ΔW = %.4f Дж).\n", dp, last.getDeltaW()));
-            resultText.append(String.format("3. Середня сила удару (при Δt=1мс): Fср ≈ %.1f Н.\n", force));
+            resultText.append(String.format("2. Збереження: Імпульс (ΔP = %.4f кг·м/с), Втрата енергії (ΔW = %.4f Дж).\n", dp, last.getDeltaW()));
+            resultText.append(String.format("3. Середня сила удару: Fср ≈ %.1f Н.\n", force));
             resultText.append(String.format("4. Похибки: Абсолютна Δp = %.4f кг·м/с, Відносна ε = %.1f %%.\n\n", dp, epsP));
         }
 

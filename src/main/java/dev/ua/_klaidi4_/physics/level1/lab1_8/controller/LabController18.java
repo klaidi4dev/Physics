@@ -25,7 +25,7 @@ public class LabController18 extends BaseLabController {
     private int idCounter = 1;
     private ComboBox<String> configCombo;
     private TextField m0Field;
-    private TextField r0Field;
+    private TextField a0Field;
     private TextField mField;
     private TextField aField;
     private TextField bField;
@@ -73,7 +73,7 @@ public class LabController18 extends BaseLabController {
         paramsBox.setPadding(new Insets(5));
 
         configCombo = new ComboBox<>(FXCollections.observableArrayList(
-                "Еталон (циліндр)",
+                "Еталон (куб)",
                 "Брусок (вісь X)",
                 "Брусок (вісь Y)",
                 "Брусок (вісь Z)"
@@ -81,23 +81,23 @@ public class LabController18 extends BaseLabController {
         configCombo.getSelectionModel().selectFirst();
 
         m0Field = new TextField("0.600");
-        r0Field = new TextField("0.05");
+        a0Field = new TextField("0.10");
         mField = new TextField("0.800");
-        aField = new TextField("0.10");
-        bField = new TextField("0.06");
+        aField = new TextField("0.12");
+        bField = new TextField("0.08");
         cField = new TextField("0.04");
         oscField = new TextField("10");
 
         configCombo.setOnAction(e -> applyPhysicsSettings());
-        r0Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        a0Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         aField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         bField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         cField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
 
         paramsBox.getChildren().addAll(
                 createInputGroup("Конфігурація тіла:", configCombo),
-                createInputGroup("Маса еталону m0 (кг):", m0Field),
-                createInputGroup("Радіус еталону R0 (м):", r0Field),
+                createInputGroup("Маса куба m0 (кг):", m0Field),
+                createInputGroup("Сторона куба a0 (м):", a0Field),
                 createInputGroup("Маса бруска m (кг):", mField),
                 createInputGroup("Довжина бруска a (м):", aField),
                 createInputGroup("Ширина бруска b (м):", bField),
@@ -198,11 +198,11 @@ public class LabController18 extends BaseLabController {
     private void applyPhysicsSettings() {
         try {
             int conf = configCombo.getSelectionModel().getSelectedIndex();
-            double r0 = Double.parseDouble(r0Field.getText());
+            double a0 = Double.parseDouble(a0Field.getText());
             double a = Double.parseDouble(aField.getText());
             double b = Double.parseDouble(bField.getText());
             double c = Double.parseDouble(cField.getText());
-            canvas.setParameters(conf, r0, a, b, c);
+            canvas.setParameters(conf, a0/2, a, b, c);
         } catch (NumberFormatException ignored) {}
     }
 
@@ -212,7 +212,7 @@ public class LabController18 extends BaseLabController {
         clearBtn.setDisable(disable);
         configCombo.setDisable(disable);
         m0Field.setDisable(disable);
-        r0Field.setDisable(disable);
+        a0Field.setDisable(disable);
         mField.setDisable(disable);
         aField.setDisable(disable);
         bField.setDisable(disable);
@@ -272,7 +272,7 @@ public class LabController18 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: cyan;");
 
         double m0 = Double.parseDouble(m0Field.getText());
-        double r0 = Double.parseDouble(r0Field.getText());
+        double a0 = Double.parseDouble(a0Field.getText());
         double m = Double.parseDouble(mField.getText());
         double a = Double.parseDouble(aField.getText());
         double b = Double.parseDouble(bField.getText());
@@ -281,7 +281,7 @@ public class LabController18 extends BaseLabController {
         double iTheory = 0;
 
         if (configIndex == 0) {
-            iTheory = 0.5 * m0 * r0 * r0;
+            iTheory = (m0 * (a0 * a0 + a0 * a0)) / 12.0;
         } else if (configIndex == 1) {
             iTheory = (m * (b * b + c * c)) / 12.0;
         } else if (configIndex == 2) {
@@ -337,7 +337,7 @@ public class LabController18 extends BaseLabController {
                 double I0 = reference.getExpI();
                 iExp = I0 * (measuredPeriod * measuredPeriod) / (T0 * T0);
             } else {
-                showAlert("Помилка обробки", "Щоб вирахувати момент інерції бруска, необхідно спочатку виміряти еталонний циліндр!");
+                showAlert("Помилка обробки", "Щоб вирахувати момент інерції бруска, необхідно спочатку виміряти еталонний куб!");
             }
         }
 
@@ -366,7 +366,10 @@ public class LabController18 extends BaseLabController {
             finalResultLabel.setText("Для повного аналізу та побудови еліпсоїда інерції потрібні всі 4 виміри (Еталон та 3 осі).");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         Measurement m0 = data.get(0);
         Measurement mx = data.get(1);
         Measurement my = data.get(2);
@@ -386,10 +389,10 @@ public class LabController18 extends BaseLabController {
 
         String conclusion = String.format(
                 "ОБРОБКА РЕЗУЛЬТАТІВ ТА АНАЛІЗ:\n" +
-                        "1. Періоди коливань: еталона T0 = %.3f с, тіла Tx = %.3f с, Ty = %.3f с, Tz = %.3f с.\n" +
+                        "1. Періоди коливань: еталона (куб) T0 = %.3f с, бруска Tx = %.3f с, Ty = %.3f с, Tz = %.3f с.\n" +
                         "2. Головні експериментальні моменти інерції (ф.16): Ix = %.5f, Iy = %.5f, Iz = %.5f (кг·м²).\n" +
                         "3. Рівняння еліпсоїда інерції: %.5f X² + %.5f Y² + %.5f Z² = 1.\n" +
-                        "4-5. Теоретичні значення за ф.(9) та похибки:\n" +
+                        "4-5. Теоретичні значення та похибки:\n" +
                         "   Ix_теор = %.5f (ε = %.1f%%), Iy_теор = %.5f (ε = %.1f%%), Iz_теор = %.5f (ε = %.1f%%).\n" +
                         "6. ВИСНОВОК: Експериментально знайдені головні моменти інерції бруска співпадають з теоретичними " +
                         "в межах розрахованої похибки. Еліпсоїд інерції побудовано успішно.",

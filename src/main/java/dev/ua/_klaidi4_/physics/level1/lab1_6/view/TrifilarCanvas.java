@@ -21,23 +21,25 @@ public class TrifilarCanvas extends Canvas {
     private long lastTime = 0;
     private double swingTime = 0;
     private double exactPeriod = 2.0;
+    private double simSpeed = 1.0;
 
     public TrifilarCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
-    public void setParameters(int configIndex, double rPlatform, double rDisk, double d) {
+    public void setParameters(int configIndex, double rPlatform, double rDisk, double a) {
         this.configIndex = configIndex;
-        this.platformRadius = rPlatform * 1000;
-        this.diskRadius = rDisk * 1000;
-        this.displacement = d * 1000;
+        this.platformRadius = rPlatform * 750;
+        this.diskRadius = rDisk * 750;
+        this.displacement = a * 750;
         this.currentAngle = 0;
         draw();
     }
 
-    public void startSimulation(double period) {
+    public void startSimulation(double period, double speedMultiplier) {
         this.exactPeriod = period;
+        this.simSpeed = speedMultiplier;
         this.swingTime = 0;
         this.isSwinging = true;
 
@@ -68,7 +70,7 @@ public class TrifilarCanvas extends Canvas {
 
     private void update(double dt) {
         if (isSwinging) {
-            swingTime += dt;
+            swingTime += dt * simSpeed;
             currentAngle = maxAngle * Math.cos((2 * Math.PI / exactPeriod) * swingTime);
         }
     }
@@ -125,6 +127,7 @@ public class TrifilarCanvas extends Canvas {
             gc.strokeOval(-displacement - diskRadius, -diskRadius, diskRadius * 2, diskRadius * 2);
             gc.setFill(Color.BLACK);
             gc.fillOval(-displacement - 3, -3, 6, 6);
+
             gc.setFill(diskGrad);
             gc.fillOval(displacement - diskRadius, -diskRadius, diskRadius * 2, diskRadius * 2);
             gc.strokeOval(displacement - diskRadius, -diskRadius, diskRadius * 2, diskRadius * 2);

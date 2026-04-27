@@ -9,10 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Measurement {
     private int id;
-    private double m;
-    private double l;
-    private double angle;
-    private double v;
+    private double c;
+    private double r;
+    private double n0;
+    private double n;
+    private double dh;
+    private double radius;
     private double tau;
+    private double v;
     private double force;
 }

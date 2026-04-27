@@ -11,6 +11,8 @@ public class Measurement {
     private int id;
     private String bodyType;
     private double m;
+    private double h;
+    private double s;
     private double r;
     private double time;
     private double expI;

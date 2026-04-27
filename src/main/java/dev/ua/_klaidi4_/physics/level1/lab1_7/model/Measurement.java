@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 public class Measurement {
     private int id;
     private double m;
-    private double bigR;
+    private double r;
+    private double h;
     private double time;
-    private double accel;
     private double expI;
     private double theoI;
 }

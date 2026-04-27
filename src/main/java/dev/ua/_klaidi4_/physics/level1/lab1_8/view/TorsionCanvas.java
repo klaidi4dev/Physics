@@ -12,12 +12,11 @@ public class TorsionCanvas extends Canvas {
 
     private int configIndex = 0;
     private double currentAngle = 0;
-    private double maxAngle = Math.PI / 2;
+    private double maxAngle = Math.PI / 3;
     private double r0 = 0.05;
     private double a = 0.1;
     private double b = 0.06;
     private double c = 0.04;
-
     private boolean isSwinging = false;
     private AnimationTimer timer;
     private long lastTime = 0;
@@ -90,7 +89,7 @@ public class TorsionCanvas extends Canvas {
 
         double originX = w / 2;
         double originY = h / 2;
-        double scale = 1200;
+        double scale = 1500;
 
         gc.save();
         gc.translate(originX, originY);

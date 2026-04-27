@@ -31,13 +31,12 @@ public class LabController14 extends BaseLabController {
     private Button autoBtn;
     private Button clearBtn;
     private Label liveStatusLabel;
-    private Label dxLabel;
+    private Label sLabel;
     private Label vCalcLabel;
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
-
     private double currentPendulumMass;
-    private double currentDx;
+    private double currentS;
     private double currentVCalc;
 
     public LabController14() {
@@ -85,7 +84,7 @@ public class LabController14 extends BaseLabController {
         paramsBox.getChildren().addAll(
                 createInputGroup("Початкова маса M (кг):", mPendField),
                 createInputGroup("Маса кулі m (кг):", mBulletField),
-                createInputGroup("Довжина підвісу L (м):", lengthField)
+                createInputGroup("Довжина підвісу l (м):", lengthField)
         );
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
@@ -119,7 +118,7 @@ public class LabController14 extends BaseLabController {
         autoBtn.setMaxWidth(Double.MAX_VALUE);
         autoBtn.setOnAction(e -> startAuto());
 
-        clearBtn = new Button("🗑 ОЧИСТИТИ ТАБЛИЦЮ (Скидає масу)");
+        clearBtn = new Button("🗑 ОЧИСТИТИ ТАБЛИЦЮ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold;");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
         clearBtn.setOnAction(e -> {
@@ -127,8 +126,8 @@ public class LabController14 extends BaseLabController {
             idCounter = 1;
             resetPendulumMass();
             updateStats();
-            dxLabel.setText("Δx = 0.000 м");
-            vCalcLabel.setText("V = 0.00 м/с");
+            sLabel.setText("S = 0.000 м");
+            vCalcLabel.setText("υ = 0.00 м/с");
             mPendField.setDisable(false);
             lengthField.setDisable(false);
             mBulletField.setDisable(false);
@@ -154,12 +153,12 @@ public class LabController14 extends BaseLabController {
         dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
         liveStatusLabel = new Label("Статус: ОЧІКУВАННЯ");
         liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
-        dxLabel = new Label("Δx = 0.000 м");
-        dxLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
-        dxLabel.setStyle("-fx-text-fill: #3498db;");
-        vCalcLabel = new Label("V = 0.00 м/с");
+        sLabel = new Label("S = 0.000 м");
+        sLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
+        sLabel.setStyle("-fx-text-fill: #3498db;");
+        vCalcLabel = new Label("υ = 0.00 м/с");
         vCalcLabel.setStyle("-fx-text-fill: #00ff00;");
-        dash.getChildren().addAll(dashTitle, liveStatusLabel, dxLabel, vCalcLabel);
+        dash.getChildren().addAll(dashTitle, liveStatusLabel, sLabel, vCalcLabel);
 
         StackPane centerPanel = new StackPane(canvas, topBar, dash);
         StackPane.setAlignment(dash, Pos.TOP_RIGHT);
@@ -172,18 +171,18 @@ public class LabController14 extends BaseLabController {
 
         TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        TableColumn<Measurement, Double> mCol = new TableColumn<>("m кулі (кг)");
-        mCol.setCellValueFactory(new PropertyValueFactory<>("m"));
-        TableColumn<Measurement, Double> pCol = new TableColumn<>("M маят. (кг)");
+        TableColumn<Measurement, Double> pCol = new TableColumn<>("M (кг)");
         pCol.setCellValueFactory(new PropertyValueFactory<>("mPend"));
-        TableColumn<Measurement, Double> lCol = new TableColumn<>("L (м)");
+        TableColumn<Measurement, Double> mCol = new TableColumn<>("m (кг)");
+        mCol.setCellValueFactory(new PropertyValueFactory<>("mBullet"));
+        TableColumn<Measurement, Double> lCol = new TableColumn<>("l (м)");
         lCol.setCellValueFactory(new PropertyValueFactory<>("length"));
-        TableColumn<Measurement, Double> dxCol = new TableColumn<>("Δx (м)");
-        dxCol.setCellValueFactory(new PropertyValueFactory<>("dx"));
-        TableColumn<Measurement, Double> vCol = new TableColumn<>("V (м/с)");
+        TableColumn<Measurement, Double> sCol = new TableColumn<>("S (м)");
+        sCol.setCellValueFactory(new PropertyValueFactory<>("s"));
+        TableColumn<Measurement, Double> vCol = new TableColumn<>("υ (м/с)");
         vCol.setCellValueFactory(new PropertyValueFactory<>("v"));
 
-        table.getColumns().addAll(idCol, mCol, pCol, lCol, dxCol, vCol);
+        table.getColumns().addAll(idCol, pCol, mCol, lCol, sCol, vCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefHeight(140);
 
@@ -258,36 +257,36 @@ public class LabController14 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: cyan;");
 
         double m = Double.parseDouble(mBulletField.getText());
-        double L = Double.parseDouble(lengthField.getText());
+        double l = Double.parseDouble(lengthField.getText());
 
         double u = (m * simVelocity) / (currentPendulumMass + m);
         double h = (u * u) / (2 * 9.81);
-        double maxAngle = Math.acos(1.0 - (h / L));
-        double exactDx = L * Math.sin(maxAngle);
+        double maxAngle = Math.acos(1.0 - (h / l));
+        double exactS = l * Math.sin(maxAngle);
 
-        currentDx = exactDx + (Math.random() - 0.5) * 0.004;
-        if (currentDx <= 0) currentDx = 0.001;
+        currentS = exactS + (Math.random() - 0.5) * 0.004;
+        if (currentS <= 0) currentS = 0.001;
 
-        double calcH = L - Math.sqrt(L * L - currentDx * currentDx);
-        currentVCalc = ((currentPendulumMass + m) / m) * Math.sqrt(2 * 9.81 * calcH);
+        currentVCalc = ((currentPendulumMass + m) / m) * currentS * Math.sqrt(9.81 / l);
 
         canvas.startSimulation(maxAngle);
     }
 
     private void finishMeasurement() {
         double m = Double.parseDouble(mBulletField.getText());
-        double L = Double.parseDouble(lengthField.getText());
+        double l = Double.parseDouble(lengthField.getText());
 
-        dxLabel.setText(String.format("Δx = %.3f м", currentDx));
-        vCalcLabel.setText(String.format("V = %.2f м/с", currentVCalc));
+        sLabel.setText(String.format("S = %.3f м", currentS));
+        vCalcLabel.setText(String.format("υ = %.2f м/с", currentVCalc));
         liveStatusLabel.setText("Статус: ВИМІРЯНО");
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
 
         Measurement meas = new Measurement(
-                idCounter++, m,
+                idCounter++,
                 Math.round(currentPendulumMass * 1000.0) / 1000.0,
-                L,
-                Math.round(currentDx * 1000.0) / 1000.0,
+                m,
+                l,
+                Math.round(currentS * 1000.0) / 1000.0,
                 Math.round(currentVCalc * 100.0) / 100.0
         );
         data.add(meas);
@@ -310,27 +309,30 @@ public class LabController14 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         double sumV = 0;
-        for (Measurement m : data) {
-            sumV += m.getV();
+        for (Measurement meas : data) {
+            sumV += meas.getV();
         }
 
         double vAvg = sumV / data.size();
         double sumDelta = 0;
-        for (Measurement m : data) {
-            sumDelta += Math.abs(m.getV() - vAvg);
+        for (Measurement meas : data) {
+            sumDelta += Math.abs(meas.getV() - vAvg);
         }
         double deltaV = sumDelta / data.size();
         double eps = (deltaV / vAvg) * 100;
 
         String conclusion = String.format(
                 "ОБРОБКА РЕЗУЛЬТАТІВ ТА АНАЛІЗ:\n" +
-                        "1. Швидкість кулі для кожного пострілу розрахована та внесена до таблиці. " +
-                        "(Під час розрахунків враховано, що маса маятника після кожного пострілу збільшувалася на величину маси кулі m = %.3f кг).\n" +
-                        "2. Середнє значення швидкості кулі: v_ср = %.2f м/с.\n" +
-                        "   Абсолютна похибка: Δv = %.2f м/с. Відносна похибка: ε = %.1f %%.\n\n" +
-                        "ВІДПОВІДЬ: v = (%.2f ± %.2f) м/с.",
+                        "1. Швидкість кулі розрахована за робочою формулою υ = ((M+m)/m)*S*√(g/l).\n" +
+                        "   (Маса маятника після кожного пострілу збільшувалася на %.3f кг).\n" +
+                        "2. Середнє значення швидкості кулі: υ_ср = %.2f м/с.\n" +
+                        "   Абсолютна похибка: Δυ = %.2f м/с. Відносна похибка: ε = %.1f %%.\n\n" +
+                        "ВІДПОВІДЬ: υ = (%.2f ± %.2f) м/с.",
                 Double.parseDouble(mBulletField.getText()), vAvg, deltaV, eps, vAvg, deltaV
         );
 

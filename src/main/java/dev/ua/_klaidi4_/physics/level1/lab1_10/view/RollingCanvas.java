@@ -28,9 +28,12 @@ public class RollingCanvas extends Canvas {
         draw();
     }
 
-    public void setParameters(int bodyTypeIndex, double angleDeg) {
+    public void setParameters(int bodyTypeIndex, double h, double s) {
         this.bodyTypeIndex = bodyTypeIndex;
-        this.angleDeg = angleDeg;
+        double ratio = h / s;
+        if (ratio > 1.0) ratio = 1.0;
+        this.angleDeg = Math.toDegrees(Math.asin(ratio));
+
         this.currentDistance = 0;
         this.currentRotation = 0;
         draw();
@@ -105,8 +108,8 @@ public class RollingCanvas extends Canvas {
         double startX = 50;
         double endX = startX + maxDistance * Math.cos(Math.toRadians(angleDeg)) + 50;
         double groundY = 350;
-
         double slopeStartY = groundY - (endX - startX) * Math.tan(Math.toRadians(angleDeg));
+
         gc.setFill(Color.web("#bdc3c7"));
         gc.fillRect(0, groundY, w, h - groundY);
         gc.setStroke(Color.web("#7f8c8d"));
@@ -153,6 +156,7 @@ public class RollingCanvas extends Canvas {
         }
 
         gc.restore();
+
         gc.setStroke(Color.web("#27ae60"));
         gc.setLineWidth(2);
         gc.setLineDashes(5);

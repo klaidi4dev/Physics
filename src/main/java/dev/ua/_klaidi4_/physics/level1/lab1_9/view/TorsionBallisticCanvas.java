@@ -76,7 +76,7 @@ public class TorsionBallisticCanvas extends Canvas {
             }
         } else if (isSwinging) {
             swingTime += dt;
-            double omega = 3.0;
+            double omega = 3.0; // Візуальна частота коливань
             currentAngle = maxAngle * Math.sin(omega * swingTime);
         }
     }
@@ -96,6 +96,7 @@ public class TorsionBallisticCanvas extends Canvas {
         double originY = h / 2;
         double targetRadius = 120;
         double weightRadius = 90;
+
         if (isShooting) {
             gc.setFill(Color.web("#e74c3c"));
             gc.fillOval(bulletX, originY - 5, 15, 10);
@@ -127,6 +128,7 @@ public class TorsionBallisticCanvas extends Canvas {
         gc.strokeOval(-15, -weightRadius - 15, 30, 30);
         gc.strokeOval(-15, weightRadius - 15, 30, 30);
         gc.restore();
+
         gc.setFill(Color.BLACK);
         gc.fillOval(originX - 5, originY - 5, 10, 10);
         gc.setFill(Color.WHITE);

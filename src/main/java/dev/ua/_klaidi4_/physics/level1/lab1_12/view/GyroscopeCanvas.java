@@ -4,20 +4,17 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.RadialGradient;
-import javafx.scene.paint.Stop;
 
 public class GyroscopeCanvas extends Canvas {
 
-    private double currentAngle = 0;
+    private double currentAngleDeg = 0;
     private boolean isRunning = false;
-
     private AnimationTimer timer;
     private long lastTime = 0;
     private double simTime = 0;
     private double exactTime = 2.0;
-    private int targetRevs = 1;
+    private double targetAngleDeg = 30.0;
+    private double speedMult = 1.0;
 
     private Runnable onFinishCallback;
 
@@ -30,11 +27,12 @@ public class GyroscopeCanvas extends Canvas {
         this.onFinishCallback = onFinishCallback;
     }
 
-    public void startSimulation(double calculatedTime, int revs) {
+    public void startSimulation(double calculatedTime, double angleDeg, double speedMultiplier) {
         this.exactTime = calculatedTime;
-        this.targetRevs = revs;
+        this.targetAngleDeg = angleDeg;
+        this.speedMult = speedMultiplier;
         this.simTime = 0;
-        this.currentAngle = 0;
+        this.currentAngleDeg = 0;
         this.isRunning = true;
 
         if (timer != null) timer.stop();
@@ -64,11 +62,11 @@ public class GyroscopeCanvas extends Canvas {
 
     private void update(double dt) {
         if (isRunning) {
-            simTime += dt;
-            currentAngle = (simTime / exactTime) * (targetRevs * 2 * Math.PI);
+            simTime += dt * speedMult;
+            currentAngleDeg = (simTime / exactTime) * targetAngleDeg;
 
             if (simTime >= exactTime) {
-                currentAngle = targetRevs * 2 * Math.PI;
+                currentAngleDeg = targetAngleDeg;
                 isRunning = false;
                 timer.stop();
                 if (onFinishCallback != null) onFinishCallback.run();
@@ -91,32 +89,26 @@ public class GyroscopeCanvas extends Canvas {
         double cx = w / 2;
         double cy = h / 2;
         double rPath = 140;
-
         gc.setStroke(Color.web("#bdc3c7"));
         gc.setLineWidth(2);
         gc.setLineDashes(5);
         gc.strokeOval(cx - rPath, cy - rPath, rPath * 2, rPath * 2);
         gc.setLineDashes(null);
-
         gc.save();
         gc.translate(cx, cy);
-        gc.rotate(Math.toDegrees(currentAngle));
+        gc.rotate(currentAngleDeg);
         gc.setStroke(Color.web("#34495e"));
         gc.setLineWidth(8);
-        gc.strokeLine(-40, 0, rPath + 20, 0);
+        gc.strokeLine(-80, 0, rPath + 40, 0);
         gc.setFill(Color.web("#2980b9", 0.9));
-        gc.fillRect(rPath - 30, -40, 20, 80);
+        gc.fillRect(-20, -50, 40, 100);
         gc.setStroke(Color.web("#2c3e50"));
         gc.setLineWidth(2);
-        gc.strokeRect(rPath - 30, -40, 20, 80);
-
-        RadialGradient weightGrad = new RadialGradient(0, 0, 0, 0, 15,
-                false, CycleMethod.NO_CYCLE, new Stop(0, Color.web("#e74c3c")), new Stop(1, Color.web("#c0392b")));
-        gc.setFill(weightGrad);
-        gc.fillOval(rPath + 5, -15, 30, 30);
+        gc.strokeRect(-20, -50, 40, 100);
+        gc.setFill(Color.web("#e74c3c"));
+        gc.fillOval(rPath - 15, -15, 30, 30);
         gc.setFill(Color.WHITE);
-        gc.fillText("m", rPath + 15, 4);
-
+        gc.fillText("m", rPath - 5, 5);
         gc.restore();
         gc.setFill(Color.web("#7f8c8d"));
         gc.fillOval(cx - 15, cy - 15, 30, 30);

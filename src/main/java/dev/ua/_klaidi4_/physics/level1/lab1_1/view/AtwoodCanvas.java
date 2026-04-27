@@ -10,10 +10,10 @@ import javafx.scene.paint.CycleMethod;
 
 public class AtwoodCanvas extends Canvas {
 
-    private double s1 = 0.3;
-    private double s2 = 0.4;
-    private double bigM = 0.1;
-    private double smallM = 0.005;
+    private double s1 = 0.2;
+    private double s2 = 0.25;
+    private double bigM = 0.0628;
+    private double smallM = 0.012;
     private double gravity = 9.81;
     private double currentY = 0;
     private double currentV = 0;
@@ -25,18 +25,19 @@ public class AtwoodCanvas extends Canvas {
     private long lastTime = 0;
     private Runnable onStage2Start;
     private Runnable onFinish;
-    private final double SCALE = 400;
+    private final double SCALE = 600;
 
     public AtwoodCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
-    public void setParameters(double bigM, double smallM, double s1, double s2) {
+    public void setParameters(double bigM, double smallM, double s1, double s2, double gravity) {
         this.bigM = bigM;
         this.smallM = smallM;
         this.s1 = s1;
         this.s2 = s2;
+        this.gravity = gravity;
         resetSystem();
     }
 

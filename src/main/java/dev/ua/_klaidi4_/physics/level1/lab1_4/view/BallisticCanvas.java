@@ -13,18 +13,14 @@ public class BallisticCanvas extends Canvas {
     private double length = 300;
     private double currentAngle = 0;
     private double maxAngle = 0;
-
     private double bulletX = 50;
-    private double bulletSpeed = 2000; // швидкість анімації кулі (пікселі/с)
-
+    private double bulletSpeed = 2000;
     private boolean isShooting = false;
     private boolean isSwinging = false;
     private boolean isFinished = false;
-
     private AnimationTimer timer;
     private long lastTime = 0;
     private double swingTime = 0;
-
     private Runnable onHitCallback;
     private Runnable onFinishCallback;
 
@@ -43,7 +39,6 @@ public class BallisticCanvas extends Canvas {
         this.currentAngle = 0;
         this.bulletX = 20;
         this.swingTime = 0;
-
         this.isShooting = true;
         this.isSwinging = false;
         this.isFinished = false;
@@ -78,7 +73,6 @@ public class BallisticCanvas extends Canvas {
 
         if (isShooting) {
             bulletX += bulletSpeed * dt;
-            // Коли куля досягає маятника
             if (bulletX >= originX - 15) {
                 bulletX = originX - 15;
                 isShooting = false;
@@ -87,8 +81,7 @@ public class BallisticCanvas extends Canvas {
             }
         } else if (isSwinging) {
             swingTime += dt;
-            // Імітація чверті періоду коливання (рух до максимальної точки)
-            double omega = 3.0; // Швидкість коливання для візуалу
+            double omega = 3.0;
             currentAngle = maxAngle * Math.sin(omega * swingTime);
 
             if (omega * swingTime >= Math.PI / 2) {
@@ -106,7 +99,6 @@ public class BallisticCanvas extends Canvas {
         double w = getWidth();
         double h = getHeight();
 
-        // Фон
         gc.setFill(Color.web("#f8f9fa"));
         gc.fillRect(0, 0, w, h);
         gc.setStroke(Color.web("#e9ecef"));
@@ -117,32 +109,26 @@ public class BallisticCanvas extends Canvas {
         double originX = w / 2;
         double originY = 40;
 
-        // Кріплення
         gc.setFill(Color.DARKGRAY);
         gc.fillRect(originX - 30, originY - 10, 60, 10);
 
-        // Пушка (ліворуч)
         gc.setFill(Color.web("#34495e"));
         gc.fillRect(10, originY + length - 15, 60, 30);
         gc.setFill(Color.web("#7f8c8d"));
         gc.fillRect(70, originY + length - 5, 30, 10);
 
-        // Куля
         if (isShooting) {
             gc.setFill(Color.web("#e74c3c"));
             gc.fillOval(bulletX, originY + length - 5, 15, 10);
         }
 
-        // Розрахунок позиції маятника
         double pendX = originX + length * Math.sin(currentAngle);
         double pendY = originY + length * Math.cos(currentAngle);
 
-        // Нитка
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2);
         gc.strokeLine(originX, originY, pendX, pendY);
 
-        // Блок маятника (з кулею всередині, якщо вже влучила)
         gc.save();
         gc.translate(pendX, pendY);
         gc.rotate(Math.toDegrees(-currentAngle));
@@ -155,7 +141,6 @@ public class BallisticCanvas extends Canvas {
         gc.setLineWidth(2);
         gc.strokeRect(-25, -20, 50, 40);
 
-        // Якщо куля всередині маятника — малюємо червону точку
         if (isSwinging || isFinished) {
             gc.setFill(Color.web("#e74c3c"));
             gc.fillOval(-10, -5, 15, 10);
@@ -163,7 +148,6 @@ public class BallisticCanvas extends Canvas {
 
         gc.restore();
 
-        // Відображення лінійки відхилення
         if (isFinished) {
             gc.setStroke(Color.web("#3498db"));
             gc.setLineWidth(1.5);
@@ -174,7 +158,7 @@ public class BallisticCanvas extends Canvas {
             gc.setLineDashes(null);
 
             gc.setFill(Color.web("#2980b9"));
-            gc.fillText("Δx", originX + (pendX - originX) / 2 - 5, originY + length + 25);
+            gc.fillText("S", originX + (pendX - originX) / 2 - 5, originY + length + 25);
         }
     }
 }

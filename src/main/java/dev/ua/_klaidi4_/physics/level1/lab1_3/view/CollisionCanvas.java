@@ -12,14 +12,14 @@ import javafx.scene.paint.Stop;
 public class CollisionCanvas extends Canvas {
 
     private CollisionType type = CollisionType.ELASTIC;
-    private double length = 300;
+    private double length = 205;
     private double gravity = 9.81;
-    private double m1 = 0.2;
-    private double m2 = 0.2;
+    private double m1 = 0.169;
+    private double m2 = 0.169;
     private double r1 = 20;
     private double r2 = 20;
-    private double startAngle1 = -Math.PI / 4;
-    private double currentAngle1 = -Math.PI / 4;
+    private double startAngle1 = -Math.toRadians(15);
+    private double currentAngle1 = -Math.toRadians(15);
     private double currentAngle2 = 0;
     private double av1 = 0;
     private double av2 = 0;
@@ -110,8 +110,9 @@ public class CollisionCanvas extends Canvas {
             double u1, u2;
 
             if (type == CollisionType.ELASTIC) {
-                u1 = ((m1 - m2) * v1 + 2 * m2 * v2) / (m1 + m2);
-                u2 = ((m2 - m1) * v2 + 2 * m1 * v1) / (m1 + m2);
+                double eCoef = 0.72;
+                u1 = (m1 * v1 + m2 * v2 - m2 * eCoef * (v1 - v2)) / (m1 + m2);
+                u2 = (m1 * v1 + m2 * v2 + m1 * eCoef * (v1 - v2)) / (m1 + m2);
             } else {
                 u1 = (m1 * v1 + m2 * v2) / (m1 + m2);
                 u2 = u1;

@@ -27,6 +27,7 @@ public class LabController11 extends BaseLabController {
     private TextField smallMField;
     private TextField s1Field;
     private TextField s2Field;
+    private TextField gravityField;
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
@@ -37,9 +38,13 @@ public class LabController11 extends BaseLabController {
     private boolean isAutoRunning = false;
 
     private static class AutoTestParam {
-        double M, m, s1, s2;
-        AutoTestParam(double M, double m, double s1, double s2) {
-            this.M = M; this.m = m; this.s1 = s1; this.s2 = s2;
+        double M, m, s1, s2, g;
+        AutoTestParam(double M, double m, double s1, double s2, double g) {
+            this.M = M;
+            this.m = m;
+            this.s1 = s1;
+            this.s2 = s2;
+            this.g = g;
         }
     }
 
@@ -73,26 +78,29 @@ public class LabController11 extends BaseLabController {
         VBox paramsBox = new VBox(12);
         paramsBox.setPadding(new Insets(5));
 
-        bigMField = new TextField("0.100");
-        smallMField = new TextField("0.005");
-        s1Field = new TextField("0.3");
-        s2Field = new TextField("0.4");
+        bigMField = new TextField("0.0628");
+        smallMField = new TextField("0.012");
+        s1Field = new TextField("0.2");
+        s2Field = new TextField("0.25");
+        gravityField = new TextField("9.81");
 
         bigMField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         smallMField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         s1Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         s2Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        gravityField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
 
         paramsBox.getChildren().addAll(
                 createInputGroup("Маса вантажу M (кг):", bigMField),
                 createInputGroup("Тягарець m (кг):", smallMField),
                 createInputGroup("Шлях розгону S1 (м):", s1Field),
-                createInputGroup("Шлях рівн. руху S2 (м):", s2Field)
+                createInputGroup("Шлях рівн. руху S2 (м):", s2Field),
+                createInputGroup("Сила тяжіння g (м/с²):", gravityField)
         );
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
         scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(250);
+        scrollParams.setPrefViewportHeight(280);
         scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         labPane.setContent(scrollParams);
 
@@ -152,7 +160,7 @@ public class LabController11 extends BaseLabController {
         data = FXCollections.observableArrayList();
         table.setItems(data);
 
-        TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
+        TableColumn<Measurement, Integer> idCol = new TableColumn<>("№ досліду");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         TableColumn<Measurement, Double> mCol = new TableColumn<>("M (кг)");
         mCol.setCellValueFactory(new PropertyValueFactory<>("bigM"));
@@ -164,12 +172,10 @@ public class LabController11 extends BaseLabController {
         s2Col.setCellValueFactory(new PropertyValueFactory<>("s2"));
         TableColumn<Measurement, Double> tCol = new TableColumn<>("t (с)");
         tCol.setCellValueFactory(new PropertyValueFactory<>("time"));
-        TableColumn<Measurement, Double> aCol = new TableColumn<>("a (м/с²)");
-        aCol.setCellValueFactory(new PropertyValueFactory<>("accel"));
         TableColumn<Measurement, Double> gCol = new TableColumn<>("g (м/с²)");
         gCol.setCellValueFactory(new PropertyValueFactory<>("gravity"));
 
-        table.getColumns().addAll(idCol, mCol, smCol, s1Col, s2Col, tCol, aCol, gCol);
+        table.getColumns().addAll(idCol, mCol, smCol, s1Col, s2Col, tCol, gCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefHeight(130);
 
@@ -197,7 +203,10 @@ public class LabController11 extends BaseLabController {
             double m = Double.parseDouble(smallMField.getText());
             double s1 = Double.parseDouble(s1Field.getText());
             double s2 = Double.parseDouble(s2Field.getText());
-            canvas.setParameters(M, m, s1, s2);
+            double g = Double.parseDouble(gravityField.getText());
+
+            canvas.setParameters(M, m, s1, s2, g);
+
             liveStatusLabel.setText("Статус: ГОТОВО");
             liveStatusLabel.setStyle("-fx-text-fill: yellow;");
             liveTimeLabel.setText("t = 0.000 с");
@@ -212,17 +221,19 @@ public class LabController11 extends BaseLabController {
         smallMField.setDisable(disable);
         s1Field.setDisable(disable);
         s2Field.setDisable(disable);
+        gravityField.setDisable(disable);
     }
 
     private void startManual() {
         try {
             Double.parseDouble(bigMField.getText());
             Double.parseDouble(smallMField.getText());
+            Double.parseDouble(gravityField.getText());
             isAutoRunning = false;
             applyPhysicsSettings();
             startSimulation();
         } catch (Exception e) {
-            showAlert("Помилка", "Введіть коректні числа в поля маси та шляху.");
+            showAlert("Помилка", "Введіть коректні числа в поля параметрів.");
         }
     }
 
@@ -250,11 +261,19 @@ public class LabController11 extends BaseLabController {
         updateStats();
         autoQueue.clear();
 
-        autoQueue.add(new AutoTestParam(0.1, 0.005, 0.3, 0.4));
-        autoQueue.add(new AutoTestParam(0.1, 0.007, 0.3, 0.4));
-        autoQueue.add(new AutoTestParam(0.1, 0.010, 0.3, 0.4));
-        autoQueue.add(new AutoTestParam(0.15, 0.005, 0.3, 0.4));
-        autoQueue.add(new AutoTestParam(0.15, 0.008, 0.3, 0.4));
+        double currentG;
+        try {
+            currentG = Double.parseDouble(gravityField.getText());
+        } catch (Exception e) {
+            currentG = 9.81;
+        }
+
+        for (int i = 0; i < 5; i++) {
+            autoQueue.add(new AutoTestParam(0.0628, 0.012, 0.2, 0.25, currentG));
+        }
+        for (int i = 0; i < 5; i++) {
+            autoQueue.add(new AutoTestParam(0.0628, 0.021, 0.2, 0.25, currentG));
+        }
 
         isAutoRunning = true;
         processNextAuto();
@@ -273,6 +292,7 @@ public class LabController11 extends BaseLabController {
         smallMField.setText(String.valueOf(param.m));
         s1Field.setText(String.valueOf(param.s1));
         s2Field.setText(String.valueOf(param.s2));
+        gravityField.setText(String.valueOf(param.g));
 
         applyPhysicsSettings();
         startSimulation();
@@ -284,9 +304,8 @@ public class LabController11 extends BaseLabController {
             double m = Double.parseDouble(smallMField.getText());
             double s1 = Double.parseDouble(s1Field.getText());
             double s2 = Double.parseDouble(s2Field.getText());
-
             double exactTime = canvas.getMeasuredTime();
-            double humanError = (Math.random() - 0.5) * 0.04;
+            double humanError = (Math.random() - 0.5) * 0.015;
             double measuredT = exactTime + humanError;
 
             if (measuredT <= 0) measuredT = 0.001;
@@ -297,15 +316,15 @@ public class LabController11 extends BaseLabController {
 
             double v = s2 / measuredT;
             double a = (s2 * s2) / (2 * s1 * measuredT * measuredT);
-            double g = ((2 * M + m) / m) * a;
+
+            double gExp = ((2 * M + m) / m) * a;
 
             vLabel.setText(String.format("V = %.2f м/с", v));
 
             Measurement meas = new Measurement(
                     idCounter++, M, m, s1, s2,
                     Math.round(measuredT * 1000.0) / 1000.0,
-                    Math.round(a * 1000.0) / 1000.0,
-                    Math.round(g * 100.0) / 100.0
+                    Math.round(gExp * 100.0) / 100.0
             );
             data.add(meas);
             updateStats();
@@ -324,6 +343,11 @@ public class LabController11 extends BaseLabController {
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");
+            return;
+        }
+
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
             return;
         }
 

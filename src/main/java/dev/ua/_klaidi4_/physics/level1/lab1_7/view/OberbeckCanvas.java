@@ -10,10 +10,9 @@ import javafx.scene.paint.Stop;
 
 public class OberbeckCanvas extends Canvas {
 
-    private double r = 0.02;
-    private double bigR = 0.15;
-    private double h = 1.0;
-
+    private double r = 0.042;
+    private double bigR = 0.2325;
+    private double h = 0.45;
     private double currentY = 0;
     private double currentAngle = 0;
 
@@ -22,6 +21,7 @@ public class OberbeckCanvas extends Canvas {
     private long lastTime = 0;
     private double simTime = 0;
     private double exactTime = 1.0;
+    private double simSpeedMultiplier = 1.0;
 
     private Runnable onFinishCallback;
 
@@ -43,8 +43,9 @@ public class OberbeckCanvas extends Canvas {
         this.onFinishCallback = onFinishCallback;
     }
 
-    public void startSimulation(double calculatedTime) {
+    public void startSimulation(double calculatedTime, double speedMultiplier) {
         this.exactTime = calculatedTime;
+        this.simSpeedMultiplier = speedMultiplier;
         this.simTime = 0;
         this.currentY = 0;
         this.currentAngle = 0;
@@ -77,11 +78,10 @@ public class OberbeckCanvas extends Canvas {
 
     private void update(double dt) {
         if (isRunning) {
-            simTime += dt;
+            simTime += dt * simSpeedMultiplier;
 
             double a = (2 * h) / (exactTime * exactTime);
             currentY = (a * simTime * simTime) / 2;
-
             currentAngle = currentY / r;
 
             if (simTime >= exactTime || currentY >= h) {
@@ -107,10 +107,10 @@ public class OberbeckCanvas extends Canvas {
         for (int i = 0; i < height; i += 20) gc.strokeLine(0, i, width, i);
 
         double originX = width / 2;
-        double originY = 120;
-        double scaleY = 250;
-        double scaleR = 400;
-        double scaledPulleyR = 15;
+        double originY = 140;
+        double scaleY = 500;
+        double scaleR = 500;
+        double scaledPulleyR = r * scaleR;
 
         gc.setFill(Color.web("#7f8c8d"));
         gc.fillRect(originX - 10, originY, 20, height - originY);
@@ -119,7 +119,7 @@ public class OberbeckCanvas extends Canvas {
         gc.translate(originX, originY);
         gc.rotate(Math.toDegrees(currentAngle));
 
-        double armLen = 0.25 * scaleR;
+        double armLen = 0.25 * scaleR; // 25cm
         gc.setStroke(Color.web("#2c3e50"));
         gc.setLineWidth(4);
         gc.strokeLine(-armLen, 0, armLen, 0);

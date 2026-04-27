@@ -272,7 +272,10 @@ public class LabController114 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: -");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         double sumEta = 0;
         for (Measurement meas : data) {
             sumEta += meas.getEta();

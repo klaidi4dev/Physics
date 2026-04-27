@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Measurement {
     private int id;
-    private double m;
     private double mPend;
+    private double mBullet;
     private double length;
-    private double dx;
+    private double s;
     private double v;
 }

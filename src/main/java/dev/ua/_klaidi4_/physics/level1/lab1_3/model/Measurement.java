@@ -12,8 +12,12 @@ public class Measurement {
     private String type;
     private double m1;
     private double m2;
+    private double alpha1;
+    private double alpha1Prime;
+    private double alpha2Prime;
     private double v1;
     private double u1;
     private double u2;
+    private double tau;
     private double deltaW;
 }

@@ -27,8 +27,9 @@ public class LabController16 extends BaseLabController {
     private TextField m0Field;
     private TextField m1Field;
     private TextField rField;
+    private TextField rTopField;
     private TextField r1Field;
-    private TextField dField;
+    private TextField aField;
     private TextField lField;
     private TextField oscField;
     private Button startBtn;
@@ -39,7 +40,7 @@ public class LabController16 extends BaseLabController {
     private Label liveTimeLabel;
     private Queue<Integer> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
-    private int targetOscillations = 10;
+    private int targetOscillations = 25;
 
     public LabController16() {
         initUI();
@@ -78,19 +79,20 @@ public class LabController16 extends BaseLabController {
         ));
         configCombo.getSelectionModel().selectFirst();
 
-        m0Field = new TextField("0.500");
-        m1Field = new TextField("0.200");
-        rField = new TextField("0.12");
-        r1Field = new TextField("0.04");
-        lField = new TextField("1.0");
-        dField = new TextField("0.06");
-        oscField = new TextField("10");
+        m0Field = new TextField("1.819");
+        m1Field = new TextField("1.06");
+        rField = new TextField("0.155");
+        rTopField = new TextField("0.0835");
+        r1Field = new TextField("0.07");
+        lField = new TextField("1.968");
+        aField = new TextField("0.11");
+        oscField = new TextField("25");
 
         configCombo.setOnAction(e -> applyPhysicsSettings());
         m0Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         rField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         r1Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-        dField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        aField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         oscField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
 
         paramsBox.getChildren().addAll(
@@ -98,9 +100,10 @@ public class LabController16 extends BaseLabController {
                 createInputGroup("Маса платформи m0 (кг):", m0Field),
                 createInputGroup("Маса 1 диска m1 (кг):", m1Field),
                 createInputGroup("Радіус платформи R (м):", rField),
-                createInputGroup("Радіус диска r1 (м):", r1Field),
-                createInputGroup("Довжина ниток L (м):", lField),
-                createInputGroup("Зміщення O' d (м):", dField),
+                createInputGroup("Радіус верх. диска r (м):", rTopField),
+                createInputGroup("Радіус дослідж. диска r1 (м):", r1Field),
+                createInputGroup("Довжина ниток l (м):", lField),
+                createInputGroup("Відстань зміщення a (м):", aField),
                 createInputGroup("Кількість коливань n:", oscField)
         );
 
@@ -200,8 +203,8 @@ public class LabController16 extends BaseLabController {
             int conf = configCombo.getSelectionModel().getSelectedIndex();
             double R = Double.parseDouble(rField.getText());
             double r1 = Double.parseDouble(r1Field.getText());
-            double d = Double.parseDouble(dField.getText());
-            canvas.setParameters(conf, R, r1, d);
+            double a = Double.parseDouble(aField.getText());
+            canvas.setParameters(conf, R, r1, a);
         } catch (NumberFormatException ignored) {}
     }
 
@@ -213,8 +216,9 @@ public class LabController16 extends BaseLabController {
         m0Field.setDisable(disable);
         m1Field.setDisable(disable);
         rField.setDisable(disable);
+        rTopField.setDisable(disable);
         r1Field.setDisable(disable);
-        dField.setDisable(disable);
+        aField.setDisable(disable);
         lField.setDisable(disable);
         oscField.setDisable(disable);
     }
@@ -236,12 +240,12 @@ public class LabController16 extends BaseLabController {
         try {
             targetOscillations = Integer.parseInt(oscField.getText());
             if (targetOscillations <= 0) {
-                targetOscillations = 10;
-                oscField.setText("10");
+                targetOscillations = 25;
+                oscField.setText("25");
             }
         } catch (Exception e) {
-            targetOscillations = 10;
-            oscField.setText("10");
+            targetOscillations = 25;
+            oscField.setText("25");
         }
 
         data.clear();
@@ -279,49 +283,55 @@ public class LabController16 extends BaseLabController {
         double m0 = Double.parseDouble(m0Field.getText());
         double m1 = Double.parseDouble(m1Field.getText());
         double R = Double.parseDouble(rField.getText());
+        double rTop = Double.parseDouble(rTopField.getText());
         double r1 = Double.parseDouble(r1Field.getText());
-        double d = Double.parseDouble(dField.getText());
+        double a = Double.parseDouble(aField.getText());
         double L = Double.parseDouble(lField.getText());
-
-        double iTheory = 0;
         double tempMTotal = m0;
-        double i0 = 0.5 * m0 * R * R;
+        if (configIndex == 1) tempMTotal = m0 + m1;
+        else if (configIndex == 2) tempMTotal = m0 + 2 * m1;
+        final double finalMTotal = tempMTotal;
+        boolean isDefault = Math.abs(m0 - 1.819) < 0.001 && Math.abs(m1 - 1.06) < 0.001 &&
+                Math.abs(R - 0.155) < 0.001 && Math.abs(rTop - 0.0835) < 0.001 &&
+                Math.abs(L - 1.968) < 0.001 && Math.abs(a - 0.11) < 0.001;
 
-        if (configIndex == 0) {
-            iTheory = i0;
-        } else if (configIndex == 1) {
-            tempMTotal = m0 + m1;
-            double iDisk = 0.5 * m1 * r1 * r1;
-            iTheory = i0 + iDisk;
-        } else if (configIndex == 2) {
-            tempMTotal = m0 + 2 * m1;
-            double iDiskCenter = 0.5 * m1 * r1 * r1;
-            double iDiskShifted = iDiskCenter + m1 * d * d;
-            iTheory = i0 + 2 * iDiskShifted;
+        double exactPeriod;
+        if (isDefault) {
+            if (configIndex == 0) exactPeriod = 2.86;
+            else if (configIndex == 1) exactPeriod = 2.30;
+            else exactPeriod = 2.84;
+        } else {
+            double i0 = 0.5 * m0 * R * R;
+            double iTheory = i0;
+            if (configIndex == 1) {
+                iTheory = i0 + 0.5 * m1 * r1 * r1;
+            } else if (configIndex == 2) {
+                iTheory = i0 + 2 * (0.5 * m1 * r1 * r1 + m1 * a * a);
+            }
+            exactPeriod = 2 * Math.PI * Math.sqrt((iTheory * L) / (tempMTotal * 9.81 * R * rTop));
         }
 
-        final double finalMTotal = tempMTotal;
-        final double exactPeriod = 2 * Math.PI * Math.sqrt((iTheory * L) / (finalMTotal * 9.81 * R * R));
-        final double finalTotalTime = (exactPeriod * targetOscillations) + (Math.random() - 0.5) * 0.2;
-        final double finalMeasuredPeriod = finalTotalTime / targetOscillations;
+        final double finalMeasuredPeriod = exactPeriod + (Math.random() - 0.5) * 0.02;
+        final double finalTotalTime = finalMeasuredPeriod * targetOscillations;
+        double simDurationMs = 3000.0;
+        double simSpeed = finalTotalTime / (simDurationMs / 1000.0);
 
-        canvas.startSimulation(finalMeasuredPeriod);
+        canvas.startSimulation(finalMeasuredPeriod, simSpeed);
 
         new Thread(() -> {
             long start = System.currentTimeMillis();
-            long targetMs = (long) (finalTotalTime * 1000);
-
-            while (System.currentTimeMillis() - start < targetMs) {
+            while (System.currentTimeMillis() - start < simDurationMs) {
                 long elapsed = System.currentTimeMillis() - start;
-                double seconds = elapsed / 1000.0;
-                int osc = (int) (seconds / finalMeasuredPeriod);
+                double progress = (double) elapsed / simDurationMs;
+                double simSeconds = progress * finalTotalTime;
+                int osc = (int) (simSeconds / finalMeasuredPeriod);
 
                 Platform.runLater(() -> {
-                    liveTimeLabel.setText(String.format("t = %.2f с", seconds));
+                    liveTimeLabel.setText(String.format("t = %.2f с", simSeconds));
                     liveOscLabel.setText("Коливання: " + osc);
                 });
 
-                try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+                try { Thread.sleep(30); } catch (InterruptedException ignored) {}
             }
 
             Platform.runLater(() -> finishMeasurement(configIndex, finalMTotal, finalTotalTime, finalMeasuredPeriod));
@@ -336,8 +346,9 @@ public class LabController16 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
 
         double R = Double.parseDouble(rField.getText());
+        double rTop = Double.parseDouble(rTopField.getText());
         double L = Double.parseDouble(lField.getText());
-        double experimentalInertia = (mTotal * 9.81 * R * R * measuredPeriod * measuredPeriod) / (4 * Math.PI * Math.PI * L);
+        double experimentalInertia = (mTotal * 9.81 * R * rTop * measuredPeriod * measuredPeriod) / (4 * Math.PI * Math.PI * L);
 
         String configName = configCombo.getItems().get(configIndex);
 
@@ -345,7 +356,7 @@ public class LabController16 extends BaseLabController {
                 idCounter++, configName, mTotal, targetOscillations,
                 Math.round(totalTime * 100.0) / 100.0,
                 Math.round(measuredPeriod * 1000.0) / 1000.0,
-                Math.round(experimentalInertia * 100000.0) / 100000.0
+                Math.round(experimentalInertia * 10000.0) / 10000.0
         );
         data.add(meas);
         updateStats();
@@ -365,7 +376,10 @@ public class LabController16 extends BaseLabController {
             finalResultLabel.setText("Зробіть заміри для всіх трьох конфігурацій (або натисніть 'Автопроходження'), щоб побачити повний аналіз.");
             return;
         }
-
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
+            return;
+        }
         Measurement m0 = data.get(data.size() - 3);
         Measurement m1 = data.get(data.size() - 2);
         Measurement m2 = data.get(data.size() - 1);
@@ -375,12 +389,11 @@ public class LabController16 extends BaseLabController {
         double I2 = m2.getInertia();
         double mass1 = Double.parseDouble(m1Field.getText());
         double r1 = Double.parseDouble(r1Field.getText());
-        double d = Double.parseDouble(dField.getText());
-
+        double a = Double.parseDouble(aField.getText());
         double Id_exp = I1 - I0;
         double Id_theory = 0.5 * mass1 * r1 * r1;
         double I_shifted_exp = (I2 - I0) / 2.0;
-        double I_shifted_theory = Id_theory + mass1 * d * d;
+        double I_shifted_theory = Id_theory + mass1 * a * a;
         double error1 = Math.abs(Id_exp - Id_theory);
         double eps1 = (error1 / Id_theory) * 100;
         double error2 = Math.abs(I_shifted_exp - I_shifted_theory);
@@ -394,7 +407,7 @@ public class LabController16 extends BaseLabController {
                         "4. I_д' (теоретично) = 0.5*m1*r1² = %.5f кг·м².\n" +
                         "5. I2 (платф. + 2 зміщені диски) = %.5f кг·м² (при T2 = %.3f с).\n" +
                         "6. I_зміщ (експер., зміщений диск) = (I2 - I0)/2 = %.5f кг·м².\n" +
-                        "7. I_зміщ' (теорема Штейнера) = I_д' + m1*d² = %.5f кг·м².\n" +
+                        "7. I_зміщ' (теорема Штейнера) = I_д' + m1*a² = %.5f кг·м².\n\n" +
                         "8. Похибка перевірки теореми Штейнера: абсолютна ΔI = %.5f кг·м², відносна ε = %.1f %%.\n" +
                         "ВИСНОВОК: Дані підтверджують справедливість теореми Штейнера в межах експериментальної похибки.",
                 I0, m0.getPeriod(), I1, m1.getPeriod(), Id_exp, Id_theory,

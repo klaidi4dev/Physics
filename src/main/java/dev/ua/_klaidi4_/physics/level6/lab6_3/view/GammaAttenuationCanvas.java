@@ -13,6 +13,7 @@ import java.util.List;
 public class GammaAttenuationCanvas extends Canvas {
 
     private double thicknessX = 0.0;
+    private double trueMu = 0.65;
     private boolean isMeasuring = false;
     private List<Measurement> dataPoints = new ArrayList<>();
     private AnimationTimer timer;
@@ -23,8 +24,9 @@ public class GammaAttenuationCanvas extends Canvas {
         startAnimation();
     }
 
-    public void setPhysicsParameters(double x, boolean measuring, List<Measurement> data) {
+    public void setPhysicsParameters(double x, double mu, boolean measuring, List<Measurement> data) {
         this.thicknessX = x;
+        this.trueMu = mu;
         this.isMeasuring = measuring;
         this.dataPoints = new ArrayList<>(data);
     }
@@ -93,7 +95,7 @@ public class GammaAttenuationCanvas extends Canvas {
             gc.setStroke(Color.web("#00e5ff", 0.6));
             gc.setLineWidth(2.0);
 
-            double transmissionProb = Math.exp(-0.8 * thicknessX);
+            double transmissionProb = Math.exp(-trueMu * thicknessX);
 
             for (int i = 0; i < 8; i++) {
                 double speed = 400.0 + i * 50;

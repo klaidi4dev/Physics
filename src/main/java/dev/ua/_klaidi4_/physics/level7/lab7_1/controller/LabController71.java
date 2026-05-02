@@ -26,9 +26,9 @@ public class LabController71 extends BaseLabController {
     private ObservableList<Measurement> data;
     private int idCounter = 1;
     private ComboBox<String> gasComboBox;
-    private Slider pressureSlider;
-    private Slider tempSlider;
-    private Slider heatRateSlider;
+    private TextField pressureField;
+    private TextField tempField;
+    private TextField heatRateField;
     private Button measureBtn;
     private Button autoBtn;
     private Button clearBtn;
@@ -82,33 +82,15 @@ public class LabController71 extends BaseLabController {
             data.clear(); idCounter = 1; updateStats();
         });
 
-        Label pressureLabel = new Label("Атмосферний тиск P0: 101.3 кПа");
-        pressureSlider = new Slider(98.0, 104.0, 101.3);
-        pressureSlider.setShowTickMarks(true);
-        pressureSlider.valueProperty().addListener((o, ov, nv) -> {
-            pressureLabel.setText(String.format(Locale.US, "Атмосферний тиск P0: %.1f кПа", nv.doubleValue()));
-        });
-
-        Label tempLabel = new Label("Кімнатна температура T0: 20 °C");
-        tempSlider = new Slider(15.0, 30.0, 20.0);
-        tempSlider.setShowTickMarks(true);
-        tempSlider.valueProperty().addListener((o, ov, nv) -> {
-            tempLabel.setText(String.format(Locale.US, "Кімнатна температура T0: %.1f °C", nv.doubleValue()));
-        });
-
-        Label heatRateLabel = new Label("Швидкість теплообміну: 1.0x");
-        heatRateSlider = new Slider(0.5, 2.0, 1.0);
-        heatRateSlider.setShowTickMarks(true);
-        heatRateSlider.setMajorTickUnit(0.5);
-        heatRateSlider.valueProperty().addListener((o, ov, nv) -> {
-            heatRateLabel.setText(String.format(Locale.US, "Швидкість теплообміну: %.1fx", nv.doubleValue()));
-        });
+        pressureField = new TextField("101.3");
+        tempField = new TextField("20.0");
+        heatRateField = new TextField("1.0");
 
         configBox.getChildren().addAll(
                 createInputGroup("Досліджуваний газ:", gasComboBox),
-                pressureLabel, pressureSlider,
-                tempLabel, tempSlider,
-                heatRateLabel, heatRateSlider
+                createInputGroup("Атмосферний тиск P0 (кПа):", pressureField),
+                createInputGroup("Кімнатна температура T0 (°C):", tempField),
+                createInputGroup("Швидкість теплообміну (x):", heatRateField)
         );
 
         ScrollPane scrollParams = new ScrollPane(configBox);
@@ -220,11 +202,19 @@ public class LabController71 extends BaseLabController {
         return 1.30;
     }
 
+    private double getDoubleValue(TextField field, double defaultValue) {
+        try {
+            return Double.parseDouble(field.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private void setControlsDisable(boolean disable) {
         gasComboBox.setDisable(disable);
-        pressureSlider.setDisable(disable);
-        tempSlider.setDisable(disable);
-        heatRateSlider.setDisable(disable);
+        pressureField.setDisable(disable);
+        tempField.setDisable(disable);
+        heatRateField.setDisable(disable);
         measureBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
@@ -239,12 +229,15 @@ public class LabController71 extends BaseLabController {
 
         double trueGamma = getTrueGamma();
 
-        double tempFactor = tempSlider.getValue() / 20.0;
+        double currentPressure = getDoubleValue(pressureField, 101.3);
+        double currentTemp = getDoubleValue(tempField, 20.0);
+        double heatRate = getDoubleValue(heatRateField, 1.0);
+
+        double tempFactor = currentTemp / 20.0;
         double targetH1 = (100.0 + Math.random() * 40.0) * tempFactor;
-        double pressureNoise = (101.3 / pressureSlider.getValue());
+        double pressureNoise = (101.3 / currentPressure);
         double expectedH2 = targetH1 * (1.0 - 1.0 / trueGamma);
         double targetH2 = expectedH2 * (1.0 + (Math.random() - 0.5) * 0.05 * pressureNoise);
-        double heatRate = heatRateSlider.getValue();
 
         measureTimer = new AnimationTimer() {
             long start = System.nanoTime();
@@ -328,7 +321,7 @@ public class LabController71 extends BaseLabController {
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
-                double heatRate = heatRateSlider.getValue();
+                double heatRate = getDoubleValue(heatRateField, 1.0);
 
                 if (!isMeasuring && elapsed > (5.0 / heatRate)) {
                     this.stop();

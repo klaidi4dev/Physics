@@ -9,14 +9,15 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class AlphaDecayCanvas extends Canvas {
 
     private double distanceX = 0.0;
     private boolean isMeasuring = false;
     private List<Measurement> dataPoints = new ArrayList<>();
-    private double currentR0 = 3.65;
-
+    private double currentR0 = 0.47;
+    private double maxAxisX = 2.0;
     private AnimationTimer timer;
     private double time = 0;
 
@@ -30,6 +31,7 @@ public class AlphaDecayCanvas extends Canvas {
         this.isMeasuring = measuring;
         this.dataPoints = new ArrayList<>(data);
         this.currentR0 = r0;
+        this.maxAxisX = Math.max(2.0, Math.ceil(r0 * 1.5));
     }
 
     private void startAnimation() {
@@ -65,12 +67,12 @@ public class AlphaDecayCanvas extends Canvas {
         for (int i = 0; i < h; i += 40) gc.strokeLine(0, i, w, i);
 
         double apparatusY = h * 0.35;
-
         double detectorX = 50.0;
+
         gc.setFill(Color.web("#1e293b"));
         gc.fillRect(10, apparatusY - 40, detectorX - 10, 80);
 
-        boolean particlesReachDetector = distanceX <= currentR0;
+        boolean particlesReachDetector = distanceX <= currentR0 * 2.0;
         if (isMeasuring && particlesReachDetector) {
             double flash = 0.5 + 0.5 * Math.random();
             gc.setFill(Color.color(0.0, 1.0, 0.8, flash));
@@ -79,7 +81,7 @@ public class AlphaDecayCanvas extends Canvas {
         }
         gc.fillRect(detectorX, apparatusY - 30, 5, 60);
 
-        double scaleX = 70.0;
+        double scaleX = (w - 120) / maxAxisX;
         double sourceX = detectorX + 5 + distanceX * scaleX;
 
         gc.setFill(Color.web("#475569"));
@@ -92,13 +94,13 @@ public class AlphaDecayCanvas extends Canvas {
         gc.fillRect(sourceX - 2, apparatusY - 10, 2, 20);
 
         if (isMeasuring) {
-            gc.setStroke(Color.web("#ffeb3b", 0.6));
+            gc.setStroke(Color.web("#ffeb3b", 0.8));
             gc.setLineWidth(2.0);
 
             for (int i = 0; i < 5; i++) {
                 double startY = apparatusY - 10 + Math.random() * 20;
-                double maxTravelPx = currentR0 * scaleX;
-                double currentTravelPx = (time * 300 + i * 50) % maxTravelPx;
+                double maxTravelPx = (currentR0 + currentR0*0.5) * scaleX;
+                double currentTravelPx = (time * 500 + i * 50) % maxTravelPx;
 
                 double particleX = sourceX - currentTravelPx;
                 double tailX = particleX + 20;
@@ -111,14 +113,14 @@ public class AlphaDecayCanvas extends Canvas {
 
         gc.setStroke(Color.web("#ffffff", 0.5));
         gc.setLineWidth(1.0);
-        gc.strokeLine(detectorX + 5, apparatusY + 60, detectorX + 5 + 6.0 * scaleX, apparatusY + 60);
-        for (double i = 0; i <= 6.0; i += 0.5) {
+        gc.strokeLine(detectorX + 5, apparatusY + 60, detectorX + 5 + maxAxisX * scaleX, apparatusY + 60);
+
+        double tickStep = maxAxisX > 5 ? 1.0 : (maxAxisX > 2 ? 0.5 : 0.2);
+        for (double i = 0; i <= maxAxisX + 0.01; i += tickStep) {
             double tickX = detectorX + 5 + i * scaleX;
             gc.strokeLine(tickX, apparatusY + 60, tickX, apparatusY + 65);
-            if (i % 1.0 == 0) {
-                gc.setFill(Color.web("#94a3b8"));
-                gc.fillText(String.format(java.util.Locale.US, "%.0f", i), tickX - 5, apparatusY + 80);
-            }
+            gc.setFill(Color.web("#94a3b8"));
+            gc.fillText(String.format(Locale.US, "%.1f", i), tickX - 8, apparatusY + 80);
         }
 
         double graphX = 60.0;
@@ -152,7 +154,7 @@ public class AlphaDecayCanvas extends Canvas {
             boolean first = true;
 
             for (Measurement m : dataPoints) {
-                double px = graphX + (m.getX() / 6.0) * graphW;
+                double px = graphX + (m.getX() / maxAxisX) * graphW;
                 double py = graphY - ((double)m.getCounts() / dynamicMaxN) * graphH;
 
                 if (first) {
@@ -165,16 +167,18 @@ public class AlphaDecayCanvas extends Canvas {
             gc.stroke();
 
             for (Measurement m : dataPoints) {
-                double px = graphX + (m.getX() / 6.0) * graphW;
+                double px = graphX + (m.getX() / maxAxisX) * graphW;
                 double py = graphY - ((double)m.getCounts() / dynamicMaxN) * graphH;
                 gc.fillOval(px - 3, py - 3, 6, 6);
             }
         }
 
-        double currentPx = graphX + (distanceX / 6.0) * graphW;
-        gc.setStroke(Color.web("#ffffff", 0.3));
-        gc.setLineDashes(4, 4);
-        gc.strokeLine(currentPx, graphY, currentPx, graphY - graphH);
-        gc.setLineDashes(null);
+        double currentPx = graphX + (distanceX / maxAxisX) * graphW;
+        if(currentPx <= graphX + graphW) {
+            gc.setStroke(Color.web("#ffffff", 0.3));
+            gc.setLineDashes(4, 4);
+            gc.strokeLine(currentPx, graphY, currentPx, graphY - graphH);
+            gc.setLineDashes(null);
+        }
     }
 }

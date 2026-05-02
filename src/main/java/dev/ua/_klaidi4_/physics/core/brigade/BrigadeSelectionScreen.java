@@ -40,6 +40,12 @@ public class BrigadeSelectionScreen extends BorderPane {
         titleLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 26));
         titleLabel.setStyle("-fx-text-fill: #0f172a;");
 
+        Label authorsLabel = new Label("Created by _Klaidi4_, Ankai, 7ei");
+        authorsLabel.setFont(Font.font("Segoe UI", 12));
+        authorsLabel.setStyle("-fx-text-fill: #94a3b8;");
+        authorsLabel.setWrapText(true);
+        authorsLabel.setAlignment(Pos.CENTER);
+
         Label subtitleLabel = new Label("Оберіть вашу бригаду для початку роботи");
         subtitleLabel.setFont(Font.font("Segoe UI", 14));
         subtitleLabel.setStyle("-fx-text-fill: #64748b;");
@@ -91,7 +97,7 @@ public class BrigadeSelectionScreen extends BorderPane {
             }
         });
 
-        centerBox.getChildren().addAll(titleLabel, subtitleLabel, brigadeComboBox, continueBtn);
+        centerBox.getChildren().addAll(titleLabel, subtitleLabel, authorsLabel, brigadeComboBox, continueBtn);
         this.setCenter(centerBox);
     }
 }

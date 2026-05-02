@@ -14,27 +14,30 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Queue;
+
 public class LabController25 extends BaseLabController {
 
     private CompensationCanvas canvas;
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-    private TextField fieldE1, fieldEn, fieldLmax;
+    private TextField fieldE1, fieldEn, fieldLmax, fieldRg;
     private RadioButton rbEx, rbEn;
-    private Slider lengthSlider;
     private TextField lengthField;
-    private Button autoBtn, recordBtn, calcBtn, clearBtn;
+    private Button recordBtn, autoBtn, clearBtn;
     private Label liveStatusLabel, liveSourceLabel, liveIgLabel;
+
     private double currentE1 = 2.0;
     private double currentEn = 1.0186;
     private double currentLmax = 1000.0;
     private double Ex;
-
-    private final double R_GALV = 100.0;
     private double currentIg = 0.0;
 
     private boolean isAutoRunning = false;
+    private Queue<Integer> autoQueue = new LinkedList<>();
 
     public LabController25() {
         generateUnknownEx();
@@ -44,18 +47,20 @@ public class LabController25 extends BaseLabController {
     @Override
     public void shutdown() {
         isAutoRunning = false;
+        autoQueue.clear();
         if (canvas != null) canvas.stopSimulation();
     }
 
     private void generateUnknownEx() {
-        Ex = 1.2 + Math.random() * 0.4;
+        double rawEx = 1.2 + Math.random() * 0.4;
+        Ex = Math.round(rawEx * 10000.0) / 10000.0;
     }
 
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(320);
-        leftPanel.setMinWidth(320);
+        leftPanel.setPrefWidth(330);
+        leftPanel.setMinWidth(330);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
         Label title = new Label("Система управління (Лаб 2-5)");
@@ -70,21 +75,18 @@ public class LabController25 extends BaseLabController {
         fieldE1 = new TextField("2.0");
         fieldEn = new TextField("1.0186");
         fieldLmax = new TextField("1000.0");
+        fieldRg = new TextField("100.0");
 
         fieldE1.textProperty().addListener((o, old, val) -> updatePhysics());
         fieldEn.textProperty().addListener((o, old, val) -> updatePhysics());
-        fieldLmax.textProperty().addListener((o, old, val) -> {
-            try {
-                double l = Double.parseDouble(val);
-                if (l > 0) lengthSlider.setMax(l);
-                updatePhysics();
-            } catch (Exception ignored) {}
-        });
+        fieldLmax.textProperty().addListener((o, old, val) -> updatePhysics());
+        fieldRg.textProperty().addListener((o, old, val) -> updatePhysics());
 
         paramsBox.getChildren().addAll(
                 createInputGroup("ЕРС робочої батареї E1 (В):", fieldE1),
                 createInputGroup("ЕРС еталона En (В):", fieldEn),
-                createInputGroup("Довжина реохорда L_max (мм):", fieldLmax)
+                createInputGroup("Довжина реохорда L_max (мм):", fieldLmax),
+                createInputGroup("Опір гальванометра Rg (Ом):", fieldRg)
         );
         paramsPane.setContent(paramsBox);
 
@@ -102,60 +104,40 @@ public class LabController25 extends BaseLabController {
         rbEn.setToggleGroup(group);
         group.selectedToggleProperty().addListener((o, old, val) -> updatePhysics());
 
-        lengthSlider = new Slider(0, 1000, 500);
-        lengthSlider.setShowTickMarks(true);
-        lengthSlider.setMajorTickUnit(200);
-
         lengthField = new TextField("500.0");
-
-        lengthSlider.valueProperty().addListener((o, old, val) -> {
-            if(!lengthField.isFocused()) {
-                lengthField.setText(String.format("%.1f", val.doubleValue()).replace(',', '.'));
+        lengthField.textProperty().addListener((o, old, val) -> {
+            if (lengthField.isFocused()) {
+                updatePhysics();
             }
-            updatePhysics();
-        });
-
-        lengthField.setOnAction(e -> {
-            try {
-                double val = Double.parseDouble(lengthField.getText().replace(',', '.'));
-                if (val >= 0 && val <= lengthSlider.getMax()) lengthSlider.setValue(val);
-            } catch (Exception ignored) {}
         });
 
         controlBox.getChildren().addAll(
                 rbEx, rbEn,
-                new Label("Повзунок реохорда l:"),
-                lengthSlider,
-                lengthField
+                createInputGroup("Точка контакту l (мм):", lengthField)
         );
         controlPane.setContent(controlBox);
-
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ");
-        autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
-        autoBtn.setMaxWidth(Double.MAX_VALUE);
-        autoBtn.setOnAction(e -> startAuto());
 
         recordBtn = new Button("✍ ЗАПИСАТИ ПОКАЗНИКИ");
         recordBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         recordBtn.setMaxWidth(Double.MAX_VALUE);
         recordBtn.setOnAction(e -> recordMeasurement());
 
-        calcBtn = new Button("🖩 РОЗРАХУВАТИ Ex");
-        calcBtn.setStyle("-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold;");
-        calcBtn.setMaxWidth(Double.MAX_VALUE);
-        calcBtn.setOnAction(e -> calculateResult());
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ");
+        autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
+        autoBtn.setMaxWidth(Double.MAX_VALUE);
+        autoBtn.setOnAction(e -> startAuto());
 
         clearBtn = new Button("🗑 ОЧИСТИТИ ТАБЛИЦЮ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold;");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
         clearBtn.setOnAction(e -> resetAll());
 
-        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, paramsPane, controlPane, autoBtn, recordBtn, calcBtn, clearBtn));
+        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, paramsPane, controlPane, recordBtn, autoBtn, clearBtn));
         scrollLeft.setFitToWidth(true);
         scrollLeft.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         leftPanel.getChildren().add(scrollLeft);
 
-        canvas = new CompensationCanvas(550, 350);
+        canvas = new CompensationCanvas(600, 350);
 
         Button toggleSidebarBtn = new Button("◀ Приховати панель");
         toggleSidebarBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 5;");
@@ -204,13 +186,12 @@ public class LabController25 extends BaseLabController {
         table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
-        HBox bottomHBox = new HBox(10, table, statsBox);
-        HBox.setHgrow(statsBox, Priority.ALWAYS);
-        bottomHBox.setPadding(new Insets(5));
+        VBox bottomPanel = new VBox(5, table, statsBox);
+        bottomPanel.setPadding(new Insets(5));
 
         this.setLeft(leftPanel);
         this.setCenter(centerTopPanel);
-        this.setBottom(bottomHBox);
+        this.setBottom(bottomPanel);
 
         canvas.startSimulation();
         updatePhysics();
@@ -219,33 +200,43 @@ public class LabController25 extends BaseLabController {
     private void updatePhysics() {
         if (isAutoRunning) return;
 
+        double Rg = 100.0;
         try {
             currentE1 = Double.parseDouble(fieldE1.getText().replace(',', '.'));
             currentEn = Double.parseDouble(fieldEn.getText().replace(',', '.'));
             currentLmax = Double.parseDouble(fieldLmax.getText().replace(',', '.'));
+            Rg = Double.parseDouble(fieldRg.getText().replace(',', '.'));
+            if (Rg <= 0) Rg = 100.0;
         } catch (Exception ignored) {}
 
-        double l = lengthSlider.getValue();
+        double l = 500.0;
+        try {
+            l = Double.parseDouble(lengthField.getText().replace(',', '.'));
+            if (l < 0) l = 0;
+            if (l > currentLmax) l = currentLmax;
+        } catch (Exception ignored) {}
+
         boolean isEx = rbEx.isSelected();
         double activeE = isEx ? Ex : currentEn;
         String sourceName = isEx ? "Ex" : "En";
 
         double Ul = currentE1 * (l / currentLmax);
-        double igAmpere = (activeE - Ul) / R_GALV;
+        double igAmpere = (activeE - Ul) / Rg;
         currentIg = igAmpere * 1e6;
 
+        final double finalL = l;
         Platform.runLater(() -> {
             liveSourceLabel.setText("Підключено: " + sourceName);
             if (Math.abs(currentIg) < 1.0) {
-                liveIgLabel.setText(String.format("Ig = %.1f мкА", currentIg));
+                liveIgLabel.setText(String.format(Locale.US, "Ig = %.1f мкА", currentIg));
                 liveIgLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-weight: bold;");
                 liveStatusLabel.setText("Статус: СКОМПЕНСОВАНО!");
             } else {
-                liveIgLabel.setText(String.format("Ig = %.1f мкА", currentIg));
+                liveIgLabel.setText(String.format(Locale.US, "Ig = %.1f мкА", currentIg));
                 liveIgLabel.setStyle("-fx-text-fill: #ff3333; -fx-font-weight: bold;");
                 liveStatusLabel.setText("Статус: НАЛАШТУВАННЯ...");
             }
-            canvas.updatePhysics(l, currentLmax, currentIg, sourceName, currentE1);
+            canvas.updatePhysics(finalL, currentLmax, currentIg, sourceName, currentE1);
         });
     }
 
@@ -253,12 +244,11 @@ public class LabController25 extends BaseLabController {
         fieldE1.setDisable(disable);
         fieldEn.setDisable(disable);
         fieldLmax.setDisable(disable);
+        fieldRg.setDisable(disable);
         rbEx.setDisable(disable);
         rbEn.setDisable(disable);
-        lengthSlider.setDisable(disable);
         lengthField.setDisable(disable);
         recordBtn.setDisable(disable);
-        calcBtn.setDisable(disable);
         clearBtn.setDisable(disable);
         autoBtn.setDisable(disable);
     }
@@ -284,14 +274,15 @@ public class LabController25 extends BaseLabController {
         isAutoRunning = true;
         setControlsDisable(true);
 
-        final double speed = 30.0;
+        final double speed = 300.0;
 
         new Thread(() -> {
             Platform.runLater(() -> rbEx.setSelected(true));
             try { Thread.sleep(500); } catch (Exception ignored) {}
 
-            double targetLx = (Ex / currentE1) * currentLmax;
-            animateSliderTo(targetLx, Ex, "Ex", speed);
+            double humanErrorX = (Math.random() - 0.5) * 1.6;
+            double targetLx = (Ex / currentE1) * currentLmax + humanErrorX;
+            animateTextTo(targetLx, Ex, "Ex", speed);
 
             Platform.runLater(this::recordMeasurement);
             try { Thread.sleep(1500); } catch (Exception ignored) {}
@@ -299,67 +290,92 @@ public class LabController25 extends BaseLabController {
             Platform.runLater(() -> rbEn.setSelected(true));
             try { Thread.sleep(500); } catch (Exception ignored) {}
 
-            double targetLn = (currentEn / currentE1) * currentLmax;
-            animateSliderTo(targetLn, currentEn, "En", speed);
+            double humanErrorN = (Math.random() - 0.5) * 1.6;
+            double targetLn = (currentEn / currentE1) * currentLmax + humanErrorN;
+            animateTextTo(targetLn, currentEn, "En", speed);
 
             Platform.runLater(this::recordMeasurement);
             try { Thread.sleep(1000); } catch (Exception ignored) {}
 
             Platform.runLater(() -> {
                 isAutoRunning = false;
-                calculateResult();
                 setControlsDisable(false);
                 liveStatusLabel.setText("Статус: АВТО ЗАВЕРШЕНО");
             });
         }).start();
     }
 
-    private void animateSliderTo(double targetValue, double activeE, String sourceName, double speedFactor) {
-        double current = lengthSlider.getValue();
-        double step = (targetValue > current) ? speedFactor : -speedFactor;
+    private void animateTextTo(double targetValue, double activeE, String sourceName, double speedFactor) {
+        double current = 0;
+        try {
+            current = Double.parseDouble(lengthField.getText().replace(',', '.'));
+        } catch (Exception ignored) {}
+
+        double step = (targetValue > current) ? speedFactor * 0.05 : -speedFactor * 0.05;
 
         Platform.runLater(() -> liveStatusLabel.setText("Статус: АВТОПОШУК " + sourceName + "..."));
+
+        double Rg = 100.0;
+        try { Rg = Double.parseDouble(fieldRg.getText().replace(',', '.')); } catch (Exception ignored) {}
 
         while (Math.abs(targetValue - current) > Math.abs(step) && isAutoRunning) {
             current += step;
             final double val = current;
 
             double Ul = currentE1 * (val / currentLmax);
-            currentIg = ((activeE - Ul) / R_GALV) * 1e6;
+            currentIg = ((activeE - Ul) / Rg) * 1e6;
 
             Platform.runLater(() -> {
-                lengthSlider.setValue(val);
+                lengthField.setText(String.format(Locale.US, "%.1f", val));
                 liveSourceLabel.setText("Підключено: " + sourceName);
-                liveIgLabel.setText(String.format("Ig = %.1f мкА", currentIg));
+                liveIgLabel.setText(String.format(Locale.US, "Ig = %.1f мкА", currentIg));
                 canvas.updatePhysics(val, currentLmax, currentIg, sourceName, currentE1);
             });
             try { Thread.sleep(50); } catch (Exception ignored) {}
         }
 
-        currentIg = 0.0;
+        double finalUl = currentE1 * (targetValue / currentLmax);
+        currentIg = ((activeE - finalUl) / Rg) * 1e6;
+
         Platform.runLater(() -> {
-            lengthSlider.setValue(targetValue);
-            liveIgLabel.setText("Ig = 0.0 мкА");
-            liveIgLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-weight: bold;");
-            liveStatusLabel.setText("Статус: СКОМПЕНСОВАНО!");
-            canvas.updatePhysics(targetValue, currentLmax, 0.0, sourceName, currentE1);
+            lengthField.setText(String.format(Locale.US, "%.1f", targetValue));
+            liveIgLabel.setText(String.format(Locale.US, "Ig = %.1f мкА", currentIg));
+
+            if (Math.abs(currentIg) < 5.0) {
+                liveIgLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-weight: bold;");
+                liveStatusLabel.setText("Статус: СКОМПЕНСОВАНО!");
+            } else {
+                liveIgLabel.setStyle("-fx-text-fill: #ff9800; -fx-font-weight: bold;");
+                liveStatusLabel.setText("Статус: МАЙЖЕ СКОМПЕНСОВАНО");
+            }
+
+            canvas.updatePhysics(targetValue, currentLmax, currentIg, sourceName, currentE1);
         });
     }
 
     private void recordMeasurement() {
         String sourceName = rbEx.isSelected() ? "Ex" : "En";
-        double l = Math.round(lengthSlider.getValue() * 10.0) / 10.0;
+        double l = 0;
+        try { l = Double.parseDouble(lengthField.getText().replace(',', '.')); } catch (Exception ignored) {}
+
+        l = Math.round(l * 10.0) / 10.0;
         double ig = Math.round(currentIg * 10.0) / 10.0;
 
         Measurement m = new Measurement(idCounter++, sourceName, l, ig);
         data.add(m);
+        updateStats();
     }
 
-    private void calculateResult() {
+    private void updateStats() {
+        if (data.isEmpty()) {
+            finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");
+            return;
+        }
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
             return;
         }
+
         double lx = -1;
         double ln = -1;
         double maxIgErr = 0;
@@ -375,23 +391,33 @@ public class LabController25 extends BaseLabController {
             }
         }
 
-        if (lx == -1 || ln == -1) {
-            showAlert("Помилка", "Для розрахунку необхідно записати точку компенсації як для Ex, так і для En.");
-            return;
+        StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ:\n");
+
+        if (lx != -1) {
+            sb.append(String.format(Locale.US, "1. Довжина компенсації для невідомого джерела Ex: l1 = %.1f мм.\n", lx));
+        } else {
+            sb.append("1. Очікується вимірювання для невідомого джерела Ex.\n");
         }
 
-        double calcEx = currentEn * (lx / ln);
-        double relErr = Math.abs(calcEx - Ex) / Ex * 100.0;
-
-        StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ:\n");
-        sb.append(String.format("1. Знайдено довжини компенсації: l1 (для Ex) = %.1f мм, l2 (для En) = %.1f мм.\n", lx, ln));
-        sb.append(String.format("2. За формулою Ex = En * (l1 / l2) розраховано: Ex = %.4f * (%.1f / %.1f) = %.4f В.\n", currentEn, lx, ln, calcEx));
-
-        if (maxIgErr > 5.0) {
-            sb.append(String.format("УВАГА: Вимірювання проведені неточно (залишковий струм G: %.1f мкА). Результат може мати похибку!\n", maxIgErr));
+        if (ln != -1) {
+            sb.append(String.format(Locale.US, "2. Довжина компенсації для еталона En: l2 = %.1f мм.\n", ln));
         } else {
-            sb.append(String.format("3. Відносна похибка симуляції: %.2f %%.\n", relErr));
-            sb.append("4. Висновок: Компенсаційний метод дозволяє точно виміряти ЕРС без споживання струму від досліджуваного джерела.");
+            sb.append("2. Очікується вимірювання для еталона En.\n");
+        }
+
+        if (lx != -1 && ln != -1) {
+            double calcEx = currentEn * (lx / ln);
+            double relErr = Math.abs(calcEx - Ex) / Ex * 100.0;
+
+            sb.append(String.format(Locale.US, "3. Розрахунок за формулою Ex = En * (l1 / l2): Ex = %.4f * (%.1f / %.1f) = %.4f В.\n", currentEn, lx, ln, calcEx));
+
+            if (maxIgErr > 15.0) {
+                sb.append(String.format(Locale.US, "УВАГА: Вимірювання проведені дуже неточно (залишковий струм G: %.1f мкА).\n", maxIgErr));
+                sb.append(String.format(Locale.US, "4. Відносна похибка симуляції: %.2f %%.\n", relErr));
+            } else {
+                sb.append(String.format(Locale.US, "4. Відносна похибка розрахунку (завдяки похибці реохорда): %.2f %%.\n", relErr));
+                sb.append("5. Висновок: Компенсаційний метод дозволяє точно виміряти ЕРС без споживання струму від досліджуваного джерела.");
+            }
         }
 
         finalResultLabel.setText(sb.toString());
@@ -401,9 +427,9 @@ public class LabController25 extends BaseLabController {
         data.clear();
         idCounter = 1;
         generateUnknownEx();
-        lengthSlider.setValue(currentLmax / 2.0);
+        lengthField.setText(String.format(Locale.US, "%.1f", currentLmax / 2.0));
         rbEx.setSelected(true);
-        finalResultLabel.setText("Обробка результатів: -");
+        finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");
         updatePhysics();
     }
 }

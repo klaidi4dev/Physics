@@ -30,11 +30,10 @@ public class LabController77 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-    private Slider voltageSlider;
-    private Label voltageLabel;
-    private Slider tempSlider;
-    private Slider emissionSlider;
-    private Slider speedSlider;
+    private TextField voltageField;
+    private TextField tempField;
+    private TextField emissionField;
+    private TextField speedField;
     private Button powerBtn;
     private Button recordBtn;
     private Button autoBtn;
@@ -72,34 +71,20 @@ public class LabController77 extends BaseLabController {
         VBox advancedBox = new VBox(10);
         advancedBox.setPadding(new Insets(5));
 
-        Label tempLabel = new Label("Температура катода T: 2000 К");
-        tempSlider = new Slider(1500.0, 2500.0, 2000.0);
-        tempSlider.setMajorTickUnit(250.0);
-        tempSlider.setShowTickMarks(true);
-        tempSlider.valueProperty().addListener((o, ov, nv) -> {
-            tempLabel.setText(String.format(Locale.US, "Температура катода T: %.0f К", nv.doubleValue()));
-            updateAdvancedParams();
-        });
+        tempField = new TextField("2000.0");
+        tempField.textProperty().addListener((o, ov, nv) -> updateAdvancedParams());
 
-        Label emissionLabel = new Label("Інтенсивність емісії: 1.0x");
-        emissionSlider = new Slider(0.5, 2.0, 1.0);
-        emissionSlider.setMajorTickUnit(0.5);
-        emissionSlider.setShowTickMarks(true);
-        emissionSlider.valueProperty().addListener((o, ov, nv) -> {
-            emissionLabel.setText(String.format(Locale.US, "Інтенсивність емісії: %.1fx", nv.doubleValue()));
-            updateAdvancedParams();
-        });
+        emissionField = new TextField("1.0");
+        emissionField.textProperty().addListener((o, ov, nv) -> updateAdvancedParams());
 
-        Label speedLabel = new Label("Швидкість анімації: 1.0x");
-        speedSlider = new Slider(0.5, 3.0, 1.0);
-        speedSlider.setMajorTickUnit(0.5);
-        speedSlider.setShowTickMarks(true);
-        speedSlider.valueProperty().addListener((o, ov, nv) -> {
-            speedLabel.setText(String.format(Locale.US, "Швидкість анімації: %.1fx", nv.doubleValue()));
-            updateAdvancedParams();
-        });
+        speedField = new TextField("1.0");
+        speedField.textProperty().addListener((o, ov, nv) -> updateAdvancedParams());
 
-        advancedBox.getChildren().addAll(tempLabel, tempSlider, emissionLabel, emissionSlider, speedLabel, speedSlider);
+        advancedBox.getChildren().addAll(
+                createInputGroup("Температура катода T (К):", tempField),
+                createInputGroup("Інтенсивність емісії (x):", emissionField),
+                createInputGroup("Швидкість анімації (x):", speedField)
+        );
         advancedPane.setContent(advancedBox);
 
         TitledPane configPane = new TitledPane();
@@ -109,17 +94,15 @@ public class LabController77 extends BaseLabController {
         VBox configBox = new VBox(10);
         configBox.setPadding(new Insets(5));
 
-        voltageLabel = new Label("Стримувальна напруга Δφ3: 0.0 В");
-        voltageSlider = new Slider(0.0, 15.0, 0.0);
-        voltageSlider.setMajorTickUnit(3.0);
-        voltageSlider.setShowTickMarks(true);
-        voltageSlider.setDisable(true);
-        voltageSlider.valueProperty().addListener((o, ov, nv) -> {
-            voltageLabel.setText(String.format(Locale.US, "Стримувальна напруга Δφ3: %.1f В", nv.doubleValue()));
-            canvas.updateState(isPowerOn, nv.doubleValue());
+        voltageField = new TextField("0.0");
+        voltageField.setDisable(true);
+        voltageField.textProperty().addListener((o, ov, nv) -> {
+            if (canvas != null) {
+                canvas.updateState(isPowerOn, getDoubleValue(voltageField, 0.0));
+            }
         });
 
-        configBox.getChildren().addAll(voltageLabel, voltageSlider);
+        configBox.getChildren().add(createInputGroup("Стримувальна напруга Δφ3 (В):", voltageField));
         configPane.setContent(configBox);
 
         powerBtn = new Button("⚡ УВІМКНУТИ ЖИВЛЕННЯ (ВУП-2)");
@@ -203,9 +186,21 @@ public class LabController77 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    private double getDoubleValue(TextField field, double defaultValue) {
+        try {
+            return Double.parseDouble(field.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private void updateAdvancedParams() {
         if (canvas != null) {
-            canvas.setAdvancedParams(tempSlider.getValue(), emissionSlider.getValue(), speedSlider.getValue());
+            canvas.setAdvancedParams(
+                    getDoubleValue(tempField, 2000.0),
+                    getDoubleValue(emissionField, 1.0),
+                    getDoubleValue(speedField, 1.0)
+            );
         }
     }
 
@@ -214,22 +209,22 @@ public class LabController77 extends BaseLabController {
         if (isPowerOn) {
             powerBtn.setText("⏹ ВИМКНУТИ ЖИВЛЕННЯ");
             powerBtn.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
-            voltageSlider.setDisable(false);
+            voltageField.setDisable(false);
             recordBtn.setDisable(false);
 
-            tempSlider.setDisable(true);
-            emissionSlider.setDisable(true);
+            tempField.setDisable(true);
+            emissionField.setDisable(true);
 
             updateAdvancedParams();
-            canvas.updateState(true, voltageSlider.getValue());
+            canvas.updateState(true, getDoubleValue(voltageField, 0.0));
         } else {
             powerBtn.setText("⚡ УВІМКНУТИ ЖИВЛЕННЯ (ВУП-2)");
             powerBtn.setStyle("-fx-background-color: #ff007f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
-            voltageSlider.setDisable(true);
+            voltageField.setDisable(true);
             recordBtn.setDisable(true);
 
-            tempSlider.setDisable(false);
-            emissionSlider.setDisable(false);
+            tempField.setDisable(false);
+            emissionField.setDisable(false);
 
             canvas.updateState(false, 0);
         }
@@ -238,14 +233,14 @@ public class LabController77 extends BaseLabController {
     private void resetLab() {
         data.clear();
         idCounter = 1;
-        voltageSlider.setValue(0);
+        voltageField.setText("0.0");
         if (finalResultLabel != null) {
             finalResultLabel.setText("Обробка результатів: Очікування даних...");
         }
     }
 
     private void recordMeasurement() {
-        double v = Math.round(voltageSlider.getValue() * 10.0) / 10.0;
+        double v = Math.round(getDoubleValue(voltageField, 0.0) * 10.0) / 10.0;
 
         for (Measurement m : data) {
             if (Math.abs(m.getVoltage() - v) < 0.05) {
@@ -283,13 +278,13 @@ public class LabController77 extends BaseLabController {
         if (!isPowerOn) togglePower();
 
         autoBtn.setDisable(true);
-        voltageSlider.setDisable(true);
+        voltageField.setDisable(true);
         recordBtn.setDisable(true);
 
         new Thread(() -> {
             try {
                 for (double v : RECOMMENDED_V) {
-                    Platform.runLater(() -> voltageSlider.setValue(v));
+                    Platform.runLater(() -> voltageField.setText(String.valueOf(v)));
                     Thread.sleep(300);
                     Platform.runLater(this::recordMeasurement);
                     Thread.sleep(200);
@@ -297,7 +292,7 @@ public class LabController77 extends BaseLabController {
 
                 Platform.runLater(() -> {
                     autoBtn.setDisable(false);
-                    voltageSlider.setDisable(false);
+                    voltageField.setDisable(false);
                     recordBtn.setDisable(false);
                     processAndShowCharts();
                 });

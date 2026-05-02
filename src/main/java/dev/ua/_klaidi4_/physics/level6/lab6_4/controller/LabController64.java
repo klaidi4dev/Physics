@@ -18,6 +18,7 @@ import javafx.scene.text.FontWeight;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 public class LabController64 extends BaseLabController {
 
@@ -26,10 +27,10 @@ public class LabController64 extends BaseLabController {
     private ObservableList<Measurement> data;
     private int idCounter = 1;
     private int trackCounter = 1;
-    private Slider xSlider;
-    private Slider ySlider;
-    private Label xValueLabel;
-    private Label yValueLabel;
+    private TextField xField;
+    private TextField yField;
+    private double currentXValue = 2.0;
+    private double currentYValue = 2.0;
     private Button recordCenterBtn;
     private Button recordTrackBtn;
     private Button autoBtn;
@@ -71,27 +72,20 @@ public class LabController64 extends BaseLabController {
         VBox configBox = new VBox(12);
         configBox.setPadding(new Insets(5));
 
-        xValueLabel = new Label("Координата X: 2.00 мм");
-        xSlider = new Slider(0.0, 10.0, 2.0);
-        xSlider.setShowTickMarks(true);
-        xSlider.setMajorTickUnit(2.0);
-        xSlider.setMinorTickCount(10);
-        xSlider.valueProperty().addListener((o, ov, nv) -> {
-            xValueLabel.setText(String.format(Locale.US, "Координата X: %.2f мм", nv.doubleValue()));
+        xField = createNumberField(currentXValue, val -> {
+            currentXValue = val;
             applyPhysicsSettings();
         });
 
-        yValueLabel = new Label("Координата Y: 2.00 мм");
-        ySlider = new Slider(0.0, 10.0, 2.0);
-        ySlider.setShowTickMarks(true);
-        ySlider.setMajorTickUnit(2.0);
-        ySlider.setMinorTickCount(10);
-        ySlider.valueProperty().addListener((o, ov, nv) -> {
-            yValueLabel.setText(String.format(Locale.US, "Координата Y: %.2f мм", nv.doubleValue()));
+        yField = createNumberField(currentYValue, val -> {
+            currentYValue = val;
             applyPhysicsSettings();
         });
 
-        configBox.getChildren().addAll(xValueLabel, xSlider, yValueLabel, ySlider);
+        configBox.getChildren().addAll(
+                createInputGroup("Координата X (мм):", xField),
+                createInputGroup("Координата Y (мм):", yField)
+        );
 
         ScrollPane scrollParams = new ScrollPane(configBox);
         scrollParams.setFitToWidth(true);
@@ -126,6 +120,8 @@ public class LabController64 extends BaseLabController {
             y0 = null;
             recordCenterBtn.setDisable(false);
             recordTrackBtn.setDisable(true);
+            xField.setDisable(false);
+            yField.setDisable(false);
             x0y0Label.setText("x0: ---, y0: ---");
             liveStepLabel.setText("Статус: Знайдіть центр 'зірочки'");
             liveStepLabel.setStyle("-fx-text-fill: #ff007f; -fx-font-weight: bold;");
@@ -197,16 +193,31 @@ public class LabController64 extends BaseLabController {
         updateStats();
     }
 
+    private TextField createNumberField(double initialValue, Consumer<Double> onChange) {
+        TextField field = new TextField(String.valueOf(initialValue));
+        field.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*(\\.\\d*)?")) {
+                field.setText(newValue.replaceAll("[^\\d.]", ""));
+            } else if (!newValue.isEmpty() && !newValue.equals(".")) {
+                try {
+                    double val = Double.parseDouble(newValue);
+                    onChange.accept(val);
+                } catch (NumberFormatException ignored) {}
+            }
+        });
+        return field;
+    }
+
     private void applyPhysicsSettings() {
-        canvas.setStageCoordinates(xSlider.getValue(), ySlider.getValue());
+        canvas.setStageCoordinates(currentXValue, currentYValue);
     }
 
     private void handleRecordCenter() {
-        double curX = Math.round(xSlider.getValue() * 100.0) / 100.0;
-        double curY = Math.round(ySlider.getValue() * 100.0) / 100.0;
+        double curX = Math.round(currentXValue * 100.0) / 100.0;
+        double curY = Math.round(currentYValue * 100.0) / 100.0;
 
         if (Math.abs(curX - 5.0) > 0.1 || Math.abs(curY - 5.0) > 0.1) {
-            showAlert("Похибка наведення", "Візирне перехрестя не знаходиться в центрі зірочки!");
+            showAlert("Похибка наведення", "Візирне перехрестя не знаходиться в центрі зірочки (x=5.0, y=5.0)!");
             return;
         }
 
@@ -226,8 +237,8 @@ public class LabController64 extends BaseLabController {
     private void handleRecordTrack() {
         if (x0 == null || y0 == null) return;
 
-        double curX = Math.round(xSlider.getValue() * 100.0) / 100.0;
-        double curY = Math.round(ySlider.getValue() * 100.0) / 100.0;
+        double curX = Math.round(currentXValue * 100.0) / 100.0;
+        double curY = Math.round(currentYValue * 100.0) / 100.0;
         double dx = curX - x0;
         double dy = curY - y0;
         double rMm = Math.sqrt(dx * dx + dy * dy);
@@ -255,10 +266,13 @@ public class LabController64 extends BaseLabController {
         trackCounter = 1;
         x0 = null;
         y0 = null;
-        recordCenterBtn.setDisable(false);
+        recordCenterBtn.setDisable(true);
         recordTrackBtn.setDisable(true);
-        autoQueue.clear();
+        xField.setDisable(true);
+        yField.setDisable(true);
+        autoBtn.setDisable(true);
 
+        autoQueue.clear();
         autoQueue.add(new double[]{5.00, 5.00});
         autoQueue.add(new double[]{6.50, 6.20});
         autoQueue.add(new double[]{3.80, 5.90});
@@ -273,24 +287,37 @@ public class LabController64 extends BaseLabController {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
             liveStepLabel.setStyle("-fx-text-fill: #a3e635; -fx-font-weight: bold;");
+            xField.setDisable(false);
+            yField.setDisable(false);
+            autoBtn.setDisable(false);
+            recordTrackBtn.setDisable(false);
             return;
         }
 
         double[] target = autoQueue.poll();
 
         autoTimer = new AnimationTimer() {
+            private long lastTime = 0;
+
             @Override
             public void handle(long now) {
-                double cx = xSlider.getValue();
-                double cy = ySlider.getValue();
+                if (lastTime == 0) { lastTime = now; return; }
+                double dt = (now - lastTime) / 1_000_000_000.0;
+                lastTime = now;
 
+                double cx = currentXValue;
+                double cy = currentYValue;
                 double dx = target[0] - cx;
                 double dy = target[1] - cy;
+                double dist = Math.sqrt(dx * dx + dy * dy);
+                double speed = 4.0;
+                double step = speed * dt;
 
-                if (Math.abs(dx) < 0.02 && Math.abs(dy) < 0.02) {
-                    xSlider.setValue(target[0]);
-                    ySlider.setValue(target[1]);
+                if (dist <= step || dist < 0.02) {
                     this.stop();
+
+                    xField.setText(String.format(Locale.US, "%.2f", target[0]));
+                    yField.setText(String.format(Locale.US, "%.2f", target[1]));
 
                     Platform.runLater(() -> {
                         if (x0 == null) handleRecordCenter();
@@ -302,8 +329,11 @@ public class LabController64 extends BaseLabController {
                         }).start();
                     });
                 } else {
-                    xSlider.setValue(cx + dx * 0.1);
-                    ySlider.setValue(cy + dy * 0.1);
+                    double newX = cx + (dx / dist) * step;
+                    double newY = cy + (dy / dist) * step;
+
+                    xField.setText(String.format(Locale.US, "%.4f", newX));
+                    yField.setText(String.format(Locale.US, "%.4f", newY));
                 }
             }
         };
@@ -327,11 +357,11 @@ public class LabController64 extends BaseLabController {
         }
 
         String conclusion = String.format(Locale.US,
-                "ОБРОБКА РЕЗУЛЬТАТІВ:\n" +
+                "АВТОМАТИЧНА ОБРОБКА РЕЗУЛЬТАТІВ:\n" +
                         "1. Метод: R = sqrt((x_i - x_0)^2 + (y_i - y_0)^2) · 10³.\n" +
                         "2. Енергія розрахована за формулою: E = 0.251 · R^0.58.\n" +
-                        "3. Максимальна зареєстрована енергія частинки уламка: E_max = %.2f МеВ.\n" +
-                        "ВИСНОВОК: Товстошарові фотоемульсії дозволяють точно визначати пробіги та енергії заряджених частинок, що виникають при ядерних реакціях.",
+                        "3. Максимальна зареєстрована енергія частинки: E_max = %.2f МеВ.\n" +
+                        "ВИСНОВОК: Товстошарові фотоемульсії дозволяють точно визначати пробіги та енергії заряджених частинок.",
                 maxE
         );
         finalResultLabel.setText(conclusion);

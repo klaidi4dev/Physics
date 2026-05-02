@@ -9,6 +9,7 @@ import javafx.scene.text.FontWeight;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DiodeCanvas extends Canvas {
 
@@ -42,10 +43,10 @@ public class DiodeCanvas extends Canvas {
         double w = getWidth();
         double h = getHeight();
 
-        gc.setFill(Color.web("#f8f9fa"));
+        gc.setFill(Color.web("#f4f7f6"));
         gc.fillRect(0, 0, w, h);
-        gc.setStroke(Color.web("#e9ecef"));
-        gc.setLineWidth(1);
+        gc.setStroke(Color.web("#e0e4e3"));
+        gc.setLineWidth(1.0);
         for (int i = 0; i < w; i += 20) gc.strokeLine(i, 0, i, h);
         for (int i = 0; i < h; i += 20) gc.strokeLine(0, i, w, i);
 
@@ -57,83 +58,81 @@ public class DiodeCanvas extends Canvas {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2.5);
 
-        gc.strokeLine(30, 80, 30, 160);
-        gc.setStroke(Color.web("#d32f2f")); gc.setLineWidth(4); gc.strokeLine(15, 160, 45, 160);
-        gc.setStroke(Color.web("#1976d2")); gc.setLineWidth(2); gc.strokeLine(20, 170, 40, 170);
-        gc.setStroke(Color.web("#d32f2f")); gc.setLineWidth(4); gc.strokeLine(15, 180, 45, 180);
-        gc.setStroke(Color.web("#1976d2")); gc.setLineWidth(2); gc.strokeLine(20, 190, 40, 190);
+        gc.strokeLine(60, 100, 60, 180);
+        gc.setStroke(Color.web("#d32f2f")); gc.setLineWidth(3); gc.strokeLine(45, 180, 75, 180);
+        gc.setStroke(Color.web("#1976d2")); gc.setLineWidth(3); gc.strokeLine(50, 190, 70, 190);
+        gc.setStroke(Color.web("#d32f2f")); gc.setLineWidth(3); gc.strokeLine(45, 200, 75, 200);
+        gc.setStroke(Color.web("#1976d2")); gc.setLineWidth(3); gc.strokeLine(50, 210, 70, 210);
         gc.setStroke(Color.BLACK); gc.setLineWidth(2.5);
-        gc.strokeLine(30, 190, 30, 280);
+        gc.strokeLine(60, 210, 60, 300);
 
-        gc.strokeLine(30, 80, 250, 80);
-        gc.strokeLine(30, 280, 250, 280);
-        gc.strokeLine(130, 80, 130, 120);
+        gc.strokeLine(60, 100, 280, 100);
+        gc.strokeLine(60, 300, 280, 300);
 
-        gc.setFill(Color.web("#fff3e0"));
-        gc.fillOval(110, 120, 40, 40);
-        gc.strokeOval(110, 120, 40, 40);
+        gc.strokeLine(160, 100, 160, 130);
+
+        gc.setFill(Color.web("#fff8e1"));
+        gc.fillOval(140, 130, 40, 40);
+        gc.strokeOval(140, 130, 40, 40);
         gc.setFill(Color.BLACK);
-        gc.setFont(Font.font("System", FontWeight.BOLD, 14));
-        gc.fillText("mA", 118, 145);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("mA", 148, 155);
 
-        gc.strokeLine(130, 160, 130, 190);
+        gc.setFill(Color.web("#00b050"));
+        gc.fillText(String.format(Locale.US, "%.3f мА", currentI), 185, 155);
 
-        gc.setFill(Color.web("#424242"));
-        gc.fillPolygon(new double[]{115, 145, 130}, new double[]{190, 190, 220}, 3);
-        gc.strokePolygon(new double[]{115, 145, 130}, new double[]{190, 190, 220}, 3);
-        gc.setLineWidth(4);
-        gc.strokeLine(115, 220, 145, 220);
+        gc.strokeLine(160, 170, 160, 200);
+
+        gc.setFill(Color.web("#333333"));
+        gc.fillPolygon(new double[]{145, 175, 160}, new double[]{200, 200, 230}, 3);
+        gc.strokePolygon(new double[]{145, 175, 160}, new double[]{200, 200, 230}, 3);
+        gc.setLineWidth(3.5);
+        gc.strokeLine(145, 230, 175, 230);
         gc.setLineWidth(2.5);
-        gc.strokeLine(130, 220, 130, 280);
+        gc.strokeLine(160, 230, 160, 300);
 
-        gc.strokeLine(130, 175, 210, 175);
-        gc.strokeLine(210, 175, 210, 190);
+        gc.strokeLine(160, 185, 240, 185);
+        gc.strokeLine(240, 185, 240, 210);
+
         gc.setFill(Color.web("#e3f2fd"));
-        gc.fillOval(190, 190, 40, 40);
-        gc.strokeOval(190, 190, 40, 40);
+        gc.fillOval(220, 210, 40, 40);
+        gc.strokeOval(220, 210, 40, 40);
         gc.setFill(Color.BLACK);
-        gc.fillText("V", 205, 215);
-        gc.strokeLine(210, 230, 210, 245);
-        gc.strokeLine(210, 245, 130, 245);
+        gc.fillText("V", 234, 236);
 
-        gc.setFill(Color.web("#00c853"));
-        gc.fillText(String.format("%.3f мА", currentI), 155, 140);
         gc.setFill(Color.web("#2962ff"));
-        gc.fillText(String.format("%.2f В", currentU), 235, 215);
+        gc.fillText(String.format(Locale.US, "%.2f В", currentU), 265, 236);
+
+        gc.strokeLine(240, 250, 240, 265);
+        gc.strokeLine(240, 265, 160, 265);
     }
 
     private void drawGraph(GraphicsContext gc) {
-        double gx0 = 500;
-        double gy0 = 340;
-        double scaleX = 25;
-        double scaleY = 10;
+        double gx0 = 530;
+        double gy0 = 360;
+        double scaleX = 20.0;
+        double scaleY = 8.0;
 
         gc.setStroke(Color.DARKGRAY);
         gc.setLineWidth(1.5);
 
-        gc.strokeLine(230, gy0, 580, gy0);
-        gc.strokeLine(gx0, 20, gx0, 400);
+        gc.strokeLine(260, gy0, getWidth() - 10, gy0);
+        gc.strokeLine(gx0, 20, gx0, 420);
 
         gc.setFill(Color.BLACK);
-        gc.setFont(Font.font("System", 12));
-        gc.fillText("U (В)", 550, gy0 - 10);
-        gc.fillText("I (мА)", gx0 + 10, 30);
+        gc.setFont(Font.font("Arial", 11));
+        gc.fillText("U (В)", getWidth() - 35, gy0 - 10);
 
-        for (int v = -10; v <= 1; v += 2) {
+        for (int v = -10; v <= -2; v += 2) {
             double px = gx0 + v * scaleX;
-            gc.strokeLine(px, gy0 - 3, px, gy0 + 3);
-            if (v != 0) gc.fillText(String.valueOf(v), px - 8, gy0 + 18);
+            gc.strokeLine(px, gy0 - 4, px, gy0 + 4);
+            gc.fillText(String.valueOf(v), px - 10, gy0 + 18);
         }
 
         for (int i = 10; i <= 30; i += 10) {
             double py = gy0 - i * scaleY;
-            gc.strokeLine(gx0 - 3, py, gx0 + 3, py);
+            gc.strokeLine(gx0 - 4, py, gx0 + 4, py);
             gc.fillText(String.valueOf(i), gx0 - 25, py + 4);
-        }
-        for (int i = -10; i >= -30; i -= 10) {
-            double py = gy0 - i * scaleY;
-            gc.strokeLine(gx0 - 3, py, gx0 + 3, py);
-            gc.fillText(String.valueOf(i), gx0 - 28, py + 4);
         }
 
         gc.setFill(Color.RED);
@@ -141,20 +140,20 @@ public class DiodeCanvas extends Canvas {
             double px = gx0 + p.getX() * scaleX;
             double py = gy0 - p.getY() * scaleY;
 
-            if (py >= 20 && py <= 420 && px >= 230 && px <= 580) {
-                gc.fillOval(px - 3, py - 3, 6, 6);
+            if (px >= 260 && px <= getWidth() - 10 && py >= 20 && py <= 420) {
+                gc.fillOval(px - 2.5, py - 2.5, 5, 5);
             }
         }
 
         if (points.size() > 1) {
-            gc.setStroke(Color.web("#ff0000", 0.6));
+            gc.setStroke(Color.RED);
             gc.setLineWidth(2);
             gc.beginPath();
             boolean first = true;
             for (Point2D p : points) {
                 double px = gx0 + p.getX() * scaleX;
                 double py = gy0 - p.getY() * scaleY;
-                if (py >= 20 && py <= 420 && px >= 230 && px <= 580) {
+                if (px >= 260 && px <= getWidth() - 10 && py >= 20 && py <= 420) {
                     if (first) { gc.moveTo(px, py); first = false; }
                     else { gc.lineTo(px, py); }
                 }

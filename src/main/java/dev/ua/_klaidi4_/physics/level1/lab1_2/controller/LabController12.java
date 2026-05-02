@@ -29,13 +29,15 @@ public class LabController12 extends BaseLabController {
     private ComboBox<String> typeComboBox;
     private TextField lengthField;
     private TextField oscField;
+
+    private TextField angleField;
+    private TextField gravityField;
+    private TextField frictionField;
+    private TextField radiusField;
+
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
-    private Slider angleSlider;
-    private Slider gravitySlider;
-    private Slider frictionSlider;
-    private Slider radiusSlider;
     private Label liveStatusLabel;
     private Label liveTimeLabel;
     private Label liveOscLabel;
@@ -64,8 +66,8 @@ public class LabController12 extends BaseLabController {
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(310);
-        leftPanel.setMinWidth(310);
+        leftPanel.setPrefWidth(320); // Трохи розширив для комфорту текстових полів
+        leftPanel.setMinWidth(320);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
         Label title = new Label("Система управління (Лаб 1-2)");
@@ -93,24 +95,31 @@ public class LabController12 extends BaseLabController {
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
         scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(200);
+        scrollParams.setPrefViewportHeight(180);
         scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         labPane.setContent(scrollParams);
 
         TitledPane physicsPane = new TitledPane();
         physicsPane.setText("Тонкі налаштування фізики");
-        VBox physBox = new VBox(5);
+        VBox physBox = new VBox(12);
         physBox.setPadding(new Insets(5));
 
-        angleSlider = createSlider("Початковий кут (°):", 5, 60, 30, physBox);
-        gravitySlider = createSlider("Гравітація g (м/с²):", 1.0, 25.0, 9.81, physBox);
-        frictionSlider = createSlider("Опір повітря:", 0.0, 0.5, 0.0, physBox);
-        radiusSlider = createSlider("Розмір вантажу:", 10, 40, 18, physBox);
+        angleField = new TextField("30.0");
+        gravityField = new TextField("9.81");
+        frictionField = new TextField("0.0");
+        radiusField = new TextField("18.0");
 
-        angleSlider.valueProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
-        gravitySlider.valueProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
-        frictionSlider.valueProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
-        radiusSlider.valueProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
+        angleField.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
+        gravityField.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
+        frictionField.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
+        radiusField.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
+
+        physBox.getChildren().addAll(
+                createInputGroup("Початковий кут (°):", angleField),
+                createInputGroup("Гравітація g (м/с²):", gravityField),
+                createInputGroup("Опір повітря:", frictionField),
+                createInputGroup("Розмір вантажу:", radiusField)
+        );
         physicsPane.setContent(physBox);
 
         startBtn = new Button("▶ ЗАПУСТИТИ ВИМІРЮВАННЯ");
@@ -134,7 +143,12 @@ public class LabController12 extends BaseLabController {
             liveOscLabel.setText("n = 0");
         });
 
-        leftPanel.getChildren().addAll(title, labPane, physicsPane, startBtn, autoBtn, clearBtn);
+        // Додаємо скрол для всієї панелі, щоб нічого не "напливало" при менших екранах
+        ScrollPane leftScroll = new ScrollPane(new VBox(10, title, labPane, physicsPane, startBtn, autoBtn, clearBtn));
+        leftScroll.setFitToWidth(true);
+        leftScroll.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
+
+        leftPanel.getChildren().add(leftScroll);
 
         canvas = new PendulumCanvas(600, 440);
 
@@ -199,24 +213,14 @@ public class LabController12 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
-    private Slider createSlider(String labelText, double min, double max, double val, VBox parent) {
-        Label label = new Label(labelText + " " + String.format("%.2f", val));
-        Slider slider = new Slider(min, max, val);
-        slider.setShowTickMarks(true);
-        slider.setShowTickLabels(true);
-        slider.valueProperty().addListener((obs, oldVal, newVal) -> label.setText(labelText + " " + String.format("%.2f", newVal.doubleValue())));
-        parent.getChildren().addAll(label, slider);
-        return slider;
-    }
-
     private void applyPhysicsSettings() {
         try {
             PendulumType type = typeComboBox.getSelectionModel().getSelectedIndex() == 0 ? PendulumType.MATHEMATICAL : PendulumType.PHYSICAL;
             double l = Double.parseDouble(lengthField.getText());
-            double g = gravitySlider.getValue();
-            double angle = angleSlider.getValue();
-            double friction = frictionSlider.getValue();
-            double radius = radiusSlider.getValue();
+            double g = Double.parseDouble(gravityField.getText());
+            double angle = Double.parseDouble(angleField.getText());
+            double friction = Double.parseDouble(frictionField.getText());
+            double radius = Double.parseDouble(radiusField.getText());
 
             canvas.setPhysicsParameters(type, l, g, angle, friction, radius);
         } catch (NumberFormatException ignored) {}
@@ -278,7 +282,7 @@ public class LabController12 extends BaseLabController {
         targetN = n;
         currentType = typeComboBox.getSelectionModel().getSelectedIndex() == 0 ? PendulumType.MATHEMATICAL : PendulumType.PHYSICAL;
 
-        double customG = gravitySlider.getValue();
+        double customG = Double.parseDouble(gravityField.getText());
         double exactPeriod = 2 * Math.PI * Math.sqrt(l / customG);
         double humanError = (Math.random() - 0.5) * 0.2;
         targetTime = (exactPeriod * n) + humanError;
@@ -412,9 +416,9 @@ public class LabController12 extends BaseLabController {
         typeComboBox.setDisable(disable);
         lengthField.setDisable(disable);
         oscField.setDisable(disable);
-        angleSlider.setDisable(disable);
-        gravitySlider.setDisable(disable);
-        frictionSlider.setDisable(disable);
-        radiusSlider.setDisable(disable);
+        angleField.setDisable(disable);
+        gravityField.setDisable(disable);
+        frictionField.setDisable(disable);
+        radiusField.setDisable(disable);
     }
 }

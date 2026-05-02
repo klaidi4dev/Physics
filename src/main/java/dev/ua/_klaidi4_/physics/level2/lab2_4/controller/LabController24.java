@@ -26,8 +26,7 @@ public class LabController24 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-    private TextField fieldD, fieldThickness, fieldFreq, fieldMaxTemp;
-    private Slider voltageSlider;
+    private TextField fieldD, fieldThickness, fieldFreq, fieldMaxTemp, fieldVoltage;
     private Button startBtn, autoBtn, clearBtn;
     private Label liveStatusLabel, liveTempLabel, liveCurrentLabel;
     private LineChart<Number, Number> chart;
@@ -35,7 +34,6 @@ public class LabController24 extends BaseLabController {
     private XYChart.Series<Number, Number> curiePointSeries;
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
-
     private final double EPSILON_0 = 8.85e-12;
     private double currentU = 120.0;
     private double currentTemp = 20.0;
@@ -56,8 +54,8 @@ public class LabController24 extends BaseLabController {
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(310);
-        leftPanel.setMinWidth(310);
+        leftPanel.setPrefWidth(330);
+        leftPanel.setMinWidth(330);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
         Label title = new Label("Система управління (Лаб 2-4)");
@@ -67,7 +65,7 @@ public class LabController24 extends BaseLabController {
         paramsPane.setText("Параметри зразка (BaTiO3)");
         paramsPane.setCollapsible(false);
         VBox paramsBox = new VBox(12);
-        paramsBox.setPadding(new Insets(5));
+        paramsBox.setPadding(new Insets(10));
 
         fieldD = new TextField("8.0");
         fieldThickness = new TextField("1.0");
@@ -84,22 +82,20 @@ public class LabController24 extends BaseLabController {
         controlPane.setText("Управління установкою");
         controlPane.setCollapsible(false);
         VBox controlBox = new VBox(12);
-        controlBox.setPadding(new Insets(5));
+        controlBox.setPadding(new Insets(10));
 
-        Label voltageLabel = new Label("Робоча напруга U: 120.0 В");
-        voltageSlider = new Slider(80.0, 150.0, 120.0);
-        voltageSlider.setShowTickMarks(true);
-        voltageSlider.valueProperty().addListener((o, old, val) -> {
-            currentU = val.doubleValue();
-            voltageLabel.setText(String.format("Робоча напруга U: %.1f В", currentU));
-            calculateInitialValues();
+        fieldVoltage = new TextField("120.0");
+        fieldVoltage.textProperty().addListener((o, old, val) -> {
+            try {
+                currentU = Double.parseDouble(val);
+                calculateInitialValues();
+            } catch (Exception ignored) {}
         });
 
         fieldMaxTemp = new TextField("140.0");
 
         controlBox.getChildren().addAll(
-                voltageLabel,
-                voltageSlider,
+                createInputGroup("Робоча напруга U (В):", fieldVoltage),
                 createInputGroup("Кінцева температура t_max (°C):", fieldMaxTemp)
         );
         controlPane.setContent(controlBox);
@@ -186,16 +182,13 @@ public class LabController24 extends BaseLabController {
         }
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefHeight(150);
-        table.setPrefWidth(250);
 
         VBox statsBox = createStatsBox();
-        HBox bottomHBox = new HBox(10, table, statsBox);
-        HBox.setHgrow(statsBox, Priority.ALWAYS);
-        bottomHBox.setPadding(new Insets(5));
-
+        VBox bottomPanel = new VBox(5, table, statsBox);
+        bottomPanel.setPadding(new Insets(5));
         this.setLeft(leftPanel);
         this.setCenter(centerTopPanel);
-        this.setBottom(bottomHBox);
+        this.setBottom(bottomPanel);
 
         calculateInitialValues();
     }
@@ -227,9 +220,7 @@ public class LabController24 extends BaseLabController {
             double thickness_m = Double.parseDouble(fieldThickness.getText()) / 1000.0;
             double freq = Double.parseDouble(fieldFreq.getText());
             double S = Math.PI * Math.pow(d_m / 2.0, 2);
-
             baseEpsilon = 1200;
-
             double omega = 2 * Math.PI * freq;
             double C1 = (EPSILON_0 * baseEpsilon * S) / thickness_m;
             double I_eff = currentU * omega * C1;
@@ -257,7 +248,7 @@ public class LabController24 extends BaseLabController {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
-        voltageSlider.setDisable(disable);
+        fieldVoltage.setDisable(disable);
         fieldD.setDisable(disable);
         fieldThickness.setDisable(disable);
         fieldFreq.setDisable(disable);
@@ -344,14 +335,11 @@ public class LabController24 extends BaseLabController {
             double freq = Double.parseDouble(fieldFreq.getText());
             double S = Math.PI * Math.pow(d_m / 2.0, 2);
             double omega = 2 * Math.PI * freq;
-
             double C = (EPSILON_0 * eps * S) / thickness_m;
             double I_eff = currentU * omega * C;
             double Ic = I_eff / 1.11;
-
             double noise = (Math.random() - 0.5) * 0.02 * Ic;
             Ic += noise;
-
             double calcEps = (1.11 * Ic * thickness_m) / (omega * EPSILON_0 * S * currentU);
             double ratio = calcEps / baseEpsilon;
 

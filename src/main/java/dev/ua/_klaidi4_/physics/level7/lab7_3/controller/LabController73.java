@@ -25,13 +25,11 @@ public class LabController73 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-
     private ComboBox<LiquidType> liquidComboBox;
     private TextField lengthField, densityField;
-    private Slider radiusSlider;
+    private TextField radiusField;
     private Button startBtn, autoBtn, clearBtn;
     private Label liveStatusLabel, liveTimeLabel;
-
     private Queue<AutoTestParam> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
     private AnimationTimer uiTimer;
@@ -98,21 +96,14 @@ public class LabController73 extends BaseLabController {
         VBox physBox = new VBox(5);
         physBox.setPadding(new Insets(5));
 
-        Label radiusLabel = new Label("Радіус кульки r: 2.0 мм");
-        radiusSlider = new Slider(1.0, 3.5, 2.0);
-        radiusSlider.setShowTickMarks(true);
-        radiusSlider.setShowTickLabels(true);
-        radiusSlider.setMajorTickUnit(0.5);
-        radiusSlider.valueProperty().addListener((o, oldVal, newVal) -> {
-            radiusLabel.setText(String.format("Радіус кульки r: %.1f мм", newVal.doubleValue()));
-            applyPhysicsSettings();
-        });
+        radiusField = new TextField("2.0");
+        radiusField.textProperty().addListener((o, oldVal, newVal) -> applyPhysicsSettings());
 
-        physBox.getChildren().addAll(radiusLabel, radiusSlider);
+        physBox.getChildren().add(createInputGroup("Радіус кульки r (мм):", radiusField));
         physicsPane.setContent(physBox);
 
         startBtn = new Button("▶ КИНУТИ КУЛЬКУ");
-        startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
+        startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
         startBtn.setOnAction(e -> startManual());
 
@@ -200,16 +191,24 @@ public class LabController73 extends BaseLabController {
         updateStats();
     }
 
+    private double getDoubleValue(TextField field, double defaultValue) {
+        try {
+            return Double.parseDouble(field.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private void applyPhysicsSettings() {
         if (isAutoRunning) return;
         try {
             LiquidType liq = liquidComboBox.getValue();
-            double r = radiusSlider.getValue();
-            double l = Double.parseDouble(lengthField.getText());
-            double rho = Double.parseDouble(densityField.getText());
+            double r = getDoubleValue(radiusField, 2.0);
+            double l = getDoubleValue(lengthField, 0.3);
+            double rho = getDoubleValue(densityField, 7800.0);
             canvas.setPhysicsParameters(liq, r, l, rho);
             liveTimeLabel.setText("t = 0.00 с");
-        } catch (NumberFormatException ignored) {}
+        } catch (Exception ignored) {}
     }
 
     private void setControlsDisable(boolean disable) {
@@ -217,15 +216,15 @@ public class LabController73 extends BaseLabController {
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
         liquidComboBox.setDisable(disable);
-        radiusSlider.setDisable(disable);
+        radiusField.setDisable(disable);
         lengthField.setDisable(disable);
         densityField.setDisable(disable);
     }
 
     private void startManual() {
         try {
-            Double.parseDouble(lengthField.getText());
-            Double.parseDouble(densityField.getText());
+            Double.parseDouble(lengthField.getText().replace(",", "."));
+            Double.parseDouble(densityField.getText().replace(",", "."));
             isAutoRunning = false;
             applyPhysicsSettings();
 
@@ -267,7 +266,7 @@ public class LabController73 extends BaseLabController {
         AutoTestParam param = autoQueue.poll();
 
         liquidComboBox.setValue(param.liq);
-        radiusSlider.setValue(param.r);
+        radiusField.setText(String.valueOf(param.r));
         lengthField.setText(String.valueOf(param.l));
         densityField.setText(String.valueOf(param.density));
 
@@ -284,9 +283,10 @@ public class LabController73 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: yellow;");
 
         LiquidType liq = liquidComboBox.getValue();
-        double r = radiusSlider.getValue();
-        double l = Double.parseDouble(lengthField.getText());
-        double rho = Double.parseDouble(densityField.getText());
+        double r = getDoubleValue(radiusField, 2.0);
+        double l = getDoubleValue(lengthField, 0.3);
+        double rho = getDoubleValue(densityField, 7800.0);
+
         double rMeters = r / 1000.0;
         double etaExp = (2 * rMeters * rMeters * 9.81 * (rho - liq.getDensity()) * t) / (9 * l);
 

@@ -213,7 +213,7 @@ public class ResistanceCanvas extends Canvas {
         gc.strokeRect(cx - 40, ovenY - 70, 80, 40);
         gc.setFill(Color.BLACK);
         gc.setFont(Font.font("System", FontWeight.BOLD, 12));
-        gc.fillText("МВУ-49", cx - 22, ovenY - 45);
+        gc.fillText("Мідь", cx - 18, ovenY - 45);
 
         double tempRatio = (displayedTemp - 20) / 80.0;
         if (tempRatio > 1.0) tempRatio = 1.0;

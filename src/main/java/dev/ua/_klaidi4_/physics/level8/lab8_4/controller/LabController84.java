@@ -17,6 +17,7 @@ import javafx.scene.text.FontWeight;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Locale;
 
 public class LabController84 extends BaseLabController {
 
@@ -24,21 +25,21 @@ public class LabController84 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-
     private ComboBox<DiodeType> diodeComboBox;
-    private Slider tempSlider, idealitySlider, breakdownSlider, voltageSlider;
+    private TextField tempField;
+    private TextField idealityField;
+    private TextField breakdownField;
+    private TextField voltageField;
     private Button startBtn, autoBtn, clearBtn;
-
     private Label liveStatusLabel;
     private Label liveULabel;
     private Label liveILabel;
-
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
     public LabController84() {
         initUI();
-        updateDisplayFromSlider();
+        updateDisplayFromInput();
     }
 
     @Override
@@ -60,34 +61,24 @@ public class LabController84 extends BaseLabController {
         TitledPane diodePane = new TitledPane();
         diodePane.setText("Параметри напівпровідника");
         diodePane.setCollapsible(false);
-        VBox diodeBox = new VBox(8);
-        diodeBox.setPadding(new Insets(5));
+        VBox diodeBox = new VBox(10);
+        diodeBox.setPadding(new Insets(10, 5, 10, 5));
 
         diodeComboBox = new ComboBox<>(FXCollections.observableArrayList(DiodeType.values()));
         diodeComboBox.getSelectionModel().selectFirst();
         diodeComboBox.setMaxWidth(Double.MAX_VALUE);
         diodeComboBox.setOnAction(e -> resetAndRecalculate());
 
-        Label nLabel = new Label("Коеф. ідеальності (n): 2.0");
-        idealitySlider = new Slider(1.0, 3.0, 2.0);
-        idealitySlider.setShowTickMarks(true);
-        idealitySlider.valueProperty().addListener((o, old, newVal) -> {
-            nLabel.setText(String.format("Коеф. ідеальності (n): %.1f", newVal.doubleValue()));
-            updateDisplayFromSlider();
-        });
+        idealityField = new TextField("2.0");
+        idealityField.textProperty().addListener((obs, oldV, newV) -> updateDisplayFromInput());
 
-        Label breakLabel = new Label("Напруга пробою (В): -5.0");
-        breakdownSlider = new Slider(-10.0, -2.0, -5.0);
-        breakdownSlider.setShowTickMarks(true);
-        breakdownSlider.valueProperty().addListener((o, old, newVal) -> {
-            breakLabel.setText(String.format("Напруга пробою (В): %.1f", newVal.doubleValue()));
-            updateDisplayFromSlider();
-        });
+        breakdownField = new TextField("-15.0");
+        breakdownField.textProperty().addListener((obs, oldV, newV) -> updateDisplayFromInput());
 
         diodeBox.getChildren().addAll(
-                new Label("Тип діода:"), diodeComboBox,
-                nLabel, idealitySlider,
-                breakLabel, breakdownSlider
+                new VBox(4, new Label("Тип діода:"), diodeComboBox),
+                createInputGroup("Коеф. ідеальності (n):", idealityField),
+                createInputGroup("Напруга пробою (В):", breakdownField)
         );
         diodePane.setContent(diodeBox);
 
@@ -95,44 +86,30 @@ public class LabController84 extends BaseLabController {
         envPane.setText("Умови середовища");
         envPane.setCollapsible(false);
         VBox envBox = new VBox(8);
-        envBox.setPadding(new Insets(5));
+        envBox.setPadding(new Insets(10, 5, 10, 5));
 
-        Label tempLabel = new Label("Температура (T): 20 °C");
-        tempSlider = new Slider(0, 100, 20);
-        tempSlider.setShowTickMarks(true);
-        tempSlider.setShowTickLabels(true);
-        tempSlider.setMajorTickUnit(20);
-        tempSlider.valueProperty().addListener((o, old, newVal) -> {
-            tempLabel.setText(String.format("Температура (T): %.0f °C", newVal.doubleValue()));
-            updateDisplayFromSlider();
-        });
+        tempField = new TextField("20.0");
+        tempField.textProperty().addListener((obs, oldV, newV) -> updateDisplayFromInput());
 
-        envBox.getChildren().addAll(tempLabel, tempSlider);
+        envBox.getChildren().addAll(createInputGroup("Температура T (°C):", tempField));
         envPane.setContent(envBox);
 
         TitledPane voltagePane = new TitledPane();
         voltagePane.setText("Джерело живлення");
         voltagePane.setCollapsible(false);
         VBox voltBox = new VBox(8);
-        voltBox.setPadding(new Insets(5));
+        voltBox.setPadding(new Insets(10, 5, 10, 5));
 
-        Label voltageLabel = new Label("Напруга U: 0.00 В");
-        voltageSlider = new Slider(-10.0, 1.2, 0.0);
-        voltageSlider.setShowTickMarks(true);
-        voltageSlider.setShowTickLabels(true);
-        voltageSlider.setMajorTickUnit(2.0);
-        voltageSlider.valueProperty().addListener((o, oldVal, newVal) -> {
-            voltageLabel.setText(String.format("Напруга U: %.2f В", newVal.doubleValue()));
-            updateDisplayFromSlider();
-        });
+        voltageField = new TextField("0.0");
+        voltageField.textProperty().addListener((obs, oldV, newV) -> updateDisplayFromInput());
 
-        voltBox.getChildren().addAll(voltageLabel, voltageSlider);
+        voltBox.getChildren().addAll(createInputGroup("Напруга U (В):", voltageField));
         voltagePane.setContent(voltBox);
 
         startBtn = new Button("▶ ЗАПИСАТИ ТОЧКУ");
         startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
-        startBtn.setOnAction(e -> recordMeasurement(voltageSlider.getValue()));
+        startBtn.setOnAction(e -> doManualMeasurement());
 
         autoBtn = new Button("⚙ АВТОЗНЯТТЯ ВАХ");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -160,18 +137,18 @@ public class LabController84 extends BaseLabController {
         topBar.setAlignment(Pos.TOP_LEFT);
         topBar.setPickOnBounds(false);
 
-        VBox dash = new VBox(2);
-        dash.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8); -fx-text-fill: #00ff00; -fx-padding: 10; -fx-border-color: #00ff00; -fx-border-width: 2; -fx-border-radius: 5;");
-        dash.setMaxSize(200, 80);
+        VBox dash = new VBox(5);
+        dash.setStyle("-fx-background-color: #2b2b2b; -fx-padding: 10; -fx-border-color: #00ff00; -fx-border-width: 2; -fx-border-radius: 3; -fx-background-radius: 3;");
+        dash.setMaxSize(200, 90);
 
         Label dashTitle = new Label("ДАТЧИКИ");
-        dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
+        dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;");
         liveStatusLabel = new Label("Статус: ГОТОВО");
-        liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
+        liveStatusLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-size: 12px;");
         liveULabel = new Label("U = 0.00 В");
-        liveULabel.setStyle("-fx-text-fill: #00ff00;");
+        liveULabel.setStyle("-fx-text-fill: #00ff00; -fx-font-size: 13px;");
         liveILabel = new Label("I = 0.00 мА");
-        liveILabel.setStyle("-fx-text-fill: #00ff00;");
+        liveILabel.setStyle("-fx-text-fill: #00ff00; -fx-font-size: 13px;");
 
         dash.getChildren().addAll(dashTitle, liveStatusLabel, liveULabel, liveILabel);
 
@@ -196,7 +173,6 @@ public class LabController84 extends BaseLabController {
         table.setPrefHeight(130);
 
         VBox statsBox = createStatsBox();
-
         VBox bottomPanel = new VBox(5, table, statsBox);
         bottomPanel.setPadding(new Insets(5));
 
@@ -207,52 +183,67 @@ public class LabController84 extends BaseLabController {
         updateStats();
     }
 
+    private double getDoubleValue(TextField field, double defaultValue) {
+        try {
+            return Double.parseDouble(field.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private void resetAndRecalculate() {
         data.clear();
         idCounter = 1;
         canvas.clearGraph();
         updateStats();
-        updateDisplayFromSlider();
+        updateDisplayFromInput();
     }
 
     private double calculateCurrent(DiodeType type, double u) {
-        if (Math.abs(u) < 0.01) return 0.0;
+        if (Math.abs(u) < 0.001) return 0.0;
 
-        double T = tempSlider.getValue() + 273.15;
+        double tempC = getDoubleValue(tempField, 20.0);
+        double T = tempC + 273.15;
         double k = 1.38e-23;
         double q = 1.6e-19;
         double Vt = (k * T) / q;
-        double n = idealitySlider.getValue();
-
+        double n = getDoubleValue(idealityField, 2.0);
         double Is = (type == DiodeType.SILICON) ? 5e-6 : 1e-3;
-
-        double tempFactor = Math.pow(2.0, (tempSlider.getValue() - 20) / 10.0);
+        double tempFactor = Math.pow(2.0, (tempC - 20) / 10.0);
         Is = Is * tempFactor;
 
         double i = 0;
         if (u >= 0) {
             i = Is * (Math.exp(u / (n * Vt)) - 1.0);
         } else {
-            i = -Is;
-            double uBreak = breakdownSlider.getValue();
+            double leakageCurrent_mA = (Math.abs(u) / 150.0) * 0.005;
+            i = -Is - leakageCurrent_mA;
+
+            double uBreak = getDoubleValue(breakdownField, -15.0);
             if (u <= uBreak) {
-                i -= 0.1 * Math.exp(Math.abs(u - uBreak) * 3.0);
+                i -= 0.1 * Math.exp(Math.abs(u - uBreak) * 0.5);
             }
         }
 
-        if (i > 45.0) i = 45.0 + (i - 45.0)*0.01;
-        if (i < -45.0) i = -45.0 - (Math.abs(i) - 45.0)*0.01;
+        if (i > 60.0) i = 60.0 + (i - 60.0)*0.01;
+        if (i < -60.0) i = -60.0 - (Math.abs(i) - 60.0)*0.01;
 
         return i;
     }
 
-    private void updateDisplayFromSlider() {
+    private void updateDisplayFromInput() {
         if (isAutoRunning) return;
-        double u = voltageSlider.getValue();
+
+        double u = getDoubleValue(voltageField, 0.0);
         double i = calculateCurrent(diodeComboBox.getValue(), u);
 
-        liveULabel.setText(String.format("U = %.2f В", u));
-        liveILabel.setText(String.format("I = %.3f мА", i));
+        liveULabel.setText(String.format(Locale.US, "U = %.2f В", u));
+
+        if (u < 0 && Math.abs(i) < 0.01) {
+            liveILabel.setText(String.format(Locale.US, "I = %.2f мкА", i * 1000.0));
+        } else {
+            liveILabel.setText(String.format(Locale.US, "I = %.3f мА", i));
+        }
 
         canvas.updateLiveValues(u, i);
     }
@@ -262,16 +253,22 @@ public class LabController84 extends BaseLabController {
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
         diodeComboBox.setDisable(disable);
-        tempSlider.setDisable(disable);
-        idealitySlider.setDisable(disable);
-        breakdownSlider.setDisable(disable);
-        voltageSlider.setDisable(disable);
+        tempField.setDisable(disable);
+        idealityField.setDisable(disable);
+        breakdownField.setDisable(disable);
+        voltageField.setDisable(disable);
+    }
+
+    private void doManualMeasurement() {
+        if (isAutoRunning) return;
+        double u = getDoubleValue(voltageField, 0.0);
+        recordMeasurement(u);
     }
 
     private void startAuto() {
         resetAndRecalculate();
 
-        double[] points = {-10.0, -5.0, -2.0, -0.5, 0.0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8};
+        double[] points = {-10.0, -8.0, -6.0, -4.0, -2.0, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.8};
         for (double p : points) autoQueue.add(p);
 
         isAutoRunning = true;
@@ -289,19 +286,24 @@ public class LabController84 extends BaseLabController {
         }
 
         double u = autoQueue.poll();
-        voltageSlider.setValue(u);
+        voltageField.setText(String.format(Locale.US, "%.2f", u));
+
         liveStatusLabel.setText("Статус: ВИМІРЮВАННЯ...");
-        liveStatusLabel.setStyle("-fx-text-fill: red;");
+        liveStatusLabel.setStyle("-fx-text-fill: #ffeb3b;");
 
         double i = calculateCurrent(diodeComboBox.getValue(), u);
 
-        liveULabel.setText(String.format("U = %.2f В", u));
-        liveILabel.setText(String.format("I = %.3f мА", i));
+        liveULabel.setText(String.format(Locale.US, "U = %.2f В", u));
+        if (u < 0 && Math.abs(i) < 0.01) {
+            liveILabel.setText(String.format(Locale.US, "I = %.2f мкА", i * 1000.0));
+        } else {
+            liveILabel.setText(String.format(Locale.US, "I = %.3f мА", i));
+        }
 
         canvas.updateLiveValues(u, i);
 
         new Thread(() -> {
-            try { Thread.sleep(500); } catch (Exception ignored) {}
+            try { Thread.sleep(400); } catch (Exception ignored) {}
             Platform.runLater(() -> recordMeasurement(u));
         }).start();
     }
@@ -311,9 +313,9 @@ public class LabController84 extends BaseLabController {
         double i = calculateCurrent(type, u);
 
         String rStat = "∞";
-        if (Math.abs(i) > 0.0005) {
+        if (Math.abs(i) > 1e-6) {
             double r = Math.abs(u / (i / 1000.0));
-            rStat = String.format("%.0f", r);
+            rStat = String.format(Locale.US, "%.0f", r);
         } else if (u == 0) {
             rStat = "-";
         }
@@ -362,14 +364,15 @@ public class LabController84 extends BaseLabController {
         double kFactor = 0.0;
         double uK = 0.0;
         for (Measurement mPr : data) {
-            if (mPr.getU() >= 0.2 && mPr.getI() > 0) {
+            if (mPr.getU() > 0.1 && mPr.getI() > 0) {
                 for (Measurement mZv : data) {
-                    if (Math.abs(mZv.getU() - (-mPr.getU())) < 0.05) {
+                    if (Math.abs(Math.abs(mZv.getU()) - mPr.getU()) < 0.01) {
                         double iPr = mPr.getI();
                         double iZv = Math.abs(mZv.getI());
                         if (iZv > 1e-6) {
                             kFactor = iPr / iZv;
                             uK = mPr.getU();
+                            break;
                         }
                     }
                 }
@@ -382,15 +385,15 @@ public class LabController84 extends BaseLabController {
         sb.append("2. Статичний опір R = U/I обчислено для кожної точки (див. таблицю).\n");
 
         if (rd > 0) {
-            sb.append(String.format("3. Динамічний опір в точці U=%.2f В: Rd = %.2f Ом.\n", uDyn, rd));
+            sb.append(String.format(Locale.US, "3. Динамічний опір в точці U=%.2f В: Rd = %.2f Ом.\n", uDyn, rd));
         } else {
             sb.append("3. Динамічний опір: Недостатньо точок на прямій вітці.\n");
         }
 
         if (kFactor > 0) {
-            sb.append(String.format("4. Коефіцієнт випрямлення при U=%.2f В: K = %.0f.\n", uK, kFactor));
+            sb.append(String.format(Locale.US, "4. Коефіцієнт випрямлення при U=%.2f В: K = %.0f.\n", uK, kFactor));
         } else {
-            sb.append("4. Коефіцієнт випрямлення: Немає симетричних точок напруги (напр. ±0.5 В).\n");
+            sb.append("4. Коефіцієнт випрямлення: Немає симетричних точок напруги.\n");
         }
 
         sb.append("5. Висновок: Діод добре проводить струм у прямому напрямі і практично не проводить у зворотному. Велике значення коефіцієнта випрямлення підтверджує його вентильні властивості.");

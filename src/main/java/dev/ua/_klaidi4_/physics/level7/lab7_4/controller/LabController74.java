@@ -25,33 +25,24 @@ public class LabController74 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-
     private Button toggleHeaterBtn;
-    private Slider flowSlider;
-    private Label flowLabel;
-    private Slider timeMeasureSlider;
-    private Label timeMeasureLabel;
-
+    private TextField flowField;
+    private TextField timeMeasureField;
+    private TextField inputTempField;
     private ComboBox<String> metalComboBox;
-    private Slider inputTempSlider;
-
     private Button startVolMeasureBtn;
     private Button autoBtn;
     private Button clearBtn;
-
     private Label liveStepLabel;
     private Label t1Label, t2Label, t3Label, t4Label;
     private Label deltaTLabel;
     private Label timerLabel, volLabel;
-
     private boolean isHeaterOn = false;
     private boolean isMeasuringVol = false;
     private boolean isAutoModeActive = false;
-
     private double currentT1 = 20.0, currentT2 = 20.0, currentT3 = 20.0, currentT4 = 20.0;
     private double heaterTemp = 20.0;
     private double currentVolumeMl = 0.0;
-
     private final double L_DISTANCE = 0.1;
     private final double S_AREA = 70.0e-6;
     private final double WATER_DENSITY = 1000.0;
@@ -95,25 +86,16 @@ public class LabController74 extends BaseLabController {
         studentLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
         toggleHeaterBtn = new Button("⚡ УВІМКНУТИ ПІЧ");
-        toggleHeaterBtn.setStyle("-fx-background-color: #ff007f; -fx-text-fill: white; -fx-font-weight: bold;");
+        toggleHeaterBtn.setStyle("-fx-background-color: #ff007f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10;");
         toggleHeaterBtn.setMaxWidth(Double.MAX_VALUE);
         toggleHeaterBtn.setOnAction(e -> handleToggleHeater());
 
-        flowLabel = new Label("Потік води в холодильнику: 0 %");
-        flowSlider = new Slider(0.0, 100.0, 0.0);
-        flowSlider.setShowTickMarks(true);
-        flowSlider.setMajorTickUnit(20.0);
-        flowSlider.valueProperty().addListener((o, ov, nv) -> {
-            flowLabel.setText(String.format(Locale.US, "Потік води в холодильнику: %.0f %%", nv.doubleValue()));
-        });
+        flowField = new TextField("0.0");
+        timeMeasureField = new TextField("60.0");
 
-        timeMeasureLabel = new Label("Час заміру об'єму τ: 60 с");
-        timeMeasureSlider = new Slider(30.0, 180.0, 60.0);
-        timeMeasureSlider.setShowTickMarks(true);
-        timeMeasureSlider.setMajorTickUnit(30.0);
-        timeMeasureSlider.valueProperty().addListener((o, ov, nv) -> {
-            timeMeasureLabel.setText(String.format(Locale.US, "Час заміру об'єму τ: %.0f с", nv.doubleValue()));
-            if (!isMeasuringVol) timerLabel.setText(String.format(Locale.US, "Таймер: 0 / %.0f с", nv.doubleValue()));
+        timeMeasureField.textProperty().addListener((o, ov, nv) -> {
+            double val = getDoubleValue(timeMeasureField, 60.0);
+            if (!isMeasuringVol) timerLabel.setText(String.format(Locale.US, "Таймер: 0 / %.0f с", val));
         });
 
         Label envSettingsLabel = new Label("Налаштування середовища:");
@@ -130,18 +112,18 @@ public class LabController74 extends BaseLabController {
             data.clear(); idCounter = 1; updateStats();
         });
 
-        Label inputTempLabel = new Label("Температура води на вході t1:");
-        inputTempSlider = new Slider(10.0, 25.0, 20.0);
-        inputTempSlider.setShowTickMarks(true);
-        inputTempSlider.valueProperty().addListener((o, ov, nv) -> {
-            inputTempLabel.setText(String.format(Locale.US, "Температура води на вході t1: %.1f °C", nv.doubleValue()));
-            currentT1 = nv.doubleValue();
+        inputTempField = new TextField("20.0");
+        inputTempField.textProperty().addListener((o, ov, nv) -> {
+            currentT1 = getDoubleValue(inputTempField, 20.0);
         });
 
         configBox.getChildren().addAll(
-                studentLabel, toggleHeaterBtn, flowLabel, flowSlider, timeMeasureLabel, timeMeasureSlider,
-                new Separator(), envSettingsLabel, createInputGroup("Матеріал стрижня:", metalComboBox),
-                inputTempLabel, inputTempSlider
+                studentLabel, toggleHeaterBtn,
+                createInputGroup("Потік води в холодильнику (%):", flowField),
+                createInputGroup("Час заміру об'єму τ (с):", timeMeasureField),
+                new Separator(), envSettingsLabel,
+                createInputGroup("Матеріал стрижня:", metalComboBox),
+                createInputGroup("Температура води на вході t1 (°C):", inputTempField)
         );
 
         ScrollPane scrollParams = new ScrollPane(configBox);
@@ -232,12 +214,20 @@ public class LabController74 extends BaseLabController {
         this.setBottom(new VBox(5, table, createStatsBox()));
     }
 
+    private double getDoubleValue(TextField field, double defaultValue) {
+        try {
+            return Double.parseDouble(field.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private void setAllControlsDisable(boolean disable) {
         toggleHeaterBtn.setDisable(disable);
-        flowSlider.setDisable(disable);
-        timeMeasureSlider.setDisable(disable);
+        flowField.setDisable(disable);
+        timeMeasureField.setDisable(disable);
         metalComboBox.setDisable(disable);
-        inputTempSlider.setDisable(disable);
+        inputTempField.setDisable(disable);
         startVolMeasureBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
@@ -246,7 +236,7 @@ public class LabController74 extends BaseLabController {
     private void handleToggleHeater() {
         isHeaterOn = !isHeaterOn;
         toggleHeaterBtn.setText(isHeaterOn ? "⏹ ВИМКНУТИ ПІЧ" : "⚡ УВІМКНУТИ ПІЧ");
-        toggleHeaterBtn.setStyle(isHeaterOn ? "-fx-background-color: #475569; -fx-text-fill: white;" : "-fx-background-color: #ff007f; -fx-text-fill: white;");
+        toggleHeaterBtn.setStyle(isHeaterOn ? "-fx-background-color: #475569; -fx-text-fill: white; -fx-padding: 10;" : "-fx-background-color: #ff007f; -fx-text-fill: white; -fx-padding: 10;");
         if (!isAutoModeActive) {
             liveStepLabel.setText(isHeaterOn ? "Статус: Нагрівання..." : "Статус: Піч вимкнена.");
             liveStepLabel.setStyle(isHeaterOn ? "-fx-text-fill: #ffeb3b;" : "-fx-text-fill: #94a3b8;");
@@ -260,14 +250,16 @@ public class LabController74 extends BaseLabController {
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
                 double dt = (now - lastTime) / 1_000_000_000.0; lastTime = now;
-                double flow = flowSlider.getValue() / 100.0;
+
+                double flow = getDoubleValue(flowField, 0.0) / 100.0;
+                currentT1 = getDoubleValue(inputTempField, 20.0);
+
                 double trueK = metalComboBox.getSelectionModel().getSelectedIndex() == 0 ? 390.0 : (metalComboBox.getSelectionModel().getSelectedIndex() == 1 ? 230.0 : 50.0);
 
                 heaterTemp += ((isHeaterOn ? 180.0 : currentT1) - heaterTemp) * 0.2 * dt;
                 currentT4 += (heaterTemp - currentT4) * (trueK / 400.0) * dt;
                 currentT3 += ((currentT4 - currentT3) * (trueK / 500.0) - (currentT3 - currentT1) * flow * 3.0) * dt;
                 currentT2 += ((flow < 0.05 && isHeaterOn ? currentT3 : currentT1 + (currentT3 - currentT1) * flow * 0.4) - currentT2) * 1.5 * dt;
-                currentT1 = inputTempSlider.getValue();
 
                 Platform.runLater(() -> {
                     t1Label.setText(String.format(Locale.US, "t1 (вхід): %.1f °C", currentT1));
@@ -284,7 +276,9 @@ public class LabController74 extends BaseLabController {
     }
 
     private void startVolumeMeasurement() {
-        if (!isHeaterOn || flowSlider.getValue() < 5) {
+        double currentFlow = getDoubleValue(flowField, 0.0);
+
+        if (!isHeaterOn || currentFlow < 5) {
             showAlert("Помилка", "Піч має бути увімкнена, а потік води відкритий!"); return;
         }
         if (currentT4 - currentT3 < 10.0) {
@@ -296,7 +290,7 @@ public class LabController74 extends BaseLabController {
         liveStepLabel.setText("Статус: Наповнення мензурки...");
         liveStepLabel.setStyle("-fx-text-fill: #0288d1; -fx-font-weight: bold;");
 
-        double targetTime = timeMeasureSlider.getValue();
+        double targetTime = getDoubleValue(timeMeasureField, 60.0);
         currentVolumeMl = 0.0;
         final double fT1 = currentT1, fT2 = currentT2, fT3 = currentT3, fT4 = currentT4;
 
@@ -305,11 +299,11 @@ public class LabController74 extends BaseLabController {
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
-                double simElapsed = elapsed * 4.0; // Швидкість х4
+                double simElapsed = elapsed * 4.0;
 
                 if (simElapsed < targetTime) {
                     timerLabel.setText(String.format(Locale.US, "Таймер: %.0f / %.0f с", simElapsed, targetTime));
-                    double flow = flowSlider.getValue() / 100.0;
+                    double flow = getDoubleValue(flowField, 0.0) / 100.0;
 
                     currentVolumeMl = flow * 3.0 * simElapsed;
 
@@ -354,8 +348,10 @@ public class LabController74 extends BaseLabController {
             isAutoModeActive = false; setAllControlsDisable(false);
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО"); liveStepLabel.setStyle("-fx-text-fill: #a3e635; -fx-font-weight: bold;"); return;
         }
-        flowSlider.setValue(autoQueue.poll()); timeMeasureSlider.setValue(60.0);
+        flowField.setText(String.valueOf(autoQueue.poll()));
+        timeMeasureField.setText("60.0");
         liveStepLabel.setText("Статус: АВТО. Очікування стабілізації..."); liveStepLabel.setStyle("-fx-text-fill: #ffeb3b;");
+
         autoTimer = new AnimationTimer() {
             long start = System.nanoTime();
             @Override

@@ -15,160 +15,136 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
 public class LabController61 extends BaseLabController {
 
+    public static class IsotopeDef {
+        public String name;
+        public double energy;
+        public double windowLoss;
+        public IsotopeDef(String n, double e, double w) { this.name = n; this.energy = e; this.windowLoss = w; }
+        @Override public String toString() { return name; }
+    }
+
     private AlphaDecayCanvas canvas;
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-    private Slider xSlider;
-    private Slider timeSlider;
-    private ComboBox<String> sourceComboBox;
-    private Slider pressureSlider;
-    private Slider activitySlider;
-    private Label xValueLabel;
-    private Label timeValueLabel;
-    private Label pressureValueLabel;
-    private Label activityValueLabel;
+    private TextField xField;
+    private TextField tField;
+    private TextField pressureField;
+    private ComboBox<IsotopeDef> sourceCombo;
     private Button measureBtn;
     private Button autoBtn;
     private Button clearBtn;
-    private Label liveStepLabel;
-    private Label liveTimerLabel;
-    private Label liveCountLabel;
-    private boolean isMeasuring = false;
-    private AnimationTimer measureTimer;
-    private AnimationTimer autoTimer;
+    private Label liveStatusLabel;
+    private Label liveTimeLabel;
+    private Label liveCountsLabel;
+    private AnimationTimer measurementTimer;
+    private long startTime;
     private Queue<Double> autoQueue = new LinkedList<>();
+    private boolean isAutoRunning = false;
+    private final double[] tableX = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8};
+    private final double[] tableN = {1471, 1465, 1440, 1350, 1100, 600, 300, 150, 80, 40, 20, 10, 5, 2, 1, 0, 0, 0, 0};
+    private final double TABLE_R0 = 0.468;
+    private final double PU_FULL_ENERGY = 5.5;
 
     public LabController61() {
         initUI();
-        applyPhysicsSettings();
+        updateCanvasPreview();
     }
 
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
-        if (measureTimer != null) measureTimer.stop();
-        if (autoTimer != null) autoTimer.stop();
+        if (measurementTimer != null) measurementTimer.stop();
+        isAutoRunning = false;
         autoQueue.clear();
     }
 
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(310);
-        leftPanel.setMinWidth(310);
+        leftPanel.setPrefWidth(320);
+        leftPanel.setMinWidth(320);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
-        Label title = new Label("Система управління (Лаб 6-1)");
-        title.setFont(Font.font("System", FontWeight.BOLD, 18));
+        Label title = new Label("Управління (Лаб 6-1)");
+        title.setFont(Font.font("System", FontWeight.BOLD, 17));
+
+        TitledPane envPane = new TitledPane();
+        envPane.setText("Налаштування середовища");
+        envPane.setCollapsible(false);
+        VBox envBox = new VBox(10);
+        envBox.setPadding(new Insets(5));
+
+        pressureField = new TextField("1.0");
+        pressureField.setStyle("-fx-background-color: #e0f2fe; -fx-border-color: #38bdf8; -fx-border-radius: 4;");
+        pressureField.textProperty().addListener((obs, ov, nv) -> updateCanvasPreview());
+        envBox.getChildren().add(createInputGroup("Тиск повітря P (атм):", pressureField));
+        envPane.setContent(envBox);
 
         TitledPane configPane = new TitledPane();
-        configPane.setText("Параметри установки");
+        configPane.setText("Параметри вимірювання");
         configPane.setCollapsible(false);
 
         VBox configBox = new VBox(12);
         configBox.setPadding(new Insets(5));
 
-        Label studentLabel = new Label("Робочі параметри:");
-        studentLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b;");
-
-        xValueLabel = new Label("Відстань мікрометра X: 0.0 см");
-        xSlider = new Slider(0.0, 6.0, 0.0);
-        xSlider.setShowTickMarks(true);
-        xSlider.setMajorTickUnit(1.0);
-        xSlider.setMinorTickCount(9);
-        xSlider.valueProperty().addListener((o, ov, nv) -> {
-            xValueLabel.setText(String.format(Locale.US, "Відстань мікрометра X: %.1f см", nv.doubleValue()));
-            applyPhysicsSettings();
-        });
-
-        timeValueLabel = new Label("Час вимірювання t: 100 с");
-        timeSlider = new Slider(10.0, 300.0, 100.0);
-        timeSlider.setShowTickMarks(true);
-        timeSlider.setMajorTickUnit(50.0);
-        timeSlider.valueProperty().addListener((o, ov, nv) -> {
-            timeValueLabel.setText(String.format(Locale.US, "Час вимірювання t: %.0f с", nv.doubleValue()));
-            if (!isMeasuring) {
-                liveTimerLabel.setText(String.format(Locale.US, "Таймер: 0 / %.0f с", nv.doubleValue()));
-            }
-        });
-
-        Label teacherLabel = new Label("Налаштування середовища:");
-        teacherLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #d32f2f; -fx-padding: 10 0 0 0;");
-
-        sourceComboBox = new ComboBox<>(FXCollections.observableArrayList(
-                "Плутоній-239 (E ≈ 5.15 МеВ)",
-                "Полоній-210 (E ≈ 5.30 МеВ)",
-                "Америцій-241 (E ≈ 5.48 МеВ)"
-        ));
-        sourceComboBox.getSelectionModel().selectFirst();
-        sourceComboBox.setMaxWidth(Double.MAX_VALUE);
-        sourceComboBox.setOnAction(e -> { data.clear(); applyPhysicsSettings(); updateStats(); });
-
-        pressureValueLabel = new Label("Тиск повітря: 1.0 атм");
-        pressureSlider = new Slider(0.5, 1.5, 1.0);
-        pressureSlider.setShowTickMarks(true);
-        pressureSlider.setMajorTickUnit(0.5);
-        pressureSlider.valueProperty().addListener((o, ov, nv) -> {
-            pressureValueLabel.setText(String.format(Locale.US, "Тиск повітря: %.2f атм", nv.doubleValue()));
-            applyPhysicsSettings();
-        });
-
-        activityValueLabel = new Label("Активність джерела: 50 імп/с");
-        activitySlider = new Slider(10, 200, 50);
-        activitySlider.setShowTickMarks(true);
-        activitySlider.setMajorTickUnit(50);
-        activitySlider.valueProperty().addListener((o, ov, nv) -> {
-            activityValueLabel.setText(String.format(Locale.US, "Активність джерела: %.0f імп/с", nv.doubleValue()));
-            applyPhysicsSettings();
-        });
-
-        configBox.getChildren().addAll(
-                studentLabel, xValueLabel, xSlider,
-                timeValueLabel, timeSlider,
-                new Separator(),
-                teacherLabel,
-                createInputGroup("Ізотоп:", sourceComboBox),
-                pressureValueLabel, pressureSlider,
-                activityValueLabel, activitySlider
+        ObservableList<IsotopeDef> isotopes = FXCollections.observableArrayList(
+                new IsotopeDef("Pu-239 (Дані з методички)", 5.5, 4.21),
+                new IsotopeDef("Pu-239 (Відкрите джерело)", 5.5, 0.0),
+                new IsotopeDef("Po-210 (Полоній)", 5.30, 0.0),
+                new IsotopeDef("Am-241 (Америцій)", 5.48, 0.0),
+                new IsotopeDef("U-238 (Уран)", 4.20, 0.0)
         );
 
-        ScrollPane scrollParams = new ScrollPane(configBox);
-        scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(320);
-        scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
-        configPane.setContent(scrollParams);
+        sourceCombo = new ComboBox<>(isotopes);
+        sourceCombo.getSelectionModel().selectFirst();
+        sourceCombo.setMaxWidth(Double.MAX_VALUE);
+        sourceCombo.setOnAction(e -> { data.clear(); updateStats(); updateCanvasPreview(); });
 
-        measureBtn = new Button("🔴 ПОЧАТИ ВИМІРЮВАННЯ");
-        measureBtn.setStyle("-fx-background-color: #ff007f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10;");
+        xField = new TextField("0.0");
+        tField = new TextField("100");
+
+        xField.textProperty().addListener((obs, ov, nv) -> updateCanvasPreview());
+
+        configBox.getChildren().addAll(
+                createInputGroup("Джерело α-випромінювання:", sourceCombo),
+                createInputGroup("Відстань до детектора x (см):", xField),
+                createInputGroup("Час вимірювання t (с):", tField)
+        );
+        configPane.setContent(configBox);
+
+        measureBtn = new Button("▶ ВИМІРЯТИ ІМПУЛЬСИ");
+        measureBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         measureBtn.setMaxWidth(Double.MAX_VALUE);
-        measureBtn.setOnAction(e -> startSingleMeasurement());
+        measureBtn.setOnAction(e -> startManual());
 
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ ЛАБИ");
-        autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (Графік N(x))");
+        autoBtn.setStyle("-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold;");
         autoBtn.setMaxWidth(Double.MAX_VALUE);
-        autoBtn.setOnAction(e -> startAutoMode());
+        autoBtn.setOnAction(e -> startAuto());
 
-        clearBtn = new Button("🗑 ОЧИСТИТИ ТАБЛИЦЮ");
+        clearBtn = new Button("🗑 ОЧИСТИТИ ДАНІ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold;");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
         clearBtn.setOnAction(e -> {
             data.clear();
             idCounter = 1;
-            applyPhysicsSettings();
             updateStats();
+            updateCanvasPreview();
+            liveCountsLabel.setText("N = 0 імп");
         });
 
-        leftPanel.getChildren().addAll(title, configPane, measureBtn, autoBtn, clearBtn);
+        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, envPane, configPane, measureBtn, autoBtn, clearBtn));
+        scrollLeft.setFitToWidth(true);
+        scrollLeft.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
+        leftPanel.getChildren().add(scrollLeft);
 
         canvas = new AlphaDecayCanvas(600, 440);
 
@@ -181,23 +157,21 @@ public class LabController61 extends BaseLabController {
         topBar.setAlignment(Pos.TOP_LEFT);
         topBar.setPickOnBounds(false);
 
-        VBox dash = new VBox(4);
-        dash.setStyle("-fx-background-color: rgba(0, 0, 0, 0.85); -fx-text-fill: #00e5ff; -fx-padding: 10; -fx-border-color: #00e5ff; -fx-border-width: 2; -fx-border-radius: 5;");
-        dash.setMaxSize(240, 110);
+        VBox dash = new VBox(2);
+        dash.setStyle("-fx-background-color: rgba(10, 20, 10, 0.9); -fx-padding: 10; -fx-border-color: #00ffcc; -fx-border-width: 2; -fx-border-radius: 5;");
+        dash.setMaxSize(220, 80);
 
-        Label dashTitle = new Label("ПРИЛАД ПСО-2,4");
+        Label dashTitle = new Label("ДЕТЕКТОР (ПСО-2,4)");
         dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
+        liveStatusLabel = new Label("Статус: ОЧІКУВАННЯ");
+        liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
+        liveTimeLabel = new Label("t = 0.0 с");
+        liveTimeLabel.setStyle("-fx-text-fill: #ffffff;");
+        liveCountsLabel = new Label("N = 0 імп");
+        liveCountsLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
+        liveCountsLabel.setStyle("-fx-text-fill: #00ffcc;");
 
-        liveStepLabel = new Label("Статус: Очікування");
-        liveStepLabel.setStyle("-fx-text-fill: gray; -fx-font-weight: bold;");
-
-        liveTimerLabel = new Label("Таймер: 0 / 100 с");
-        liveTimerLabel.setStyle("-fx-text-fill: yellow;");
-
-        liveCountLabel = new Label("N(x): ---");
-        liveCountLabel.setStyle("-fx-text-fill: #00ffcc; -fx-font-size: 14px; -fx-font-weight: bold;");
-
-        dash.getChildren().addAll(dashTitle, liveStepLabel, liveTimerLabel, liveCountLabel);
+        dash.getChildren().addAll(dashTitle, liveStatusLabel, liveTimeLabel, liveCountsLabel);
 
         StackPane centerPanel = new StackPane(canvas, topBar, dash);
         StackPane.setAlignment(dash, Pos.TOP_RIGHT);
@@ -210,18 +184,18 @@ public class LabController61 extends BaseLabController {
 
         TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        TableColumn<Measurement, String> srcCol = new TableColumn<>("Ізотоп");
+        TableColumn<Measurement, String> srcCol = new TableColumn<>("Препарат");
         srcCol.setCellValueFactory(new PropertyValueFactory<>("sourceName"));
         TableColumn<Measurement, Double> pCol = new TableColumn<>("P (атм)");
         pCol.setCellValueFactory(new PropertyValueFactory<>("pressure"));
         TableColumn<Measurement, Double> xCol = new TableColumn<>("x (см)");
         xCol.setCellValueFactory(new PropertyValueFactory<>("x"));
-        TableColumn<Measurement, Integer> nCountCol = new TableColumn<>("N(x)");
-        nCountCol.setCellValueFactory(new PropertyValueFactory<>("counts"));
+        TableColumn<Measurement, Integer> nCol = new TableColumn<>("N (імп)");
+        nCol.setCellValueFactory(new PropertyValueFactory<>("counts"));
 
-        table.getColumns().addAll(idCol, srcCol, pCol, xCol, nCountCol);
+        table.getColumns().addAll(idCol, srcCol, pCol, xCol, nCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setPrefHeight(130);
+        table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
         VBox bottomPanel = new VBox(5, table, statsBox);
@@ -232,157 +206,162 @@ public class LabController61 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
-    private double getBaseR0() {
-        int idx = sourceComboBox.getSelectionModel().getSelectedIndex();
-        if (idx == 0) return 3.65;
-        if (idx == 1) return 3.88;
-        return 4.08;
+    private double calculateR0() {
+        try {
+            IsotopeDef iso = sourceCombo.getValue();
+            double p = Double.parseDouble(pressureField.getText().replace(',', '.'));
+            if(p <= 0) p = 1.0;
+            double effectiveE = iso.energy - iso.windowLoss;
+            if(effectiveE <= 0) effectiveE = 0.1;
+            return (0.318 * Math.pow(effectiveE, 1.5)) / p;
+        } catch (Exception e) {
+            return TABLE_R0;
+        }
     }
 
-    private double getActualR0() {
-        double pressure = pressureSlider.getValue();
-        return getBaseR0() / pressure;
-    }
-
-    private void applyPhysicsSettings() {
-        canvas.setPhysicsParameters(xSlider.getValue(), isMeasuring, new ArrayList<>(data), getActualR0());
+    private void updateCanvasPreview() {
+        if (isAutoRunning || measureBtn.isDisabled()) return;
+        try {
+            double x = Double.parseDouble(xField.getText().replace(',', '.'));
+            canvas.setPhysicsParameters(x, false, data, calculateR0());
+        } catch (NumberFormatException ignored) {}
     }
 
     private void setControlsDisable(boolean disable) {
-        xSlider.setDisable(disable);
-        timeSlider.setDisable(disable);
-        sourceComboBox.setDisable(disable);
-        pressureSlider.setDisable(disable);
-        activitySlider.setDisable(disable);
         measureBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
+        xField.setDisable(disable);
+        tField.setDisable(disable);
+        pressureField.setDisable(disable);
+        sourceCombo.setDisable(disable);
     }
 
-    private void startSingleMeasurement() {
-        double currentX = Math.round(xSlider.getValue() * 10.0) / 10.0;
-        double targetTime = timeSlider.getValue();
-
-        for (Measurement m : data) {
-            if (Math.abs(m.getX() - currentX) < 0.05 && m.getSourceName().equals(sourceComboBox.getValue().split(" ")[0])) {
-                showAlert("Увага", "Вимірювання для цієї відстані вже проведено!");
-                return;
-            }
+    private void startManual() {
+        try {
+            double x = Double.parseDouble(xField.getText().replace(',', '.'));
+            int t = Integer.parseInt(tField.getText());
+            Double.parseDouble(pressureField.getText().replace(',', '.'));
+            isAutoRunning = false;
+            runMeasurement(x, t);
+        } catch (Exception e) {
+            showAlert("Помилка", "Перевірте правильність введених даних.");
         }
-
-        isMeasuring = true;
-        setControlsDisable(true);
-        liveStepLabel.setText("Статус: ВИМІРЮВАННЯ...");
-        liveStepLabel.setStyle("-fx-text-fill: #ff007f; -fx-font-weight: bold;");
-        applyPhysicsSettings();
-
-        measureTimer = new AnimationTimer() {
-            long start = System.nanoTime();
-            @Override
-            public void handle(long now) {
-                double elapsed = (now - start) / 1_000_000_000.0;
-                double simRate = targetTime / 1.5;
-                int simulatedSeconds = (int) (elapsed * simRate);
-
-                if (simulatedSeconds < targetTime) {
-                    liveTimerLabel.setText(String.format(Locale.US, "Таймер: %d / %.0f с", simulatedSeconds, targetTime));
-
-                    int currentCount = (int) ((generateCountForX(currentX, targetTime) / targetTime) * simulatedSeconds);
-                    liveCountLabel.setText(String.format("N(x): %d", currentCount));
-                } else {
-                    this.stop();
-                    completeMeasurement(currentX, targetTime);
-                }
-            }
-        };
-        measureTimer.start();
     }
 
-    private void completeMeasurement(double x, double timeSec) {
-        isMeasuring = false;
-        liveStepLabel.setText("Статус: ГОТОВО");
-        liveStepLabel.setStyle("-fx-text-fill: #00ffcc; -fx-font-weight: bold;");
-        liveTimerLabel.setText(String.format(Locale.US, "Таймер: %.0f / %.0f с", timeSec, timeSec));
-
-        int finalCount = generateCountForX(x, timeSec);
-        liveCountLabel.setText(String.format("N(x): %d", finalCount));
-
-        String srcName = sourceComboBox.getValue().split(" ")[0];
-        double pressure = Math.round(pressureSlider.getValue() * 100.0) / 100.0;
-
-        data.add(new Measurement(idCounter++, srcName, pressure, x, finalCount));
-        updateStats();
-        applyPhysicsSettings();
-        setControlsDisable(false);
-    }
-
-    private int generateCountForX(double x, double timeSec) {
-        double actualR0 = getActualR0();
-        double ratePerSec = activitySlider.getValue();
-        double peakPos = actualR0 - 0.25;
-        double peakFactor = 1.0 + 0.18 * Math.exp(-Math.pow(x - peakPos, 2) / 0.08);
-        double dropOff = 1.0 / (1.0 + Math.exp(30.0 * (x - actualR0)));
-        double expectedRate = ratePerSec * peakFactor * dropOff;
-        double expectedTotal = expectedRate * timeSec;
-        double noise = (Math.random() - 0.5) * Math.sqrt(expectedTotal) * 2;
-        expectedTotal += noise;
-
-        double bgRate = 0.2;
-        if (expectedTotal < bgRate * timeSec) {
-            expectedTotal = bgRate * timeSec + (Math.random() - 0.5) * Math.sqrt(bgRate * timeSec);
-        }
-
-        return Math.max(0, (int) Math.round(expectedTotal));
-    }
-
-    private void startAutoMode() {
+    private void startAuto() {
         data.clear();
         idCounter = 1;
         updateStats();
         autoQueue.clear();
 
-        double currentR0 = getActualR0();
+        double currentR0 = calculateR0();
+        double step = currentR0 / 15.0;
+        if(step < 0.05) step = 0.05;
+        if(step > 0.5) step = 0.5;
 
-        double[] autoPoints = {0.0, 1.0, 2.0,
-                currentR0 - 0.8, currentR0 - 0.5, currentR0 - 0.3, currentR0 - 0.1,
-                currentR0, currentR0 + 0.1, currentR0 + 0.3, currentR0 + 0.8};
-
-        for (double p : autoPoints) {
-            if (p >= 0.0 && p <= 6.0) autoQueue.add(Math.round(p * 10.0) / 10.0);
+        for (double px = 0.0; px <= currentR0 * 1.5; px += step) {
+            autoQueue.add(Math.round(px * 100.0) / 100.0);
         }
 
+        isAutoRunning = true;
         processNextAuto();
     }
 
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
-            liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
-            liveStepLabel.setStyle("-fx-text-fill: #a3e635; -fx-font-weight: bold;");
+            isAutoRunning = false;
+            liveStatusLabel.setText("СИСТЕМА: ГОТОВО");
+            liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
             setControlsDisable(false);
+            updateStats();
             return;
         }
 
         double nextX = autoQueue.poll();
-        xSlider.setValue(nextX);
+        xField.setText(String.format(Locale.US, "%.2f", nextX));
+        runMeasurement(nextX, 100);
+    }
 
-        Platform.runLater(this::startSingleMeasurement);
+    private double getExpectedRate(double x, double r0) {
+        double mappedX = x * (TABLE_R0 / r0);
 
-        autoTimer = new AnimationTimer() {
-            long start = System.nanoTime();
+        if (mappedX <= 0) return tableN[0];
+        if (mappedX >= 1.8) return 0;
+
+        for (int i = 0; i < tableX.length - 1; i++) {
+            if (mappedX >= tableX[i] && mappedX <= tableX[i+1]) {
+                double t = (mappedX - tableX[i]) / (tableX[i+1] - tableX[i]);
+                return tableN[i] + t * (tableN[i+1] - tableN[i]);
+            }
+        }
+        return 0;
+    }
+
+    private void runMeasurement(double xCm, int tSec) {
+        setControlsDisable(true);
+        liveStatusLabel.setText("СИСТЕМА: ВИМІРЮВАННЯ");
+        liveStatusLabel.setStyle("-fx-text-fill: red;");
+
+        double r0 = calculateR0();
+        double expectedRate = getExpectedRate(xCm, r0);
+        double scaleT = tSec / 100.0;
+        double noise = 0;
+
+        final int finalCounts = (int) Math.round((expectedRate + noise) * scaleT);
+        canvas.setPhysicsParameters(xCm, true, data, r0);
+        startTime = System.nanoTime();
+        double animDuration = 0.5;
+
+        measurementTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (!isMeasuring && ((now - start) / 1_000_000_000.0) > 1.2) {
+                double elapsed = (now - startTime) / 1_000_000_000.0;
+                double progress = Math.min(elapsed / animDuration, 1.0);
+
+                liveTimeLabel.setText(String.format(Locale.US, "t = %.1f с", progress * tSec));
+                liveCountsLabel.setText(String.format("N = %d імп", (int)(finalCounts * progress)));
+
+                if (progress >= 1.0) {
                     this.stop();
-                    processNextAuto();
+                    finishMeasurement(xCm, tSec, finalCounts);
                 }
             }
         };
-        autoTimer.start();
+        measurementTimer.start();
+    }
+
+    private void finishMeasurement(double xCm, int tSec, int counts) {
+        liveStatusLabel.setText("СИСТЕМА: ЗАПИС");
+        liveStatusLabel.setStyle("-fx-text-fill: yellow;");
+        liveTimeLabel.setText(String.format(Locale.US, "t = %d.0 с", tSec));
+        liveCountsLabel.setText(String.format("N = %d імп", counts));
+
+        try {
+            double p = Double.parseDouble(pressureField.getText().replace(',', '.'));
+            Measurement m = new Measurement(idCounter++, sourceCombo.getValue().name, p, xCm, counts);
+
+            data.removeIf(existing -> Math.abs(existing.getX() - xCm) < 0.001);
+            data.add(m);
+            canvas.setPhysicsParameters(xCm, false, data, calculateR0());
+        } catch (Exception ignored){}
+
+        if (isAutoRunning) {
+            new Thread(() -> {
+                try { Thread.sleep(50); Platform.runLater(this::processNextAuto); }
+                catch (InterruptedException ignored) {}
+            }).start();
+        } else {
+            updateStats();
+            setControlsDisable(false);
+            liveStatusLabel.setText("СИСТЕМА: ОЧІКУВАННЯ");
+            liveStatusLabel.setStyle("-fx-text-fill: yellow;");
+        }
     }
 
     private void updateStats() {
-        if (data.size() < 5) {
-            finalResultLabel.setText("Обробка результатів: [Зберіть більше даних для аналізу кривої]");
+        if (data.isEmpty() || isAutoRunning) {
+            finalResultLabel.setText("Обробка результатів: Очікування завершення серії...");
             return;
         }
 
@@ -391,50 +370,52 @@ public class LabController61 extends BaseLabController {
             return;
         }
 
-        List<Measurement> sorted = new ArrayList<>(data);
-        sorted.sort(Comparator.comparingDouble(Measurement::getX));
+        data.sort(Comparator.comparingDouble(Measurement::getX));
+        double maxN = data.get(0).getCounts();
+        double targetN = maxN / 2.0;
 
-        double maxN = 0;
-        for (Measurement m : sorted) {
-            if (m.getCounts() > maxN) maxN = m.getCounts();
-        }
+        double expR0 = 0.0;
+        double expRe = 0.0;
 
-        double halfN = maxN / 2.0;
-        double r0_exp = -1.0;
+        for (int i = 0; i < data.size() - 1; i++) {
+            if (data.get(i).getCounts() >= targetN && data.get(i+1).getCounts() < targetN) {
+                double n1 = data.get(i).getCounts();
+                double n2 = data.get(i+1).getCounts();
+                double x1 = data.get(i).getX();
+                double x2 = data.get(i+1).getX();
 
-        for (int i = 0; i < sorted.size() - 1; i++) {
-            Measurement m1 = sorted.get(i);
-            Measurement m2 = sorted.get(i + 1);
-
-            if (m1.getCounts() >= halfN && m2.getCounts() < halfN) {
-                double fraction = (m1.getCounts() - halfN) / (double) (m1.getCounts() - m2.getCounts());
-                r0_exp = m1.getX() + fraction * (m2.getX() - m1.getX());
+                expR0 = x1 + (x2 - x1) * ((targetN - n1) / (n2 - n1));
+                double slope = (n2 - n1) / (x2 - x1);
+                expRe = expR0 - (targetN / slope);
                 break;
             }
         }
 
-        if (r0_exp > 0) {
-            double currentPressure = pressureSlider.getValue();
-            double r0_normalized = r0_exp * currentPressure;
+        if (expR0 > 0) {
+            IsotopeDef iso = sourceCombo.getValue();
+            double p = Double.parseDouble(pressureField.getText().replace(',', '.'));
 
-            double energyExp = Math.pow(r0_normalized / 0.318, 2.0 / 3.0);
+            double energyExp = Math.pow((expR0 * p) / 0.318, 2.0 / 3.0);
 
-            int idx = sourceComboBox.getSelectionModel().getSelectedIndex();
-            double trueEnergy = (idx == 0) ? 5.15 : (idx == 1) ? 5.30 : 5.48;
+            StringBuilder conc = new StringBuilder();
+            conc.append(String.format(Locale.US, "ОБРОБКА РЕЗУЛЬТАТІВ:\n1. За графіком знайдено точку перегину А. Середній пробіг R0 ≈ %.3f см.\n", expR0));
+            conc.append(String.format(Locale.US, "   Екстрапольований пробіг Re (за дотичною) ≈ %.3f см.\n", expRe));
+            conc.append(String.format(Locale.US, "2. За формулою E = (R0 * P / 0.318)^(2/3) розраховано енергію частинок: E_експ ≈ %.2f МеВ.\n", energyExp));
 
-            double error = Math.abs(energyExp - trueEnergy) / trueEnergy * 100.0;
+            if (iso.windowLoss > 0 && p == 1.0) {
+                double lostEnergy = PU_FULL_ENERGY - energyExp;
+                conc.append(String.format(Locale.US, "3. ВІДПОВІДЬ НА ПИТАННЯ №7: Початкова енергія Pu-239 дорівнює %.1f МеВ. Різниця (%.1f - %.2f = %.2f МеВ) — це енергія, яка була витрачена частинками у вікні лічильника та захисному шарі препарату.\n", PU_FULL_ENERGY, PU_FULL_ENERGY, energyExp, lostEnergy));
+            } else {
+                double error = Math.abs(energyExp - iso.energy) / iso.energy * 100.0;
+                conc.append(String.format(Locale.US, "3. Теоретичне значення початкової енергії для %s: E_теор = %.2f МеВ. Похибка: %.1f %%.\n", iso.name, iso.energy, error));
+                if (p != 1.0) {
+                    conc.append(String.format(Locale.US, "4. ВИСНОВОК: Зміна тиску повітря (P=%.2f атм) змінює довжину пробігу R0, але розрахована початкова енергія частинок залишається незмінною.", p));
+                }
+            }
 
-            String conclusion = String.format(Locale.US,
-                    "ОБРОБКА РЕЗУЛЬТАТІВ:\n" +
-                            "1. Експериментальний пробіг: R_exp = %.2f см (при тиску %.2f атм).\n" +
-                            "2. Пробіг за нормальних умов (1 атм): R_0 = %.2f см.\n" +
-                            "3. Розрахована енергія: E = (R_0 / 0.318)^(2/3) = %.2f МеВ.\n" +
-                            "ВИСНОВОК: Похибка склала ε = %.1f %%. Чим більший час вимірювання t, тим плавніше виглядає крива Брегга.",
-                    r0_exp, currentPressure, r0_normalized, energyExp, error
-            );
-            finalResultLabel.setText(conclusion);
+            finalResultLabel.setText(conc.toString());
         } else {
-            finalResultLabel.setText("Обробка результатів: [Неможливо знайти R0. Зберіть точки у зоні різкого спаду N(x)]");
+            finalResultLabel.setText("ОБРОБКА РЕЗУЛЬТАТІВ: Зробіть більше вимірів на ділянці різкого спаду кількості імпульсів (для пошуку R0).");
         }
     }
 }

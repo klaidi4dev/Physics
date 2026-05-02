@@ -2,7 +2,7 @@ package dev.ua._klaidi4_.physics.level7.lab7_8.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
 import dev.ua._klaidi4_.physics.level7.lab7_8.model.Measurement;
-import dev.ua._klaidi4_.physics.level7.lab7_8.view.SurfaceTensionCanvas;
+import dev.ua._klaidi4_.physics.level7.lab7_8.view.RebinderCanvas;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -15,58 +15,41 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.util.Locale;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.List;
+import java.util.ArrayList;
 
 public class LabController78 extends BaseLabController {
 
-    private SurfaceTensionCanvas canvas;
+    private RebinderCanvas canvas;
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-
-    private ComboBox<String> liquidBox;
-    private Slider tempSlider;
-    private Slider radiusSlider;
-    private Slider pumpSpeedSlider;
-
+    private ComboBox<String> liquidCombo;
     private Button pumpBtn;
     private Button recordBtn;
     private Button autoBtn;
     private Button clearBtn;
-
-    private Label livePressureLabel;
-    private Label peakPressureLabel;
-    private Label statusLabel;
-
-    // Фізичні константи (Коефіцієнти поверхневого натягу, мН/м)
-    private final double ALPHA_WATER_20 = 72.8;
-    private final double ALPHA_ETHANOL_20 = 22.0;
-    private final double ALPHA_GLYCERIN_20 = 63.0;
-
-    // Зменшення натягу при нагріванні на 1°C
-    private final double D_ALPHA_WATER = 0.15;
-    private final double D_ALPHA_ETHANOL = 0.08;
-    private final double D_ALPHA_GLYCERIN = 0.06;
-
+    private Label liveStatusLabel;
+    private Label liveHLabel;
+    private AnimationTimer uiTimer;
     private boolean isPumping = false;
     private boolean isAutoRunning = false;
-
-    private double currentH = 0.0;
-    private double maxTargetH = 0.0;
-    private double lastPeakH = 0.0;
-    private double noiseOffset = 0.0;
-
-    private AnimationTimer simTimer;
+    private Queue<String> autoQueue = new LinkedList<>();
+    private final double ALPHA_WATER = 72.8;
+    private final double ALPHA_ETHANOL = 22.4;
+    private final double ALPHA_GLYCERIN = 64.0;
 
     public LabController78() {
         initUI();
-        updateTargetPressure();
+        updateLiquidInCanvas();
     }
 
     @Override
     public void shutdown() {
-        if (simTimer != null) simTimer.stop();
-        isPumping = false;
+        if (canvas != null) canvas.stopAnimation();
+        if (uiTimer != null) uiTimer.stop();
         isAutoRunning = false;
     }
 
@@ -80,75 +63,35 @@ public class LabController78 extends BaseLabController {
         Label title = new Label("Система управління (Лаб 7-8)");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
-        // --- ПАНЕЛЬ ВИБОРУ РІДИНИ ---
-        TitledPane liquidPane = new TitledPane();
-        liquidPane.setText("Досліджувана рідина");
-        liquidPane.setCollapsible(false);
-
-        liquidBox = new ComboBox<>(FXCollections.observableArrayList(
-                "Дистильована вода (Еталон)",
-                "Рідина №1 (Етиловий спирт)",
-                "Рідина №2 (Гліцерин)"
-        ));
-        liquidBox.getSelectionModel().selectFirst();
-        liquidBox.setMaxWidth(Double.MAX_VALUE);
-        liquidBox.setOnAction(e -> {
-            updateTargetPressure();
-            currentH = 0.0;
-            lastPeakH = 0.0;
-            updateUI();
-        });
-        liquidPane.setContent(liquidBox);
-
-        // --- ПАНЕЛЬ НАЛАШТУВАНЬ ---
         TitledPane configPane = new TitledPane();
         configPane.setText("Параметри установки");
-        configPane.setCollapsible(true);
-
-        VBox configBox = new VBox(10);
+        configPane.setCollapsible(false);
+        VBox configBox = new VBox(12);
         configBox.setPadding(new Insets(5));
 
-        Label tempLabel = new Label("Температура досліду t: 20 °C");
-        tempSlider = new Slider(10.0, 80.0, 20.0);
-        tempSlider.setMajorTickUnit(10.0);
-        tempSlider.setShowTickMarks(true);
-        tempSlider.valueProperty().addListener((o, ov, nv) -> {
-            tempLabel.setText(String.format(Locale.US, "Температура досліду t: %.0f °C", nv.doubleValue()));
-            updateTargetPressure();
-            updateUI();
+        liquidCombo = new ComboBox<>(FXCollections.observableArrayList(
+                "Дистильована вода", "Спирт етиловий", "Гліцерин"
+        ));
+        liquidCombo.getSelectionModel().selectFirst();
+        liquidCombo.setMaxWidth(Double.MAX_VALUE);
+        liquidCombo.setOnAction(e -> {
+            updateLiquidInCanvas();
+            updateStats();
         });
 
-        Label radiusLabel = new Label("Радіус капіляра R: 0.20 мм");
-        radiusSlider = new Slider(0.1, 0.4, 0.2);
-        radiusSlider.setMajorTickUnit(0.1);
-        radiusSlider.setShowTickMarks(true);
-        radiusSlider.valueProperty().addListener((o, ov, nv) -> {
-            radiusLabel.setText(String.format(Locale.US, "Радіус капіляра R: %.2f мм", nv.doubleValue()));
-            updateTargetPressure();
-            updateUI();
-        });
-
-        Label pumpSpeedLabel = new Label("Потужність нагнітання: 1.0x");
-        pumpSpeedSlider = new Slider(0.2, 3.0, 1.0);
-        pumpSpeedSlider.setMajorTickUnit(0.5);
-        pumpSpeedSlider.setShowTickMarks(true);
-        pumpSpeedSlider.valueProperty().addListener((o, ov, nv) -> {
-            pumpSpeedLabel.setText(String.format(Locale.US, "Потужність нагнітання: %.1fx", nv.doubleValue()));
-        });
-
-        configBox.getChildren().addAll(tempLabel, tempSlider, radiusLabel, radiusSlider, pumpSpeedLabel, pumpSpeedSlider);
+        configBox.getChildren().add(createInputGroup("Досліджувана рідина:", liquidCombo));
         configPane.setContent(configBox);
 
-        // --- КНОПКИ ---
-        pumpBtn = new Button("💨 НАГНІТАТИ ПОВІТРЯ (НАСОС)");
-        pumpBtn.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
+        pumpBtn = new Button("▶ ПОЧАТИ НАГНІТАННЯ ПОВІТРЯ");
+        pumpBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
         pumpBtn.setMaxWidth(Double.MAX_VALUE);
-        pumpBtn.setOnAction(e -> togglePump());
+        pumpBtn.setOnAction(e -> togglePumping());
 
-        recordBtn = new Button("📝 ЗАПИСАТИ ПІКОВИЙ ТИСК (h_x)");
+        recordBtn = new Button("📝 ЗАПИСАТИ МАКСИМАЛЬНИЙ h");
         recordBtn.setStyle("-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
         recordBtn.setMaxWidth(Double.MAX_VALUE);
-        recordBtn.setOnAction(e -> recordMeasurement());
+        recordBtn.setDisable(true);
+        recordBtn.setOnAction(e -> recordMeasurement(canvas.getCurrentH()));
 
         autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ ЛАБИ");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
@@ -158,14 +101,26 @@ public class LabController78 extends BaseLabController {
         clearBtn = new Button("🗑 ОЧИСТИТИ ТАБЛИЦЮ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
-        clearBtn.setOnAction(e -> resetLab());
+        clearBtn.setOnAction(e -> {
+            data.clear();
+            idCounter = 1;
+            updateStats();
+        });
 
-        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, liquidPane, configPane, pumpBtn, recordBtn, autoBtn, clearBtn));
+        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, configPane, pumpBtn, recordBtn, autoBtn, clearBtn));
         scrollLeft.setFitToWidth(true);
         scrollLeft.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         leftPanel.getChildren().add(scrollLeft);
 
-        canvas = new SurfaceTensionCanvas(600, 440);
+        canvas = new RebinderCanvas(600, 440);
+        canvas.setOnBubblePop(() -> {
+            if (isPumping && !isAutoRunning) {
+                Platform.runLater(() -> {
+                    liveStatusLabel.setText("Статус: ВІДРИВ БУЛЬБАШКИ!");
+                    liveStatusLabel.setStyle("-fx-text-fill: #ff9800;");
+                });
+            }
+        });
 
         Button toggleSidebarBtn = new Button("◀ Приховати панель");
         toggleSidebarBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 5;");
@@ -176,53 +131,38 @@ public class LabController78 extends BaseLabController {
         topBar.setAlignment(Pos.TOP_LEFT);
         topBar.setPickOnBounds(false);
 
-        // --- ІНФО ПАНЕЛЬ ---
-        VBox dash = new VBox(4);
-        dash.setStyle("-fx-background-color: rgba(0, 0, 0, 0.85); -fx-text-fill: #00ffcc; -fx-padding: 10; -fx-border-color: #00ffcc; -fx-border-width: 2; -fx-border-radius: 5;");
-        dash.setMaxSize(220, 110);
-
-        Label dashTitle = new Label("МАНОМЕТР");
+        VBox dash = new VBox(2);
+        dash.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8); -fx-padding: 10; -fx-border-color: #00ff00; -fx-border-width: 2; -fx-border-radius: 5;");
+        dash.setMaxSize(220, 80);
+        Label dashTitle = new Label("ДАТЧИК ТИСКУ");
         dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
-
-        livePressureLabel = new Label("Поточний h: 0.0 мм");
-        livePressureLabel.setStyle("-fx-text-fill: #a3e635; -fx-font-size: 14px;");
-
-        peakPressureLabel = new Label("Піковий h: 0.0 мм");
-        peakPressureLabel.setStyle("-fx-text-fill: #ff007f; -fx-font-size: 16px; -fx-font-weight: bold;");
-
-        statusLabel = new Label("Статус: Очікування");
-        statusLabel.setStyle("-fx-text-fill: #94a3b8;");
-
-        dash.getChildren().addAll(dashTitle, livePressureLabel, peakPressureLabel, statusLabel);
+        liveStatusLabel = new Label("Статус: ОЧІКУВАННЯ");
+        liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
+        liveHLabel = new Label("h = 0.0 мм");
+        liveHLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
+        liveHLabel.setStyle("-fx-text-fill: #00ff00;");
+        dash.getChildren().addAll(dashTitle, liveStatusLabel, liveHLabel);
 
         StackPane centerPanel = new StackPane(canvas, topBar, dash);
         StackPane.setAlignment(dash, Pos.TOP_RIGHT);
         StackPane.setMargin(dash, new Insets(10));
-        centerPanel.setStyle("-fx-background-color: #000000;");
+        centerPanel.setStyle("-fx-background-color: #ffffff;");
 
-        // --- ТАБЛИЦЯ ДАНИХ ---
         table = new TableView<>();
         data = FXCollections.observableArrayList();
         table.setItems(data);
 
-        TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(40);
-
-        TableColumn<Measurement, String> liqCol = new TableColumn<>("Рідина");
-        liqCol.setCellValueFactory(new PropertyValueFactory<>("liquidName"));
-
-        TableColumn<Measurement, Double> hCol = new TableColumn<>("Max тиск h_x (мм)");
-        hCol.setCellValueFactory(new PropertyValueFactory<>("h"));
-
-        TableColumn<Measurement, Double> alphaCol = new TableColumn<>("α експ (мН/м)");
-        alphaCol.setCellValueFactory(new PropertyValueFactory<>("alpha"));
-
-        table.getColumns().addAll(idCol, liqCol, hCol, alphaCol);
+        table.getColumns().addAll(
+                createCol("№", "id"),
+                createCol("Рідина", "liquid"),
+                createCol("h (мм)", "h"),
+                createCol("α (мН/м)", "alpha")
+        );
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
+
         VBox bottomPanel = new VBox(5, table, statsBox);
         bottomPanel.setPadding(new Insets(5));
 
@@ -230,255 +170,199 @@ public class LabController78 extends BaseLabController {
         this.setCenter(centerPanel);
         this.setBottom(bottomPanel);
 
-        startSimulationLoop();
-    }
-
-    private void updateTargetPressure() {
-        int idx = liquidBox.getSelectionModel().getSelectedIndex();
-        double t = tempSlider.getValue();
-        double r = radiusSlider.getValue();
-
-        double currentAlpha = 0;
-        if (idx == 0) currentAlpha = ALPHA_WATER_20 - D_ALPHA_WATER * (t - 20.0);
-        if (idx == 1) currentAlpha = ALPHA_ETHANOL_20 - D_ALPHA_ETHANOL * (t - 20.0);
-        if (idx == 2) currentAlpha = ALPHA_GLYCERIN_20 - D_ALPHA_GLYCERIN * (t - 20.0);
-
-        currentAlpha = Math.max(5.0, currentAlpha);
-
-        double baseManometerScale = 0.4;
-        double idealH = (currentAlpha / r) * baseManometerScale;
-
-        noiseOffset = (Math.random() - 0.5) * 2.5;
-        maxTargetH = idealH + noiseOffset;
-    }
-
-    private void togglePump() {
-        isPumping = !isPumping;
-        if (isPumping) {
-            pumpBtn.setText("⏹ ЗУПИНИТИ НАСОС");
-            pumpBtn.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
-            statusLabel.setText("Статус: Нагнітання...");
-            statusLabel.setStyle("-fx-text-fill: #ffeb3b;");
-
-            radiusSlider.setDisable(true);
-            tempSlider.setDisable(true);
-        } else {
-            pumpBtn.setText("💨 НАГНІТАТИ ПОВІТРЯ (НАСОС)");
-            pumpBtn.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
-            statusLabel.setText("Статус: Очікування");
-            statusLabel.setStyle("-fx-text-fill: #94a3b8;");
-
-            radiusSlider.setDisable(false);
-            tempSlider.setDisable(false);
-        }
-    }
-
-    private void startSimulationLoop() {
-        simTimer = new AnimationTimer() {
-            private long lastTime = 0;
+        uiTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (lastTime == 0) { lastTime = now; return; }
-                double dt = (now - lastTime) / 1_000_000_000.0;
-                lastTime = now;
-
-                physicsTick(dt);
-                updateUI();
+                liveHLabel.setText(String.format("h = %.1f мм", canvas.getCurrentH()));
             }
         };
-        simTimer.start();
+        uiTimer.start();
+        updateStats();
     }
 
-    private void physicsTick(double dt) {
+    private TableColumn<Measurement, Object> createCol(String title, String prop) {
+        TableColumn<Measurement, Object> col = new TableColumn<>(title);
+        col.setCellValueFactory(new PropertyValueFactory<>(prop));
+        return col;
+    }
+
+    private void updateLiquidInCanvas() {
+        String liq = liquidCombo.getValue();
+        double theoreticalAlpha = ALPHA_WATER;
+        if (liq.contains("Спирт")) theoreticalAlpha = ALPHA_ETHANOL;
+        if (liq.contains("Гліцерин")) theoreticalAlpha = ALPHA_GLYCERIN;
+
+        canvas.setLiquidParams(liq, theoreticalAlpha);
+    }
+
+    private void togglePumping() {
+        isPumping = !isPumping;
+        canvas.setPumping(isPumping);
+
         if (isPumping) {
-            currentH += 40.0 * pumpSpeedSlider.getValue() * dt;
-
-            if (currentH >= maxTargetH) {
-                lastPeakH = maxTargetH;
-                currentH = maxTargetH * 0.15;
-                updateTargetPressure();
-
-                if (!isAutoRunning) {
-                    statusLabel.setText("Статус: ВІДРИВ БУЛЬБАШКИ!");
-                    statusLabel.setStyle("-fx-text-fill: #ff007f;");
-                }
-            }
+            pumpBtn.setText("⏹ ЗУПИНИТИ НАГНІТАННЯ");
+            pumpBtn.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
+            recordBtn.setDisable(false);
+            liquidCombo.setDisable(true);
+            liveStatusLabel.setText("Статус: НАГНІТАННЯ");
+            liveStatusLabel.setStyle("-fx-text-fill: red;");
         } else {
-            if (currentH > 0) {
-                currentH = Math.max(0, currentH - 5.0 * dt);
-            }
+            pumpBtn.setText("▶ ПОЧАТИ НАГНІТАННЯ ПОВІТРЯ");
+            pumpBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
+            recordBtn.setDisable(true);
+            liquidCombo.setDisable(false);
+            liveStatusLabel.setText("Статус: ОЧІКУВАННЯ");
+            liveStatusLabel.setStyle("-fx-text-fill: yellow;");
         }
     }
 
-    private void updateUI() {
-        livePressureLabel.setText(String.format(Locale.US, "Поточний h: %.1f мм", currentH));
-        peakPressureLabel.setText(String.format(Locale.US, "Піковий h: %.1f мм", lastPeakH));
+    private void recordMeasurement(double measuredH) {
+        String currentLiq = liquidCombo.getValue();
+        double alphaValue = 0.0;
+        double avgH0 = getAverageHForWater();
 
-        canvas.updateState(liquidBox.getSelectionModel().getSelectedIndex(), currentH, maxTargetH,
-                tempSlider.getValue(), radiusSlider.getValue());
-    }
-
-    private void recordMeasurement() {
-        if (lastPeakH == 0) {
-            showAlert("Увага", "Спочатку нагнітайте повітря доки бульбашка не відірветься!");
-            return;
-        }
-
-        String liqName = liquidBox.getValue().split(" ")[0];
-
-        double alphaCalc = 0.0;
-        int idx = liquidBox.getSelectionModel().getSelectedIndex();
-        double t = tempSlider.getValue();
-
-        double refAlphaWater = ALPHA_WATER_20 - D_ALPHA_WATER * (t - 20.0);
-
-        if (idx == 0) {
-            alphaCalc = refAlphaWater;
+        if (currentLiq.equals("Дистильована вода")) {
+            alphaValue = ALPHA_WATER;
         } else {
-            double sumH0 = 0;
-            int count0 = 0;
-            for (Measurement m : data) {
-                if (m.getLiquidName().contains("Дистильована")) {
-                    sumH0 += m.getH();
-                    count0++;
-                }
-            }
-
-            if (count0 == 0) {
-                showAlert("Помилка", "Для розрахунку невідомої рідини спочатку необхідно виміряти еталон (Воду) при тих самих умовах!");
+            if (avgH0 == 0) {
+                showAlert("Увага", "Спочатку необхідно провести вимірювання для дистильованої води (еталон), щоб знайти h0!");
                 return;
             }
-
-            double avgH0 = sumH0 / count0;
-            alphaCalc = refAlphaWater * (lastPeakH / avgH0);
+            alphaValue = ALPHA_WATER * (measuredH / avgH0);
         }
 
         Measurement m = new Measurement(
                 idCounter++,
-                liqName,
-                Math.round(lastPeakH * 10.0) / 10.0,
-                Math.round(alphaCalc * 10.0) / 10.0
+                currentLiq,
+                Math.round(measuredH * 10.0) / 10.0,
+                Math.round(alphaValue * 100.0) / 100.0
         );
+
         data.add(m);
-
-        Platform.runLater(() -> {
-            try { table.scrollTo(data.size() - 1); } catch (Exception e) {}
-        });
-
+        table.scrollTo(data.size() - 1);
         updateStats();
     }
 
-    private void startAutoMode() {
-        resetLab();
-        isAutoRunning = true;
-        autoBtn.setDisable(true);
-        pumpBtn.setDisable(true);
-        recordBtn.setDisable(true);
-        liquidBox.setDisable(true);
-        radiusSlider.setDisable(true);
-        tempSlider.setDisable(true);
-        pumpSpeedSlider.setValue(2.0); // Пришвидшуємо для авто-режиму
-
-        new Thread(() -> {
-            try {
-                for (int liq = 0; liq < 3; liq++) {
-                    final int currentLiq = liq;
-                    Platform.runLater(() -> liquidBox.getSelectionModel().select(currentLiq));
-                    Thread.sleep(500);
-
-                    Platform.runLater(this::togglePump);
-
-                    for (int i = 0; i < 3; i++) {
-                        double oldPeak = lastPeakH;
-                        while (lastPeakH == oldPeak && isAutoRunning) {
-                            Thread.sleep(100);
-                        }
-
-                        if (!isAutoRunning) break;
-
-                        Thread.sleep(200);
-                        Platform.runLater(this::recordMeasurement);
-                    }
-
-                    Platform.runLater(this::togglePump);
-                    Thread.sleep(1000);
-                }
-
-                Platform.runLater(() -> {
-                    isAutoRunning = false;
-                    autoBtn.setDisable(false);
-                    pumpBtn.setDisable(false);
-                    recordBtn.setDisable(false);
-                    liquidBox.setDisable(false);
-                    radiusSlider.setDisable(false);
-                    tempSlider.setDisable(false);
-                    statusLabel.setText("Статус: АВТО ЗАВЕРШЕНО");
-                    statusLabel.setStyle("-fx-text-fill: #a3e635;");
-                });
-
-            } catch (InterruptedException ignored) {}
-        }).start();
+    private double getAverageHForWater() {
+        double sumH = 0;
+        int count = 0;
+        for (Measurement m : data) {
+            if (m.getLiquid().equals("Дистильована вода")) {
+                sumH += m.getH();
+                count++;
+            }
+        }
+        return count > 0 ? sumH / count : 0.0;
     }
 
-    private void resetLab() {
-        isAutoRunning = false;
-        if (isPumping) togglePump();
-
+    private void startAutoMode() {
         data.clear();
         idCounter = 1;
-        currentH = 0.0;
-        lastPeakH = 0.0;
-        liquidBox.getSelectionModel().selectFirst();
-        updateTargetPressure();
-        updateUI();
+        updateStats();
+        autoQueue.clear();
 
-        if (finalResultLabel != null) {
-            finalResultLabel.setText("Обробка результатів: Очікування даних...");
+        autoQueue.add("Дистильована вода");
+        autoQueue.add("Дистильована вода");
+        autoQueue.add("Дистильована вода");
+        autoQueue.add("Спирт етиловий");
+        autoQueue.add("Спирт етиловий");
+        autoQueue.add("Спирт етиловий");
+        autoQueue.add("Гліцерин");
+        autoQueue.add("Гліцерин");
+        autoQueue.add("Гліцерин");
+
+        isAutoRunning = true;
+        setControlsDisable(true);
+        processNextAuto();
+    }
+
+    private void processNextAuto() {
+        if (autoQueue.isEmpty() || !isAutoRunning) {
+            isAutoRunning = false;
+            setControlsDisable(false);
+            if (isPumping) togglePumping();
+            liveStatusLabel.setText("Статус: ГОТОВО");
+            liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
+            return;
         }
+
+        String nextLiq = autoQueue.poll();
+        Platform.runLater(() -> {
+            liquidCombo.getSelectionModel().select(nextLiq);
+            updateLiquidInCanvas();
+            if (!isPumping) togglePumping();
+            liveStatusLabel.setText("Статус: АВТО-ВИМІРЮВАННЯ");
+        });
+
+        canvas.setOnBubblePop(() -> {
+            if (isAutoRunning) {
+                double noiseH = canvas.getCurrentH() + (Math.random() - 0.5) * 1.5;
+                Platform.runLater(() -> recordMeasurement(noiseH));
+
+                canvas.setOnBubblePop(null);
+
+                new Thread(() -> {
+                    try { Thread.sleep(800); } catch (Exception ignored) {}
+                    Platform.runLater(this::processNextAuto);
+                }).start();
+            }
+        });
     }
 
     private void updateStats() {
+        if (data.isEmpty()) {
+            finalResultLabel.setText("Обробка результатів: Очікування вимірювань...\nПочніть з дистильованої води.");
+            return;
+        }
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
             return;
         }
 
-        double h0 = 0, h1 = 0, h2 = 0;
-        int c0 = 0, c1 = 0, c2 = 0;
-
-        for (Measurement m : data) {
-            if (m.getLiquidName().contains("Дистильована")) { h0 += m.getH(); c0++; }
-            if (m.getLiquidName().contains("Рідина №1")) { h1 += m.getH(); c1++; }
-            if (m.getLiquidName().contains("Рідина №2")) { h2 += m.getH(); c2++; }
-        }
-
-        if (c0 == 0) {
-            finalResultLabel.setText("СТАТУС: Для розрахунків необхідно спочатку виміряти еталон (Дистильовану воду).");
+        double avgH0 = getAverageHForWater();
+        if (avgH0 == 0) {
+            finalResultLabel.setText("Увага: Немає вимірів для еталонної рідини (води). Подальші розрахунки неможливі.");
             return;
         }
 
-        h0 /= c0;
+        StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ:\n");
+        sb.append(String.format("1. Еталонна рідина (Дистильована вода): α0 = %.1f мН/м. Середнє h0 = %.1f мм.\n", ALPHA_WATER, avgH0));
 
-        double t = tempSlider.getValue();
-        double refAlphaWater = ALPHA_WATER_20 - D_ALPHA_WATER * (t - 20.0);
+        List<String> processedLiqs = new ArrayList<>();
+        processedLiqs.add("Дистильована вода");
 
-        String conclusion = String.format(Locale.US,
-                "ОБРОБКА РЕЗУЛЬТАТІВ (Температура %.0f °C, R = %.2f мм):\n" +
-                        "1. Еталон (Вода): h_0 = %.1f мм вод.ст. (Табличне α_0 = %.1f мН/м).\n", t, radiusSlider.getValue(), h0, refAlphaWater);
+        for (Measurement m : data) {
+            String liqName = m.getLiquid();
+            if (!processedLiqs.contains(liqName)) {
+                processedLiqs.add(liqName);
 
-        if (c1 > 0) {
-            h1 /= c1;
-            double a1 = refAlphaWater * (h1 / h0);
-            conclusion += String.format(Locale.US, "2. Етиловий спирт: h_x = %.1f мм. Розраховано α_1 = α_0(h_1/h_0) = %.1f мН/м.\n", h1, a1);
+                double sumHx = 0;
+                int countX = 0;
+                for (Measurement innerM : data) {
+                    if (innerM.getLiquid().equals(liqName)) {
+                        sumHx += innerM.getH();
+                        countX++;
+                    }
+                }
+                double avgHx = sumHx / countX;
+                double calcAlpha = ALPHA_WATER * (avgHx / avgH0);
+
+                double theorAlpha = liqName.contains("Спирт") ? ALPHA_ETHANOL : ALPHA_GLYCERIN;
+                double error = Math.abs(calcAlpha - theorAlpha) / theorAlpha * 100.0;
+
+                sb.append(String.format("2. %s: Середнє hx = %.1f мм. Розраховано αx = %.1f мН/м. (Похибка %.1f%%)\n",
+                        liqName, avgHx, calcAlpha, error));
+            }
         }
-        if (c2 > 0) {
-            h2 /= c2;
-            double a2 = refAlphaWater * (h2 / h0);
-            conclusion += String.format(Locale.US, "3. Гліцерин: h_x = %.1f мм. Розраховано α_2 = α_0(h_2/h_0) = %.1f мН/м.\n", h2, a2);
-        }
 
-        conclusion += "ВИСНОВОК: Поверхневий натяг (α) падає при нагріванні і залежить від рідини. Зменшення радіуса капіляра (R) вимагає більшого тиску для відриву бульбашки (формула Лапласа: Δp = 2α/R).";
+        sb.append("Висновок: Розрахунок коефіцієнтів поверхневого натягу за методом Ребіндера показав збіжність з табличними значеннями.");
+        finalResultLabel.setText(sb.toString());
+    }
 
-        finalResultLabel.setText(conclusion);
+    private void setControlsDisable(boolean disable) {
+        autoBtn.setDisable(disable);
+        clearBtn.setDisable(disable);
+        liquidCombo.setDisable(disable);
+        pumpBtn.setDisable(disable);
     }
 }

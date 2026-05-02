@@ -10,21 +10,29 @@ public class ElectrostaticCanvas extends Canvas {
     private double currentU = 20.0;
     private double currentD = 20.0;
     private double currentR = 1.0;
+    private int currentN = 4;
 
     private boolean isScanning = false;
     private double scanProgress = 0.0;
     private AnimationTimer timer;
     private long lastTime = 0;
 
+    private Runnable onFinishCallback;
+
     public ElectrostaticCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
-    public void updatePhysicsParameters(double u, double d, double r) {
+    public void setOnFinishCallback(Runnable callback) {
+        this.onFinishCallback = callback;
+    }
+
+    public void updatePhysicsParameters(double u, double d, double r, int n) {
         this.currentU = u;
         this.currentD = d;
         this.currentR = r;
+        this.currentN = n;
         if (!isScanning) {
             draw();
         }
@@ -46,11 +54,12 @@ public class ElectrostaticCanvas extends Canvas {
                 if (lastTime == 0) { lastTime = now; return; }
                 double dt = (now - lastTime) / 1_000_000_000.0;
                 lastTime = now;
-                scanProgress += dt * 0.5;
+                scanProgress += dt * 0.4;
                 if (scanProgress >= 1.0) {
                     scanProgress = 1.0;
                     isScanning = false;
                     this.stop();
+                    if (onFinishCallback != null) onFinishCallback.run();
                 }
                 draw();
             }
@@ -84,11 +93,12 @@ public class ElectrostaticCanvas extends Canvas {
         if (scanProgress > 0) {
             gc.setStroke(Color.web("#1976d2", 0.7));
             gc.setLineWidth(2);
-            int linesCount = (int) (5 * scanProgress);
-            double step = currentU / 10.0;
+            int linesCount = (int) (currentN * scanProgress);
+            double step = (currentU / 2.0) / currentN;
 
             for (int i = 1; i <= linesCount; i++) {
                 double targetV = i * step;
+
                 double k = Math.exp((2 * targetV * Math.log(currentD / currentR)) / currentU);
                 double a = currentD / 2.0;
                 double xc = a * (k + 1) / (k - 1);
@@ -106,11 +116,11 @@ public class ElectrostaticCanvas extends Canvas {
         if (scanProgress >= 1.0) {
             gc.setStroke(Color.web("#d32f2f", 0.6));
             gc.setLineWidth(1.5);
-            for (int i = -4; i <= 4; i++) {
+            for (int i = -5; i <= 5; i++) {
                 if (i == 0) {
                     gc.strokeLine(x1, cy, x2, cy);
                 } else {
-                    double arcR = Math.abs(i * 30);
+                    double arcR = Math.abs(i * 25);
                     double arcCy = cy + (i > 0 ? arcR : -arcR);
                     double angle = Math.atan2(dPx / 2, arcR);
                     gc.beginPath();
@@ -127,7 +137,8 @@ public class ElectrostaticCanvas extends Canvas {
         gc.fillOval(x2 - rPx, cy - rPx, rPx * 2, rPx * 2);
 
         gc.setFill(Color.WHITE);
-        gc.fillText("-V", x1 - 5, cy + 4);
-        gc.fillText("+V", x2 - 5, cy + 4);
+        gc.setFont(javafx.scene.text.Font.font("System", javafx.scene.text.FontWeight.BOLD, 12));
+        gc.fillText("-V", x1 - 7, cy + 4);
+        gc.fillText("+V", x2 - 7, cy + 4);
     }
 }

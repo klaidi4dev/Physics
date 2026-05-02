@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Measurement {
     private int id;
-    private String connectionType;
+    private String phase;
+    private String details;
     private double cMeasured;
     private double cTheoretical;
+    private double epsilon;
     private double errorPct;
 }

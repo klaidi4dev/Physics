@@ -2,6 +2,8 @@ module dev.ua._klaidi4_.physics {
     requires javafx.controls;
     requires javafx.fxml;
     requires static lombok;
+    requires org.apache.pdfbox;
+    requires java.desktop;
 
     opens dev.ua._klaidi4_.physics.level1.lab1_1.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level1.lab1_2.model to javafx.base;
@@ -19,11 +21,9 @@ module dev.ua._klaidi4_.physics {
     opens dev.ua._klaidi4_.physics.level1.lab1_14.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level2.lab2_1.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level2.lab2_2.model to javafx.base;
-    opens dev.ua._klaidi4_.physics.level2.lab2_3.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level2.lab2_4.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level2.lab2_5.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level2.lab2_6.model to javafx.base;
-    opens dev.ua._klaidi4_.physics.level2.lab222.model to javafx.base;
 
     opens dev.ua._klaidi4_.physics.level3.lab3_1.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level3.lab3_2.model to javafx.base;
@@ -59,8 +59,11 @@ module dev.ua._klaidi4_.physics {
     opens dev.ua._klaidi4_.physics.level7.lab7_6.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level7.lab7_7.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level7.lab7_8.model to javafx.base;
-
+    opens dev.ua._klaidi4_.physics.level8.lab8_1.model to javafx.base;
+    opens dev.ua._klaidi4_.physics.level8.lab8_2.model to javafx.base;
+    opens dev.ua._klaidi4_.physics.level8.lab8_3.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level8.lab8_4.model to javafx.base;
+    opens dev.ua._klaidi4_.physics.level8.lab8_5.model to javafx.base;
 
     opens dev.ua._klaidi4_.physics to javafx.fxml;
     exports dev.ua._klaidi4_.physics;

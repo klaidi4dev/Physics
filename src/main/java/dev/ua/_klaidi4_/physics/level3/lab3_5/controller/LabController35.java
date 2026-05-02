@@ -16,6 +16,7 @@ import javafx.scene.text.FontWeight;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LabController35 extends BaseLabController {
 
@@ -23,26 +24,20 @@ public class LabController35 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-
     private TextField freqField;
     private TextField r0Field;
     private TextField l0Field;
     private TextField lCoreField;
     private TextField rCoreField;
-
     private ComboBox<String> coreCombo;
-    private Slider uSlider;
-    private Label uLabel;
-
+    private TextField uField;
     private Button addPointBtn;
-    private Button autoRunBtn;
+    private Button autoBtn;
     private Button clearBtn;
-
     private Label liveStatusLabel;
     private Label liveULabel;
     private Label liveILabel;
     private Label livePLabel;
-
     private boolean isAutoRunning = false;
     private double currentU_meas;
     private double currentI_meas;
@@ -69,17 +64,18 @@ public class LabController35 extends BaseLabController {
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
         TitledPane paramsPane = new TitledPane();
-        paramsPane.setText("Параметри кола");
-        paramsPane.setCollapsible(false);
+        paramsPane.setText("Параметри кола (Приховані константи)");
+        paramsPane.setCollapsible(true);
+        paramsPane.setExpanded(false);
 
         VBox paramsBox = new VBox(12);
         paramsBox.setPadding(new Insets(5));
 
         freqField = new TextField("50.0");
-        r0Field = new TextField("15.0");
-        l0Field = new TextField("0.04");
-        lCoreField = new TextField("0.25");
-        rCoreField = new TextField("45.0");
+        r0Field = new TextField("31.5");
+        l0Field = new TextField("0.67");
+        lCoreField = new TextField("1.38");
+        rCoreField = new TextField("32.1");
 
         freqField.textProperty().addListener((o, old, val) -> updatePhysics());
         r0Field.textProperty().addListener((o, old, val) -> updatePhysics());
@@ -108,19 +104,12 @@ public class LabController35 extends BaseLabController {
         coreCombo.setMaxWidth(Double.MAX_VALUE);
         coreCombo.setOnAction(e -> updatePhysics());
 
-        uLabel = new Label("Напруга ЛАТР: 50 В");
-        uSlider = new Slider(0, 100, 50);
-        uSlider.setBlockIncrement(5);
-        uSlider.setShowTickMarks(true);
-        uSlider.valueProperty().addListener((o, old, val) -> {
-            uLabel.setText(String.format("Напруга ЛАТР: %d В", val.intValue()));
-            updatePhysics();
-        });
+        uField = new TextField("100.0");
+        uField.textProperty().addListener((o, old, val) -> updatePhysics());
 
         controlBox.getChildren().addAll(
                 createInputGroup("Стан котушки:", coreCombo),
-                uLabel,
-                uSlider
+                createInputGroup("Напруга ЛАТР U (В):", uField)
         );
         controlPane.setContent(controlBox);
 
@@ -129,10 +118,10 @@ public class LabController35 extends BaseLabController {
         addPointBtn.setMaxWidth(Double.MAX_VALUE);
         addPointBtn.setOnAction(e -> recordPoint());
 
-        autoRunBtn = new Button("⚙ АВТО-ВИМІРЮВАННЯ");
-        autoRunBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
-        autoRunBtn.setMaxWidth(Double.MAX_VALUE);
-        autoRunBtn.setOnAction(e -> runAuto());
+        autoBtn = new Button("⚙ АВТО-ВИМІРЮВАННЯ");
+        autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
+        autoBtn.setMaxWidth(Double.MAX_VALUE);
+        autoBtn.setOnAction(e -> runAuto());
 
         clearBtn = new Button("🗑 ОЧИСТИТИ ТАБЛИЦЮ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -143,7 +132,7 @@ public class LabController35 extends BaseLabController {
             updateStats();
         });
 
-        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, paramsPane, controlPane, addPointBtn, autoRunBtn, clearBtn));
+        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, paramsPane, controlPane, addPointBtn, autoBtn, clearBtn));
         scrollLeft.setFitToWidth(true);
         scrollLeft.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         leftPanel.getChildren().add(scrollLeft);
@@ -220,13 +209,13 @@ public class LabController35 extends BaseLabController {
     private void updatePhysics() {
         if (isAutoRunning) return;
         try {
-            double u = uSlider.getValue();
-            double freq = Double.parseDouble(freqField.getText());
+            double u = Double.parseDouble(uField.getText().replace(',', '.'));
+            double freq = Double.parseDouble(freqField.getText().replace(',', '.'));
             double omega = 2 * Math.PI * freq;
-            double r0 = Double.parseDouble(r0Field.getText());
-            double l0 = Double.parseDouble(l0Field.getText());
-            double lCore = Double.parseDouble(lCoreField.getText());
-            double rCore = Double.parseDouble(rCoreField.getText());
+            double r0 = Double.parseDouble(r0Field.getText().replace(',', '.'));
+            double l0 = Double.parseDouble(l0Field.getText().replace(',', '.'));
+            double lCore = Double.parseDouble(lCoreField.getText().replace(',', '.'));
+            double rCore = Double.parseDouble(rCoreField.getText().replace(',', '.'));
 
             boolean hasCore = coreCombo.getSelectionModel().getSelectedIndex() == 1;
             double Z, R_active, I_true, P_true;
@@ -239,7 +228,7 @@ public class LabController35 extends BaseLabController {
                 R_active = r0;
             }
 
-            if (u == 0 || Z == 0) {
+            if (u <= 0 || Z == 0) {
                 I_true = 0;
                 P_true = 0;
             } else {
@@ -254,9 +243,9 @@ public class LabController35 extends BaseLabController {
             currentI_meas = I_true * noiseFactI;
             currentP_meas = P_true * noiseFactP;
 
-            liveULabel.setText(String.format("U = %.1f В", currentU_meas));
-            liveILabel.setText(String.format("I = %.2f А", currentI_meas));
-            livePLabel.setText(String.format("P = %.1f Вт", currentP_meas));
+            liveULabel.setText(String.format(Locale.US, "U = %.1f В", currentU_meas));
+            liveILabel.setText(String.format(Locale.US, "I = %.2f А", currentI_meas));
+            livePLabel.setText(String.format(Locale.US, "P = %.1f Вт", currentP_meas));
 
             if (canvas != null) {
                 canvas.updateMeters(currentU_meas, currentI_meas, currentP_meas, hasCore);
@@ -265,7 +254,7 @@ public class LabController35 extends BaseLabController {
     }
 
     private void recordPoint() {
-        if (currentU_meas == 0) return;
+        if (currentU_meas <= 0) return;
 
         Measurement m = new Measurement(
                 idCounter++,
@@ -291,25 +280,25 @@ public class LabController35 extends BaseLabController {
         new Thread(() -> {
             try {
                 Platform.runLater(() -> coreCombo.getSelectionModel().select(0));
-                for (int u = 30; u <= 50; u += 10) {
+                for (int u = 100; u <= 140; u += 20) {
                     final int voltage = u;
                     Platform.runLater(() -> {
-                        uSlider.setValue(voltage);
+                        uField.setText(String.valueOf(voltage));
                         updatePhysics();
                         recordPoint();
                     });
-                    Thread.sleep(800);
+                    Thread.sleep(1000);
                 }
 
                 Platform.runLater(() -> coreCombo.getSelectionModel().select(1));
-                for (int u = 30; u <= 50; u += 10) {
+                for (int u = 100; u <= 140; u += 20) {
                     final int voltage = u;
                     Platform.runLater(() -> {
-                        uSlider.setValue(voltage);
+                        uField.setText(String.valueOf(voltage));
                         updatePhysics();
                         recordPoint();
                     });
-                    Thread.sleep(800);
+                    Thread.sleep(1000);
                 }
 
                 Platform.runLater(() -> {
@@ -323,10 +312,10 @@ public class LabController35 extends BaseLabController {
     }
 
     private void setControlsDisable(boolean disable) {
-        uSlider.setDisable(disable);
+        uField.setDisable(disable);
         coreCombo.setDisable(disable);
         addPointBtn.setDisable(disable);
-        autoRunBtn.setDisable(disable);
+        autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
         freqField.setDisable(disable);
         r0Field.setDisable(disable);
@@ -342,9 +331,9 @@ public class LabController35 extends BaseLabController {
             return;
         }
         try {
-            double freq = Double.parseDouble(freqField.getText());
+            double freq = Double.parseDouble(freqField.getText().replace(',', '.'));
             double omega = 2 * Math.PI * freq;
-            double r0 = Double.parseDouble(r0Field.getText());
+            double r0 = Double.parseDouble(r0Field.getText().replace(',', '.'));
 
             List<Measurement> noCoreData = new ArrayList<>();
             List<Measurement> coreData = new ArrayList<>();
@@ -366,8 +355,8 @@ public class LabController35 extends BaseLabController {
                 double l0 = 0;
                 if (val > 0) l0 = Math.sqrt(val) / omega;
 
-                sb.append(String.format("1. Без осердя: Середній повний опір Zср = %.2f Ом.\n", zAvg));
-                sb.append(String.format("2. Індуктивність без осердя: L0 = %.4f Гн.\n", l0));
+                sb.append(String.format(Locale.US, "1. Без осердя: Середній повний опір Zср = %.2f Ом.\n", zAvg));
+                sb.append(String.format(Locale.US, "2. Індуктивність без осердя: L0 = %.4f Гн.\n", l0));
             }
 
             if (!coreData.isEmpty()) {
@@ -383,13 +372,13 @@ public class LabController35 extends BaseLabController {
                 double lc = 0;
                 if (val > 0) lc = Math.sqrt(val) / omega;
 
-                sb.append(String.format("3. З осердям: Повний опір Z' = %.2f Ом.\n", zcAvg));
-                sb.append(String.format("4. Активний опір з осердям R' = %.2f Ом.\n", rcAvg));
-                sb.append(String.format("5. Індуктивність з осердям L' = %.4f Гн.\n", lc));
+                sb.append(String.format(Locale.US, "3. З осердям: Повний опір Z' = %.2f Ом.\n", zcAvg));
+                sb.append(String.format(Locale.US, "4. Активний опір з осердям R' = %.2f Ом.\n", rcAvg));
+                sb.append(String.format(Locale.US, "5. Індуктивність з осердям L' = %.4f Гн.\n", lc));
             }
 
             if (!noCoreData.isEmpty() && !coreData.isEmpty()) {
-                sb.append("\nВИСНОВОК: Введення феромагнітного осердя призводить до різкого збільшення магнітного потоку, що спричиняє зростання індуктивності (L > L0) та активних втрат (R' > R0).");
+                sb.append("\nВИСНОВОК: Введення феромагнітного осердя призводить до збільшення магнітного потоку, що спричиняє зростання індуктивності (L' > L0) та активних втрат (R' > R0).");
             }
 
             finalResultLabel.setText(sb.toString());

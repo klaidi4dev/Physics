@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 
 public class LabController31 extends BaseLabController {
@@ -29,16 +30,26 @@ public class LabController31 extends BaseLabController {
     private TableView<Measurement31> table;
     private ObservableList<Measurement31> data;
     private int idCounter = 1;
-    private TextField l0Field;
+
+    private ComboBox<String> l0Box;
     private TextField iField;
     private TextField xField;
-    private Button startBtn;
+
+    private TextField fieldR;
+    private TextField fieldRg;
+    private TextField fieldBeta;
+    private TextField fieldN;
+    private TextField fieldS;
+
+    private Button recordBtn;
     private Button autoBtn;
-    private Button clearBtn;
     private Button analyzeBtn;
+    private Button clearBtn;
+
     private Label liveStatusLabel;
     private Label liveNLabel;
     private Label bLabel;
+
     private Queue<AutoTestParam> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
@@ -51,7 +62,6 @@ public class LabController31 extends BaseLabController {
 
     public LabController31() {
         initUI();
-        applyPhysicsSettings();
     }
 
     @Override
@@ -64,52 +74,72 @@ public class LabController31 extends BaseLabController {
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(310);
-        leftPanel.setMinWidth(310);
+        leftPanel.setPrefWidth(320);
+        leftPanel.setMinWidth(320);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
         Label title = new Label("Система управління (Лаб 3-1)");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
-        TitledPane labPane = new TitledPane();
-        labPane.setText("Параметри установки");
-        labPane.setCollapsible(true);
-        labPane.setExpanded(true);
+        TitledPane constantsPane = new TitledPane();
+        constantsPane.setText("Константи приладів");
+        constantsPane.setCollapsible(true);
+        constantsPane.setExpanded(false);
 
+        VBox constantsBox = new VBox(10);
+        constantsBox.setPadding(new Insets(5));
+
+        fieldR = new TextField("14.0");
+        fieldRg = new TextField("61.0");
+        fieldBeta = new TextField("3.61");
+        fieldN = new TextField("1734");
+        fieldS = new TextField("16.0");
+
+        constantsBox.getChildren().addAll(
+                createInputGroup("Опір котушки R (Ом):", fieldR),
+                createInputGroup("Опір гальванометра Rg (Ом):", fieldRg),
+                createInputGroup("Стала гальв. β (нКл/под):", fieldBeta),
+                createInputGroup("Кількість витків N:", fieldN),
+                createInputGroup("Площа витка S (мм²):", fieldS)
+        );
+        constantsPane.setContent(constantsBox);
+
+        TitledPane paramsPane = new TitledPane();
+        paramsPane.setText("Параметри установки");
+        paramsPane.setCollapsible(false);
         VBox paramsBox = new VBox(12);
         paramsBox.setPadding(new Insets(5));
 
-        l0Field = new TextField("20");
-        iField = new TextField("1.5");
-        xField = new TextField("0.0");
+        l0Box = new ComboBox<>();
+        l0Box.getItems().addAll("20.0", "30.0");
+        l0Box.getSelectionModel().selectFirst();
+        l0Box.setMaxWidth(Double.MAX_VALUE);
 
-        l0Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-        iField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-        xField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
+        iField = new TextField("1.00");
+        xField = new TextField("0");
+
+        l0Box.setOnAction(e -> updateCanvasVisuals());
+        iField.textProperty().addListener((o, ov, nv) -> updateCanvasVisuals());
+        xField.textProperty().addListener((o, ov, nv) -> updateCanvasVisuals());
 
         paramsBox.getChildren().addAll(
-                createInputGroup("Проміжок l0 (мм) [20 або 30]:", l0Field),
-                createInputGroup("Струм магніту I (А):", iField),
+                createInputGroup("Проміжок l0 (мм):", l0Box),
+                createInputGroup("Струм електромагніту I (А):", iField),
                 createInputGroup("Координата котушки x (см):", xField)
         );
+        paramsPane.setContent(paramsBox);
 
-        ScrollPane scrollParams = new ScrollPane(paramsBox);
-        scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(200);
-        scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
-        labPane.setContent(scrollParams);
+        recordBtn = new Button("▶ ПЕРЕМИКНУТИ СТРУМ");
+        recordBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
+        recordBtn.setMaxWidth(Double.MAX_VALUE);
+        recordBtn.setOnAction(e -> triggerMeasurement());
 
-        startBtn = new Button("▶ ПЕРЕМИКНУТИ СТРУМ");
-        startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
-        startBtn.setMaxWidth(Double.MAX_VALUE);
-        startBtn.setOnAction(e -> startManual());
-
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (ЗАВ. 1 і 2)");
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (Всі завдання)");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
         autoBtn.setMaxWidth(Double.MAX_VALUE);
         autoBtn.setOnAction(e -> startAuto());
 
-        analyzeBtn = new Button("📊 ОБРОБКА ТА ГРАФІКИ");
+        analyzeBtn = new Button("📊 ГРАФІКИ");
         analyzeBtn.setStyle("-fx-background-color: #8e24aa; -fx-text-fill: white; -fx-font-weight: bold;");
         analyzeBtn.setMaxWidth(Double.MAX_VALUE);
         analyzeBtn.setOnAction(e -> showAnalysisDialog());
@@ -121,13 +151,16 @@ public class LabController31 extends BaseLabController {
             data.clear();
             idCounter = 1;
             updateStats();
-            liveNLabel.setText("n = 0.0 под.");
-            bLabel.setText("B = 0.000 Тл");
+            liveNLabel.setText("n = 0 под.");
+            bLabel.setText("B = 0.0000 мТл");
         });
 
-        leftPanel.getChildren().addAll(title, labPane, startBtn, autoBtn, analyzeBtn, clearBtn);
+        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, constantsPane, paramsPane, recordBtn, autoBtn, analyzeBtn, clearBtn));
+        scrollLeft.setFitToWidth(true);
+        scrollLeft.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
+        leftPanel.getChildren().add(scrollLeft);
 
-        canvas = new GalvanometerCanvas(600, 440);
+        canvas = new GalvanometerCanvas(600, 300);
 
         Button toggleSidebarBtn = new Button("◀ Приховати панель");
         toggleSidebarBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 5;");
@@ -141,15 +174,15 @@ public class LabController31 extends BaseLabController {
         VBox dash = new VBox(2);
         dash.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8); -fx-text-fill: #00ff00; -fx-padding: 10; -fx-border-color: #00ff00; -fx-border-width: 2; -fx-border-radius: 5;");
         dash.setMaxSize(200, 80);
-        Label dashTitle = new Label("ГАЛЬВАНОМЕТР");
+        Label dashTitle = new Label("ПОКАЗНИКИ");
         dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
-        liveStatusLabel = new Label("Статус: ОЧІКУВАННЯ");
+        liveStatusLabel = new Label("Статус: ГОТОВО");
         liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
-        liveNLabel = new Label("n = 0.0 под.");
+        liveNLabel = new Label("n = 0 под.");
         liveNLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 18));
         liveNLabel.setStyle("-fx-text-fill: #00ff00;");
-        bLabel = new Label("B = 0.000 Тл");
-        bLabel.setStyle("-fx-text-fill: #00ff00;");
+        bLabel = new Label("B = 0.0000 мТл");
+        bLabel.setStyle("-fx-text-fill: #ff9800; -fx-font-weight: bold;");
         dash.getChildren().addAll(dashTitle, liveStatusLabel, liveNLabel, bLabel);
 
         StackPane centerPanel = new StackPane(canvas, topBar, dash);
@@ -161,26 +194,18 @@ public class LabController31 extends BaseLabController {
         data = FXCollections.observableArrayList();
         table.setItems(data);
 
-        TableColumn<Measurement31, Integer> idCol = new TableColumn<>("№");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        TableColumn<Measurement31, Double> l0Col = new TableColumn<>("l0 (мм)");
-        l0Col.setCellValueFactory(new PropertyValueFactory<>("l0"));
-        TableColumn<Measurement31, Double> iCol = new TableColumn<>("I (А)");
-        iCol.setCellValueFactory(new PropertyValueFactory<>("currentI"));
-        TableColumn<Measurement31, Double> xCol = new TableColumn<>("x (см)");
-        xCol.setCellValueFactory(new PropertyValueFactory<>("x"));
-        TableColumn<Measurement31, Double> nCol = new TableColumn<>("n (под.)");
-        nCol.setCellValueFactory(new PropertyValueFactory<>("n"));
-        TableColumn<Measurement31, Double> bCol = new TableColumn<>("B (Тл)");
-        bCol.setCellValueFactory(new PropertyValueFactory<>("b"));
+        String[] cols = {"№", "l0 (мм)", "I (А)", "x (см)", "n (под.)", "B (мТл)"};
+        String[] props = {"id", "l0", "currentI", "x", "n", "b"};
 
-        table.getColumns().addAll(idCol, l0Col, iCol, xCol, nCol, bCol);
+        for (int i = 0; i < cols.length; i++) {
+            TableColumn<Measurement31, Object> col = new TableColumn<>(cols[i]);
+            col.setCellValueFactory(new PropertyValueFactory<>(props[i]));
+            table.getColumns().add(col);
+        }
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setPrefHeight(130);
+        table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
-        finalResultLabel.setText("Для перегляду графіків та аналізу натисніть кнопку «ОБРОБКА ТА ГРАФІКИ».");
-
         VBox bottomPanel = new VBox(5, table, statsBox);
         bottomPanel.setPadding(new Insets(5));
 
@@ -188,79 +213,131 @@ public class LabController31 extends BaseLabController {
         this.setCenter(centerPanel);
         this.setBottom(bottomPanel);
 
-        canvas.setCallbacks(
-                () -> Platform.runLater(() -> liveNLabel.setText(String.format("n = %.1f под.", canvas.getMeasuredN()))),
-                () -> Platform.runLater(this::finishMeasurement)
-        );
+        updateCanvasVisuals();
     }
 
-    private void applyPhysicsSettings() {
+    private double calculateCoeffC() {
         try {
-            double l0 = Double.parseDouble(l0Field.getText());
-            double current = Double.parseDouble(iField.getText());
-            double x = Double.parseDouble(xField.getText());
-            canvas.setParameters(l0, current, x);
-            if (!isAutoRunning) {
-                liveStatusLabel.setText("Статус: ГОТОВО");
-                liveStatusLabel.setStyle("-fx-text-fill: yellow;");
-            }
-        } catch (NumberFormatException ignored) {}
-    }
+            double R = Double.parseDouble(fieldR.getText().replace(',', '.'));
+            double Rg = Double.parseDouble(fieldRg.getText().replace(',', '.'));
+            double beta = Double.parseDouble(fieldBeta.getText().replace(',', '.'));
+            double N = Double.parseDouble(fieldN.getText().replace(',', '.'));
+            double S = Double.parseDouble(fieldS.getText().replace(',', '.'));
 
-    private void setControlsDisable(boolean disable) {
-        startBtn.setDisable(disable);
-        autoBtn.setDisable(disable);
-        analyzeBtn.setDisable(disable);
-        clearBtn.setDisable(disable);
-        l0Field.setDisable(disable);
-        iField.setDisable(disable);
-        xField.setDisable(disable);
-    }
-
-    private void startManual() {
-        try {
-            Double.parseDouble(l0Field.getText());
-            Double.parseDouble(iField.getText());
-            Double.parseDouble(xField.getText());
-            isAutoRunning = false;
-            applyPhysicsSettings();
-            startSimulation();
+            return (beta * 1e-9 * (R + Rg)) / (2 * N * S * 1e-6) * 1000.0;
         } catch (Exception e) {
-            showAlert("Помилка", "Введіть коректні числа в поля.");
+            return 0.0048794;
         }
     }
 
-    private void startSimulation() {
-        setControlsDisable(true);
-        liveStatusLabel.setText("Статус: ІМПУЛЬС");
-        liveStatusLabel.setStyle("-fx-text-fill: red;");
-        liveNLabel.setText("n = 0.0 под.");
-        bLabel.setText("B = 0.000 Тл");
-        canvas.startSimulation();
+    private void updateCanvasVisuals() {
+        if (isAutoRunning) return;
+        try {
+            double l0 = Double.parseDouble(l0Box.getValue());
+            double x = Double.parseDouble(xField.getText().replace(',', '.'));
+            canvas.updatePhysics(l0, x);
+        } catch (Exception ignored) {}
+    }
+
+    private void setControlsDisable(boolean disable) {
+        l0Box.setDisable(disable);
+        iField.setDisable(disable);
+        xField.setDisable(disable);
+        fieldR.setDisable(disable);
+        fieldRg.setDisable(disable);
+        fieldBeta.setDisable(disable);
+        fieldN.setDisable(disable);
+        fieldS.setDisable(disable);
+        recordBtn.setDisable(disable);
+        autoBtn.setDisable(disable);
+        analyzeBtn.setDisable(disable);
+        clearBtn.setDisable(disable);
+    }
+
+    private double calculateTargetN(double l0, double I, double x) {
+        double nMax = (l0 == 30.0) ? 41.0 : 55.0;
+        double decay = 1.0;
+
+        if (l0 == 30.0) {
+            if (x == 0) decay = 1.0;
+            else if (x == 1) decay = 30.0 / 41.0;
+            else if (x == 2) decay = 23.0 / 41.0;
+            else if (x == 3) decay = 18.0 / 41.0;
+            else if (x == 4) decay = 14.0 / 41.0;
+            else if (x == 5) decay = 10.0 / 41.0;
+            else if (x == 6) decay = 7.0 / 41.0;
+            else if (x == 7) decay = 5.0 / 41.0;
+            else decay = Math.exp(-0.25 * x);
+        } else {
+            if (x == 0) decay = 1.0;
+            else if (x == 1) decay = 40.0 / 55.0;
+            else if (x == 2) decay = 30.0 / 55.0;
+            else if (x == 3) decay = 20.0 / 55.0;
+            else if (x == 4) decay = 15.0 / 55.0;
+            else if (x == 5) decay = 11.0 / 55.0;
+            else if (x == 6) decay = 8.0 / 55.0;
+            else if (x == 7) decay = 6.0 / 55.0;
+            else decay = Math.exp(-0.28 * x);
+        }
+
+        return Math.round(nMax * (I / 1.0) * decay);
+    }
+
+    private void triggerMeasurement() {
+        try {
+            double l0 = Double.parseDouble(l0Box.getValue());
+            double currentI = Double.parseDouble(iField.getText().replace(',', '.'));
+            double x = Double.parseDouble(xField.getText().replace(',', '.'));
+
+            setControlsDisable(true);
+            liveStatusLabel.setText("Статус: ІМПУЛЬС...");
+            liveStatusLabel.setStyle("-fx-text-fill: red;");
+
+            double targetN = calculateTargetN(l0, currentI, x);
+            double coeffC = calculateCoeffC();
+
+            canvas.updatePhysics(l0, x);
+            canvas.playPulse(targetN, () -> {
+                double bVal = targetN * coeffC;
+                Measurement31 meas = new Measurement31(
+                        idCounter++, l0, currentI, x, targetN,
+                        Math.round(bVal * 10000.0) / 10000.0
+                );
+                data.add(meas);
+
+                Platform.runLater(() -> {
+                    liveNLabel.setText(String.format(Locale.US, "n = %.0f под.", targetN));
+                    bLabel.setText(String.format(Locale.US, "B = %.4f мТл", bVal));
+                    liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
+                    liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
+                    updateStats();
+
+                    if (isAutoRunning) {
+                        processNextAuto();
+                    } else {
+                        setControlsDisable(false);
+                    }
+                });
+            });
+
+        } catch (Exception e) {
+            showAlert("Помилка", "Перевірте правильність введених даних.");
+            setControlsDisable(false);
+        }
     }
 
     private void startAuto() {
         data.clear();
         idCounter = 1;
-        updateStats();
         autoQueue.clear();
 
-        autoQueue.add(new AutoTestParam(20, 1.5, 0));
-        autoQueue.add(new AutoTestParam(20, 1.5, 1));
-        autoQueue.add(new AutoTestParam(20, 1.5, 2));
-        autoQueue.add(new AutoTestParam(20, 1.5, 3));
-        autoQueue.add(new AutoTestParam(20, 1.5, 4));
+        for (int x = 0; x <= 7; x++) autoQueue.add(new AutoTestParam(20, 1.0, x));
+        for (int x = 0; x <= 7; x++) autoQueue.add(new AutoTestParam(30, 1.0, x));
 
-        autoQueue.add(new AutoTestParam(30, 1.5, 0));
-        autoQueue.add(new AutoTestParam(30, 1.5, 1));
-        autoQueue.add(new AutoTestParam(30, 1.5, 2));
-        autoQueue.add(new AutoTestParam(30, 1.5, 3));
-        autoQueue.add(new AutoTestParam(30, 1.5, 4));
-
-        autoQueue.add(new AutoTestParam(20, 1.2, 0));
-        autoQueue.add(new AutoTestParam(20, 0.9, 0));
-        autoQueue.add(new AutoTestParam(20, 0.6, 0));
-        autoQueue.add(new AutoTestParam(20, 0.3, 0));
+        double[] currents = {0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55};
+        for (double i : currents) {
+            autoQueue.add(new AutoTestParam(20, i, 0));
+        }
 
         isAutoRunning = true;
         processNextAuto();
@@ -269,58 +346,26 @@ public class LabController31 extends BaseLabController {
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
-            liveStatusLabel.setText("СИСТЕМА: ГОТОВО");
-            liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
-            setControlsDisable(false);
+            Platform.runLater(() -> {
+                liveStatusLabel.setText("СИСТЕМА: АВТО ЗАВЕРШЕНО");
+                setControlsDisable(false);
+                updateStats();
+            });
             return;
         }
+
         AutoTestParam param = autoQueue.poll();
-        l0Field.setText(String.valueOf(param.l0));
-        iField.setText(String.valueOf(param.I));
-        xField.setText(String.valueOf(param.x));
-
-        applyPhysicsSettings();
-        startSimulation();
-    }
-
-    private void finishMeasurement() {
-        try {
-            double l0 = Double.parseDouble(l0Field.getText());
-            double current = Double.parseDouble(iField.getText());
-            double x = Double.parseDouble(xField.getText());
-
-            double measuredN = canvas.getMeasuredN();
-
-            liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
-            liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
-
-            double C = 0.0045;
-            double b = measuredN * C;
-
-            bLabel.setText(String.format("B = %.3f Тл", b));
-
-            Measurement31 meas = new Measurement31(
-                    idCounter++, l0, current, x,
-                    Math.round(measuredN * 10.0) / 10.0,
-                    Math.round(b * 1000.0) / 1000.0
-            );
-            data.add(meas);
-            updateStats();
-
-            if (isAutoRunning) {
-                new Thread(() -> {
-                    try { Thread.sleep(700); Platform.runLater(this::processNextAuto); }
-                    catch (InterruptedException ignored) {}
-                }).start();
-            } else {
-                setControlsDisable(false);
-            }
-        } catch (Exception ignored) {}
+        Platform.runLater(() -> {
+            l0Box.getSelectionModel().select(param.l0 == 20.0 ? 0 : 1);
+            iField.setText(String.format(Locale.US, "%.2f", param.I));
+            xField.setText(String.format(Locale.US, "%.0f", param.x));
+            triggerMeasurement();
+        });
     }
 
     private void updateStats() {
         if (data.isEmpty()) {
-            finalResultLabel.setText("Обробка результатів: -");
+            finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");
             return;
         }
 
@@ -331,24 +376,20 @@ public class LabController31 extends BaseLabController {
 
         double maxB = 0;
         for (Measurement31 m : data) {
-            if (m.getB() > maxB) {
-                maxB = m.getB();
-            }
+            if (m.getB() > maxB) maxB = m.getB();
         }
 
         Measurement31 last = data.get(data.size() - 1);
-        double c = 0.0045;
+        double c = calculateCoeffC();
 
-        String conclusion = String.format(
-                "ОБРОБКА РЕЗУЛЬТАТІВ:\n" +
-                        "1. Робоча формула: B = [β(R+R_g) / (2NS)] * n = C * n\n" +
-                        "2. Приклад розрахунку (останній вимір): B = %.4f * %.1f = %.4f Тл.\n" +
-                        "3. Максимальне зафіксоване поле в центрі зазору: B_max = %.4f Тл.\n\n" +
-                        "➡ Натисніть «ОБРОБКА ТА ГРАФІКИ» для побудови залежностей B=f(x) та B=f(I).",
-                c, last.getN(), last.getB(), maxB
-        );
+        StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ ЕКСПЕРИМЕНТУ:\n");
+        sb.append("1. Робоча формула: B = [β(R+Rg) / 2NS] * n = C * n.\n");
+        sb.append(String.format(Locale.US, "2. Динамічна стала: C = %.6f мТл/под.\n", c));
+        sb.append(String.format(Locale.US, "3. Останній вимір: n = %.0f, B = %.4f мТл.\n", last.getN(), last.getB()));
+        sb.append(String.format(Locale.US, "4. Максимальна індукція: B_max = %.4f мТл.\n", maxB));
+        sb.append("Висновок: Індукція зменшується віддаляючись від центру і при розширенні зазору.");
 
-        finalResultLabel.setText(conclusion);
+        finalResultLabel.setText(sb.toString());
     }
 
     private void showAnalysisDialog() {
@@ -358,14 +399,14 @@ public class LabController31 extends BaseLabController {
         }
 
         Stage stage = new Stage();
-        stage.setTitle("Обробка результатів та графіки (Лаб 3-1)");
+        stage.setTitle("Графіки (Лаб 3-1)");
 
         TabPane tabPane = new TabPane();
 
         NumberAxis xAxis1 = new NumberAxis();
         xAxis1.setLabel("Координата x (см)");
         NumberAxis yAxis1 = new NumberAxis();
-        yAxis1.setLabel("Індукція B (Тл)");
+        yAxis1.setLabel("Індукція B (мТл)");
         LineChart<Number, Number> chart1 = new LineChart<>(xAxis1, yAxis1);
         chart1.setTitle("Залежність магнітної індукції від координати: B = f(x)");
 
@@ -377,14 +418,14 @@ public class LabController31 extends BaseLabController {
         NumberAxis xAxis2 = new NumberAxis();
         xAxis2.setLabel("Струм I (А)");
         NumberAxis yAxis2 = new NumberAxis();
-        yAxis2.setLabel("Індукція B (Тл)");
+        yAxis2.setLabel("Індукція B (мТл)");
         LineChart<Number, Number> chart2 = new LineChart<>(xAxis2, yAxis2);
         chart2.setTitle("Залежність магнітної індукції від струму: B = f(I)");
         XYChart.Series<Number, Number> seriesI = new XYChart.Series<>();
         seriesI.setName("l0 = 20 мм, x = 0");
 
         for (Measurement31 m : data) {
-            if (m.getCurrentI() >= 1.4 && m.getCurrentI() <= 1.6) {
+            if (m.getCurrentI() >= 0.99 && m.getCurrentI() <= 1.01) {
                 if (m.getL0() == 20) series20.getData().add(new XYChart.Data<>(m.getX(), m.getB()));
                 if (m.getL0() == 30) series30.getData().add(new XYChart.Data<>(m.getX(), m.getB()));
             }

@@ -24,9 +24,12 @@ public class LabController21 extends BaseLabController {
     private ObservableList<Measurement> data;
     private int idCounter = 1;
 
-    private Slider voltageSlider;
-    private Slider distSlider;
-    private Slider radiusSlider;
+    private TextField voltageField;
+    private TextField distField;
+    private TextField radiusField;
+    private TextField numMeasurementsField;
+    private ComboBox<String> scaleCombo;
+
     private Button startBtn;
     private Button autoBtn;
     private Button clearBtn;
@@ -51,63 +54,53 @@ public class LabController21 extends BaseLabController {
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(320);
-        leftPanel.setMinWidth(320);
+        leftPanel.setPrefWidth(340);
+        leftPanel.setMinWidth(340);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
         Label title = new Label("Система управління (Лаб 2-1)");
-        title.setFont(Font.font("System", FontWeight.BOLD, 16));
+        title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
         TitledPane paramsPane = new TitledPane();
-        paramsPane.setText("Параметри установки");
+        paramsPane.setText("Налаштування Установки");
         paramsPane.setCollapsible(false);
-        VBox paramsBox = new VBox(8);
-        paramsBox.setPadding(new Insets(5));
+        VBox paramsBox = new VBox(12);
+        paramsBox.setPadding(new Insets(10));
 
-        Label voltageLabel = new Label("Напруга між електродами U: 20.0 В");
-        voltageSlider = new Slider(10.0, 30.0, 20.0);
-        voltageSlider.setShowTickMarks(true);
-        voltageSlider.setShowTickLabels(true);
-        voltageSlider.setMajorTickUnit(5.0);
-        voltageSlider.valueProperty().addListener((o, old, newVal) -> {
-            voltageLabel.setText(String.format("Напруга між електродами U: %.1f В", newVal.doubleValue()));
-            updateDisplayFromSlider();
-        });
+        voltageField = new TextField("20.0");
+        distField = new TextField("20.0");
+        radiusField = new TextField("1.0");
+        numMeasurementsField = new TextField("4");
 
-        Label distLabel = new Label("Відстань між електродами d: 20.0 см");
-        distSlider = new Slider(10.0, 30.0, 20.0);
-        distSlider.setShowTickMarks(true);
-        distSlider.setShowTickLabels(true);
-        distSlider.setMajorTickUnit(5.0);
-        distSlider.valueProperty().addListener((o, old, newVal) -> {
-            distLabel.setText(String.format("Відстань між електродами d: %.1f см", newVal.doubleValue()));
-            updateDisplayFromSlider();
-        });
+        scaleCombo = new ComboBox<>(FXCollections.observableArrayList("1:1 (15 пікс/см)", "1:2 (7.5 пікс/см)", "2:1 (30 пікс/см)"));
+        scaleCombo.getSelectionModel().selectFirst();
 
-        Label radiusLabel = new Label("Радіус електрода r: 1.0 см");
-        radiusSlider = new Slider(0.5, 2.5, 1.0);
-        radiusSlider.setShowTickMarks(true);
-        radiusSlider.setShowTickLabels(true);
-        radiusSlider.setMajorTickUnit(0.5);
-        radiusSlider.valueProperty().addListener((o, old, newVal) -> {
-            radiusLabel.setText(String.format("Радіус електрода r: %.1f см", newVal.doubleValue()));
-            updateDisplayFromSlider();
-        });
+        voltageField.textProperty().addListener((o, old, newVal) -> updateDisplayFromInput());
+        distField.textProperty().addListener((o, old, newVal) -> updateDisplayFromInput());
+        radiusField.textProperty().addListener((o, old, newVal) -> updateDisplayFromInput());
+        numMeasurementsField.textProperty().addListener((o, old, newVal) -> updateDisplayFromInput());
+        scaleCombo.setOnAction(e -> updateDisplayFromInput());
 
-        paramsBox.getChildren().addAll(voltageLabel, voltageSlider, distLabel, distSlider, radiusLabel, radiusSlider);
+        paramsBox.getChildren().addAll(
+                createInputGroup("Напруга джерела U (В):", voltageField),
+                createInputGroup("Відстань між центрами d (см):", distField),
+                createInputGroup("Радіус електродів r (см):", radiusField),
+                createInputGroup("Кількість замірів n:", numMeasurementsField),
+                createInputGroup("Масштаб відображення:", scaleCombo)
+        );
         paramsPane.setContent(paramsBox);
 
-        startBtn = new Button("▶ ПОБУДУВАТИ ЛІНІЇ ПОЛЯ");
+        startBtn = new Button("▶ ПОБУДУВАТИ КАРТУ ПОЛЯ");
         startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
-        startBtn.setOnAction(e -> startMeasurement(voltageSlider.getValue()));
+        startBtn.setOnAction(e -> startManual());
 
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ ЛАБИ");
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ (3 напруги)");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
         autoBtn.setMaxWidth(Double.MAX_VALUE);
         autoBtn.setOnAction(e -> startAuto());
 
-        clearBtn = new Button("🗑 ОЧИСТИТИ ТАБЛИЦЮ");
+        clearBtn = new Button("🗑 ОЧИСТИТИ ДАНІ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold;");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
         clearBtn.setOnAction(e -> resetAndRecalculate());
@@ -136,8 +129,9 @@ public class LabController21 extends BaseLabController {
         dashTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
         liveStatusLabel = new Label("Статус: ГОТОВО");
         liveStatusLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 11px;");
-        liveVoltageLabel = new Label("U = 0.0 В");
-        liveVoltageLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-weight: bold; -fx-font-size: 14px;");
+        liveVoltageLabel = new Label("U = 20.0 В");
+        liveVoltageLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
+        liveVoltageLabel.setStyle("-fx-text-fill: #00ff00;");
 
         dash.getChildren().addAll(dashTitle, liveStatusLabel, liveVoltageLabel);
 
@@ -162,7 +156,6 @@ public class LabController21 extends BaseLabController {
         table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
-
         VBox bottomPanel = new VBox(5, table, statsBox);
         bottomPanel.setPadding(new Insets(5));
 
@@ -170,8 +163,24 @@ public class LabController21 extends BaseLabController {
         this.setCenter(centerPanel);
         this.setBottom(bottomPanel);
 
-        updateDisplayFromSlider();
+        updateDisplayFromInput();
         updateStats();
+
+        canvas.setOnFinishCallback(this::onCanvasFinished);
+    }
+
+    private double parseVoltage() {
+        try { return Double.parseDouble(voltageField.getText()); }
+        catch (Exception e) { return 20.0; }
+    }
+
+    private int parseMeasurements() {
+        try {
+            int n = Integer.parseInt(numMeasurementsField.getText());
+            return n > 0 ? n : 4;
+        } catch (Exception e) {
+            return 4;
+        }
     }
 
     private void resetAndRecalculate() {
@@ -179,28 +188,46 @@ public class LabController21 extends BaseLabController {
         idCounter = 1;
         canvas.resetSystem();
         updateStats();
-        updateDisplayFromSlider();
+        updateDisplayFromInput();
     }
 
-    private void updateDisplayFromSlider() {
+    private void updateDisplayFromInput() {
         if (isAutoRunning) return;
-        double u = voltageSlider.getValue();
-        double d = distSlider.getValue();
-        double r = radiusSlider.getValue();
-        canvas.updatePhysicsParameters(u, d, r);
-        liveVoltageLabel.setText(String.format("U = %.1f В", u));
+        try {
+            double u = Double.parseDouble(voltageField.getText());
+            double d = Double.parseDouble(distField.getText());
+            double r = Double.parseDouble(radiusField.getText());
+            int n = parseMeasurements();
+            canvas.updatePhysicsParameters(u, d, r, n);
+            liveVoltageLabel.setText(String.format("U = %.1f В", u));
+        } catch (NumberFormatException ignored) {}
     }
 
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
-        voltageSlider.setDisable(disable);
-        distSlider.setDisable(disable);
-        radiusSlider.setDisable(disable);
+        voltageField.setDisable(disable);
+        distField.setDisable(disable);
+        radiusField.setDisable(disable);
+        numMeasurementsField.setDisable(disable);
+        scaleCombo.setDisable(disable);
+    }
+
+    private void startManual() {
+        if (isAutoRunning) return;
+        startMeasurement(parseVoltage());
     }
 
     private void startAuto() {
+        try {
+            Double.parseDouble(distField.getText());
+            Double.parseDouble(radiusField.getText());
+        } catch (NumberFormatException e) {
+            showAlert("Помилка", "Введіть коректні значення для відстані та радіуса.");
+            return;
+        }
+
         resetAndRecalculate();
         autoQueue.add(10.0);
         autoQueue.add(20.0);
@@ -220,36 +247,56 @@ public class LabController21 extends BaseLabController {
             return;
         }
         double u = autoQueue.poll();
-        voltageSlider.setValue(u);
+        voltageField.setText(String.valueOf(u));
+        updateDisplayFromInput();
         startMeasurement(u);
     }
 
+    private double recordedU, recordedD, recordedR;
+    private int recordedN;
+
     private void startMeasurement(double u) {
-        setControlsDisable(true);
-        liveStatusLabel.setText("Статус: СКАНУВАННЯ...");
-        liveStatusLabel.setStyle("-fx-text-fill: red;");
+        try {
+            double d = Double.parseDouble(distField.getText());
+            double r = Double.parseDouble(radiusField.getText());
+            int n = parseMeasurements();
 
-        double d = distSlider.getValue() / 100.0;
-        double r = radiusSlider.getValue() / 100.0;
+            if (r >= d/2) {
+                showAlert("Помилка фізики", "Радіус електрода не може бути більшим за половину відстані між ними.");
+                return;
+            }
 
-        canvas.startSimulation();
+            setControlsDisable(true);
+            liveStatusLabel.setText("Статус: МОДЕЛЮВАННЯ ПОЛЯ...");
+            liveStatusLabel.setStyle("-fx-text-fill: red;");
 
-        new Thread(() -> {
-            try { Thread.sleep(2500); } catch (Exception ignored) {}
-            Platform.runLater(() -> recordMeasurementData(u, d, r));
-        }).start();
+            recordedU = u;
+            recordedD = d;
+            recordedR = r;
+            recordedN = n;
+
+            canvas.startSimulation();
+
+        } catch (NumberFormatException e) {
+            showAlert("Помилка", "Перевірте правильність введених даних.");
+        }
     }
 
-    private void recordMeasurementData(double u0, double d, double r) {
+    private void onCanvasFinished() {
+        Platform.runLater(() -> {
+            recordMeasurementData(recordedU, recordedD / 100.0, recordedR / 100.0, recordedN);
+        });
+    }
+
+    private void recordMeasurementData(double u0, double d, double r, int n) {
         double currentX = 0;
         double currentPhi = 0;
-        double stepPhi = u0 / 5.0;
+        double stepPhi = (u0 / 2.0) / n;
 
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= n; i++) {
             double phi2 = currentPhi + stepPhi;
-            double targetV = phi2;
 
-            double k = Math.exp((2 * targetV * Math.log(d / r)) / u0);
+            double k = Math.exp((2 * phi2 * Math.log(d / r)) / u0);
             double x2 = (d / 2.0) * (k - 1) / (k + 1);
 
             double dX = x2 - currentX;
@@ -275,7 +322,7 @@ public class LabController21 extends BaseLabController {
 
         if (isAutoRunning) {
             new Thread(() -> {
-                try { Thread.sleep(1000); } catch (Exception ignored) {}
+                try { Thread.sleep(1200); } catch (Exception ignored) {}
                 Platform.runLater(this::processNextAuto);
             }).start();
         } else {
@@ -287,25 +334,27 @@ public class LabController21 extends BaseLabController {
 
     private void updateStats() {
         if (data.isEmpty()) {
-            finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");
+            finalResultLabel.setText("Обробка результатів: Очікування моделювання...");
             return;
         }
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
             return;
         }
-        double d = distSlider.getValue() / 100.0;
-        double r = radiusSlider.getValue() / 100.0;
+        try {
+            double d = Double.parseDouble(distField.getText()) / 100.0;
+            double r = Double.parseDouble(radiusField.getText()) / 100.0;
 
-        double eps0 = 8.854e-12;
-        double cLinear = (Math.PI * eps0) / Math.log(d / r);
+            double eps0 = 8.854e-12;
+            double cLinear = (Math.PI * eps0) / Math.log(d / r);
 
-        StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ ДОСЛІДЖЕННЯ:\n");
-        sb.append("1. На карті побудовано еквіпотенціальні поверхні та лінії напруженості електричного поля.\n");
-        sb.append("2. Розраховано напруженість електричного поля E = Δφ/Δx на кожному з відрізків (див. таблицю).\n");
-        sb.append(String.format("3. Погонна ємність модельованої системи (ε=1): Cl = %.2e Ф/м (%.2f пФ/м).\n", cLinear, cLinear * 1e12));
-        sb.append("4. Висновок: Електричне поле між двома електродами неоднорідне. Напруженість поля E зростає при наближенні до електродів.");
+            StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ ДОСЛІДЖЕННЯ:\n");
+            sb.append("1. Побудовано еквіпотенціальні поверхні та ортогональні до них лінії напруженості електричного поля.\n");
+            sb.append("2. Розраховано напруженість поля E = Δφ/Δx на кожному з відрізків між еквіпотенціалями (див. табл.).\n");
+            sb.append(String.format("3. Погонна ємність модельованої двопровідної лінії (при ε=1): C_l = %.2e Ф/м (або %.2f пФ/м).\n", cLinear, cLinear * 1e12));
+            sb.append("4. ВИСНОВОК: Поле між циліндричними електродами суттєво неоднорідне. Напруженість E стрімко зростає при наближенні до електродів (Δx зменшується).");
 
-        finalResultLabel.setText(sb.toString());
+            finalResultLabel.setText(sb.toString());
+        } catch (Exception ignored) {}
     }
 }

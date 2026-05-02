@@ -3,6 +3,7 @@ package dev.ua._klaidi4_.physics.level6.lab6_5.controller;
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
 import dev.ua._klaidi4_.physics.level6.lab6_5.model.Measurement;
 import dev.ua._klaidi4_.physics.level6.lab6_5.view.MagnetronCanvas;
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,6 +18,11 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Queue;
+import java.util.function.Consumer;
+
 public class LabController65 extends BaseLabController {
 
     private MagnetronCanvas canvas;
@@ -28,14 +34,17 @@ public class LabController65 extends BaseLabController {
     private TextField fieldD;
     private TextField fieldN;
     private TextField fieldRa;
+
+    private TextField uaField;
+    private TextField icField;
+
     private final double MU_0 = 4 * Math.PI * 1e-7;
+    private final double E_M_TRUE = 1.75882e11;
+
     private double currentUa = 6.3;
     private double currentIc = 0.0;
     private double currentIa = 0.0;
-    private double I_KR_TRUE = 0.285;
 
-    private Slider icSlider;
-    private Slider uaSlider;
     private LineChart<Number, Number> chart;
     private XYChart.Series<Number, Number> dataSeries;
     private XYChart.Series<Number, Number> topTangentSeries;
@@ -49,8 +58,11 @@ public class LabController65 extends BaseLabController {
 
     private Button addPointBtn;
     private Button autoRunBtn;
-    private Button analyzeBtn;
     private Button clearBtn;
+
+    private boolean isAutoRunning = false;
+    private AnimationTimer autoTimer;
+    private Queue<Double> autoQueue = new LinkedList<>();
 
     public LabController65() {
         initUI();
@@ -58,13 +70,16 @@ public class LabController65 extends BaseLabController {
 
     @Override
     public void shutdown() {
+        if (canvas != null) canvas.stopAnimation();
+        if (autoTimer != null) autoTimer.stop();
+        autoQueue.clear();
     }
 
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(310);
-        leftPanel.setMinWidth(310);
+        leftPanel.setPrefWidth(320);
+        leftPanel.setMinWidth(320);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
         Label title = new Label("Система управління (Лаб 6-5)");
@@ -76,10 +91,10 @@ public class LabController65 extends BaseLabController {
         VBox setupParams = new VBox(12);
         setupParams.setPadding(new Insets(5));
 
-        fieldL = new TextField("0.15");
-        fieldD = new TextField("0.05");
-        fieldN = new TextField("1500");
-        fieldRa = new TextField("0.005");
+        fieldL = createNumberField(0.25, val -> updatePhysics());
+        fieldD = createNumberField(0.05, val -> updatePhysics());
+        fieldN = createNumberField(1000, val -> updatePhysics());
+        fieldRa = createNumberField(0.0094, val -> updatePhysics());
 
         setupParams.getChildren().addAll(
                 createInputGroup("Довжина соленоїда L (м):", fieldL),
@@ -95,27 +110,35 @@ public class LabController65 extends BaseLabController {
         VBox controlParams = new VBox(12);
         controlParams.setPadding(new Insets(5));
 
-        Label uaLabel = new Label("Анодна напруга Ua: 6.3 В");
-        uaSlider = new Slider(4.0, 10.0, 6.3);
-        uaSlider.setShowTickMarks(true);
-        uaSlider.valueProperty().addListener((o, old, val) -> {
-            currentUa = val.doubleValue();
-            uaLabel.setText(String.format("Анодна напруга Ua: %.1f В", currentUa));
-            I_KR_TRUE = 0.285 * Math.sqrt(currentUa / 6.3);
+        uaField = createNumberField(currentUa, val -> {
+            currentUa = val;
             updatePhysics();
         });
 
-        Label icLabel = new Label("Струм соленоїда Ic: 0.00 А");
-        icSlider = new Slider(0.0, 1.2, 0.0);
-        icSlider.setShowTickMarks(true);
-        icSlider.valueProperty().addListener((o, old, val) -> {
-            currentIc = val.doubleValue();
-            icLabel.setText(String.format("Струм соленоїда Ic: %.2f А", currentIc));
+        icField = createNumberField(currentIc, val -> {
+            currentIc = val;
             updatePhysics();
         });
 
-        controlParams.getChildren().addAll(uaLabel, uaSlider, icLabel, icSlider);
+        controlParams.getChildren().addAll(
+                createInputGroup("Анодна напруга Ua (В):", uaField),
+                createInputGroup("Струм соленоїда Ic (А):", icField)
+        );
         controlPane.setContent(controlParams);
+
+        // --- ІНІЦІАЛІЗАЦІЯ ТАБЛИЦІ ---
+        table = new TableView<>();
+        data = FXCollections.observableArrayList();
+        table.setItems(data);
+
+        TableColumn<Measurement, Double> colIc = new TableColumn<>("Ic (А)");
+        colIc.setCellValueFactory(new PropertyValueFactory<>("ic"));
+        TableColumn<Measurement, Double> colIa = new TableColumn<>("Ia (мА)");
+        colIa.setCellValueFactory(new PropertyValueFactory<>("ia"));
+
+        table.getColumns().addAll(colIc, colIa);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setPrefHeight(150); // Висота таблиці в лівій панелі
 
         addPointBtn = new Button("✍ ЗАПИСАТИ ТОЧКУ");
         addPointBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -125,19 +148,17 @@ public class LabController65 extends BaseLabController {
         autoRunBtn = new Button("⚙ АВТО-ВИМІРЮВАННЯ");
         autoRunBtn.setStyle("-fx-background-color: #0288d1; -fx-text-fill: white; -fx-font-weight: bold;");
         autoRunBtn.setMaxWidth(Double.MAX_VALUE);
-        autoRunBtn.setOnAction(e -> runAuto());
-
-        analyzeBtn = new Button("📐 АНАЛІЗ (МЕТОД ДОТИЧНИХ)");
-        analyzeBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
-        analyzeBtn.setMaxWidth(Double.MAX_VALUE);
-        analyzeBtn.setOnAction(e -> performAnalysis());
+        autoRunBtn.setOnAction(e -> startAutoMode());
 
         clearBtn = new Button("🗑 ОЧИСТИТИ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold;");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
         clearBtn.setOnAction(e -> clearAll());
 
-        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, setupPane, controlPane, addPointBtn, autoRunBtn, analyzeBtn, clearBtn));
+        // Додаємо таблицю над кнопками
+        VBox leftControls = new VBox(10, title, setupPane, controlPane, table, addPointBtn, autoRunBtn, clearBtn);
+
+        ScrollPane scrollLeft = new ScrollPane(leftControls);
         scrollLeft.setFitToWidth(true);
         scrollLeft.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         leftPanel.getChildren().add(scrollLeft);
@@ -174,12 +195,15 @@ public class LabController65 extends BaseLabController {
         StackPane.setAlignment(dash, Pos.TOP_RIGHT);
         StackPane.setMargin(dash, new Insets(10));
 
-        NumberAxis xAxis = new NumberAxis("Струм соленоїда Ic (А)", 0, 1.2, 0.1);
-        NumberAxis yAxis = new NumberAxis("Анодний струм Ia (мА)", 0, 8, 1);
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Струм соленоїда Ic (А)");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Анодний струм Ia (мА)");
+
         chart = new LineChart<>(xAxis, yAxis);
         chart.setAnimated(false);
         chart.setCreateSymbols(true);
-        chart.setPrefHeight(250);
+        chart.setPrefHeight(300); // Збільшено висоту графіка
 
         dataSeries = new XYChart.Series<>();
         dataSeries.setName("Залежність Ia = f(Ic)");
@@ -192,87 +216,133 @@ public class LabController65 extends BaseLabController {
 
         chart.getData().addAll(dataSeries, topTangentSeries, dropTangentSeries, vLineSeries);
 
-        VBox centerPanel = new VBox(canvasStack, chart);
-
-        table = new TableView<>();
-        data = FXCollections.observableArrayList();
-        table.setItems(data);
-
-        TableColumn<Measurement, Double> colIc = new TableColumn<>("Ic (А)");
-        colIc.setCellValueFactory(new PropertyValueFactory<>("ic"));
-        TableColumn<Measurement, Double> colIa = new TableColumn<>("Ia (мА)");
-        colIa.setCellValueFactory(new PropertyValueFactory<>("ia"));
-
-        table.getColumns().addAll(colIc, colIa);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setPrefHeight(120);
-        table.setPrefWidth(200);
+        VBox centerPanel = new VBox(10, canvasStack, chart);
+        VBox.setVgrow(chart, Priority.ALWAYS); // Графік займає весь вільний простір
 
         VBox statsBox = createStatsBox();
-        HBox bottomHBox = new HBox(10, table, statsBox);
-        HBox.setHgrow(statsBox, Priority.ALWAYS);
-        bottomHBox.setPadding(new Insets(5));
+        statsBox.setPadding(new Insets(5));
 
         this.setLeft(leftPanel);
         this.setCenter(centerPanel);
-        this.setBottom(bottomHBox);
+        this.setBottom(statsBox); // Таблиці тут більше немає, тільки статистика
 
         updatePhysics();
     }
 
-    private void updatePhysics() {
-        double iaMax = 2.0 + (currentUa * 0.4);
-        currentIa = iaMax / (1 + Math.exp(50 * (currentIc - I_KR_TRUE)));
+    private TextField createNumberField(double initialValue, Consumer<Double> onChange) {
+        TextField field = new TextField(String.valueOf(initialValue));
+        field.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*(\\.\\d*)?")) {
+                field.setText(newValue.replaceAll("[^\\d.]", ""));
+            } else if (!newValue.isEmpty() && !newValue.equals(".")) {
+                try {
+                    double val = Double.parseDouble(newValue);
+                    onChange.accept(val);
+                } catch (NumberFormatException ignored) {}
+            }
+        });
+        return field;
+    }
 
-        liveUaLabel.setText(String.format("Ua = %.2f В", currentUa));
-        liveIcLabel.setText(String.format("Ic = %.2f А", currentIc));
-        liveIaLabel.setText(String.format("Ia = %.2f мА", currentIa));
+    private double getTrueIkr() {
+        try {
+            double L = Double.parseDouble(fieldL.getText());
+            double D = Double.parseDouble(fieldD.getText());
+            double N = Double.parseDouble(fieldN.getText());
+            double Ra = Double.parseDouble(fieldRa.getText());
+
+            double B_kr = Math.sqrt((8 * currentUa) / (E_M_TRUE * Ra * Ra));
+            return B_kr * Math.sqrt(L * L + D * D) / (MU_0 * N);
+        } catch (Exception e) {
+            return 0.5;
+        }
+    }
+
+    private void updatePhysics() {
+        double trueIkr = getTrueIkr();
+        double iaMax = 2.0 + (currentUa * 0.4);
+
+        currentIa = iaMax / (1 + Math.exp(50 * (currentIc - trueIkr)));
+
+        liveUaLabel.setText(String.format(Locale.US, "Ua = %.2f В", currentUa));
+        liveIcLabel.setText(String.format(Locale.US, "Ic = %.2f А", currentIc));
+        liveIaLabel.setText(String.format(Locale.US, "Ia = %.2f мА", currentIa));
 
         if (canvas != null) {
-            canvas.updatePhysicsParameters(currentIc, currentUa);
+            double ratio = (trueIkr > 0) ? (currentIc / trueIkr) : 0;
+            canvas.updatePhysicsParameters(ratio, currentUa, currentIc);
         }
     }
 
     private void recordPoint(double ic) {
-        double iaMax = 2.0 + (currentUa * 0.4);
-        double ia = iaMax / (1 + Math.exp(50 * (ic - I_KR_TRUE)));
-        ia += (Math.random() - 0.5) * 0.15;
-        if (ia < 0.05) ia = 0.05;
+        for (Measurement m : data) {
+            if (Math.abs(m.getIc() - ic) < 0.01) return;
+        }
 
-        Measurement m = new Measurement(idCounter++, Math.round(ic * 100) / 100.0, Math.round(ia * 100) / 100.0);
+        double trueIkr = getTrueIkr();
+        double iaMax = 2.0 + (currentUa * 0.4);
+        double ia = iaMax / (1 + Math.exp(50 * (ic - trueIkr)));
+
+        ia += (Math.random() - 0.5) * (iaMax * 0.05);
+        if (ia < 0.02) ia = 0.02;
+
+        Measurement m = new Measurement(idCounter++, Math.round(ic * 100) / 100.0, Math.round(ia * 1000) / 1000.0);
         data.add(m);
         dataSeries.getData().add(new XYChart.Data<>(m.getIc(), m.getIa()));
+
+        // Автоматично прокручуємо таблицю вниз при додаванні нових даних
+        table.scrollTo(data.size() - 1);
+
+        performAnalysis();
     }
 
-    private void runAuto() {
+    private void startAutoMode() {
         clearAll();
+        isAutoRunning = true;
         liveStatusLabel.setText("Статус: АВТОВИМІРЮВАННЯ");
         liveStatusLabel.setStyle("-fx-text-fill: red;");
         setControlsDisable(true);
 
-        new Thread(() -> {
-            for (double ic = 0.0; ic <= 1.0; ic += 0.05) {
-                final double loopIc = ic;
-                Platform.runLater(() -> {
-                    icSlider.setValue(loopIc);
-                    recordPoint(loopIc);
-                });
-                try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+        double targetMaxIc = getTrueIkr() * 1.6;
+        double step = targetMaxIc / 20.0;
+
+        autoQueue.clear();
+        for (double ic = 0.0; ic <= targetMaxIc + step; ic += step) {
+            autoQueue.add(ic);
+        }
+
+        autoTimer = new AnimationTimer() {
+            private long lastTime = 0;
+
+            @Override
+            public void handle(long now) {
+                if (lastTime == 0) { lastTime = now; return; }
+                if ((now - lastTime) / 1_000_000_000.0 < 0.2) return;
+                lastTime = now;
+
+                if (autoQueue.isEmpty()) {
+                    this.stop();
+                    isAutoRunning = false;
+                    liveStatusLabel.setText("Статус: ГОТОВО");
+                    liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
+                    setControlsDisable(false);
+                    performAnalysis();
+                    return;
+                }
+
+                double nextIc = autoQueue.poll();
+                icField.setText(String.format(Locale.US, "%.3f", nextIc));
+                recordPoint(nextIc);
             }
-            Platform.runLater(() -> {
-                liveStatusLabel.setText("Статус: ГОТОВО");
-                liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
-                setControlsDisable(false);
-            });
-        }).start();
+        };
+        autoTimer.start();
     }
 
     private void setControlsDisable(boolean disable) {
-        icSlider.setDisable(disable);
-        uaSlider.setDisable(disable);
+        icField.setDisable(disable);
+        uaField.setDisable(disable);
         addPointBtn.setDisable(disable);
         autoRunBtn.setDisable(disable);
-        analyzeBtn.setDisable(disable);
         clearBtn.setDisable(disable);
         fieldL.setDisable(disable);
         fieldD.setDisable(disable);
@@ -281,14 +351,13 @@ public class LabController65 extends BaseLabController {
     }
 
     private void performAnalysis() {
+        if (isAutoRunning || data.size() < 6) return;
+
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
             return;
         }
-        if (data.size() < 5) {
-            finalResultLabel.setText("Помилка: Недостатньо даних для аналізу. Зніміть ВАХ.");
-            return;
-        }
+
         try {
             double L_val = Double.parseDouble(fieldL.getText());
             double D_val = Double.parseDouble(fieldD.getText());
@@ -298,7 +367,7 @@ public class LabController65 extends BaseLabController {
             double yMax = data.stream().limit(3).mapToDouble(Measurement::getIa).average().orElse(0);
             topTangentSeries.getData().clear();
             topTangentSeries.getData().add(new XYChart.Data<>(0.0, yMax));
-            topTangentSeries.getData().add(new XYChart.Data<>(1.0, yMax));
+            topTangentSeries.getData().add(new XYChart.Data<>(getTrueIkr() * 2, yMax));
 
             int bestIdx = 0;
             double minSlope = 0;
@@ -314,29 +383,33 @@ public class LabController65 extends BaseLabController {
 
             double x0 = data.get(bestIdx).getIc();
             double y0 = data.get(bestIdx).getIa();
+
             dropTangentSeries.getData().clear();
-            dropTangentSeries.getData().add(new XYChart.Data<>(x0 - 0.3, y0 + minSlope * (-0.3)));
-            dropTangentSeries.getData().add(new XYChart.Data<>(x0 + 0.3, y0 + minSlope * (0.3)));
+            double dropStartX = x0 - (yMax * 0.4) / Math.abs(minSlope);
+            double dropEndX = x0 + (yMax * 0.6) / Math.abs(minSlope);
+            dropTangentSeries.getData().add(new XYChart.Data<>(dropStartX, y0 + minSlope * (dropStartX - x0)));
+            dropTangentSeries.getData().add(new XYChart.Data<>(dropEndX, y0 + minSlope * (dropEndX - x0)));
 
-            double i_kr = x0 + (yMax - y0) / minSlope;
+            double i_kr_exp = x0 + (yMax - y0) / minSlope;
             vLineSeries.getData().clear();
-            vLineSeries.getData().add(new XYChart.Data<>(i_kr, yMax));
-            vLineSeries.getData().add(new XYChart.Data<>(i_kr, 0.0));
+            vLineSeries.getData().add(new XYChart.Data<>(i_kr_exp, yMax));
+            vLineSeries.getData().add(new XYChart.Data<>(i_kr_exp, 0.0));
 
-            double B_kr = (MU_0 * N_val * i_kr) / Math.sqrt(L_val * L_val + D_val * D_val);
+            double B_kr = (MU_0 * N_val * i_kr_exp) / Math.sqrt(L_val * L_val + D_val * D_val);
             double em = (8 * currentUa) / (B_kr * B_kr * Ra_val * Ra_val);
 
-            double emTrue = 1.75882e11;
-            double error = Math.abs(em - emTrue) / emTrue * 100.0;
+            double error = Math.abs(em - E_M_TRUE) / E_M_TRUE * 100.0;
 
-            StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ ЕКСПЕРИМЕНТУ:\n");
-            sb.append(String.format("1. З графіка визначено критичний струм соленоїда: Iкр = %.3f А.\n", i_kr));
-            sb.append(String.format("2. Розраховано індукцію магнітного поля: Bкр = %.4f Тл.\n", B_kr));
-            sb.append(String.format("3. Обчислено питомий заряд електрона: e/m = %.2e Кл/кг.\n", em));
-            sb.append(String.format("4. Відносна похибка вимірювань: ε = %.1f %%.\n", error));
-            sb.append("5. Висновок: Побудовано скидну характеристику магнетрона Ia=f(Ic). Значення e/m збігається з табличним.");
+            String conclusion = String.format(Locale.US,
+                    "АВТОМАТИЧНА ОБРОБКА РЕЗУЛЬТАТІВ:\n" +
+                            "1. Метод дотичних визначає критичний струм: Iкр = %.3f А.\n" +
+                            "2. Індукція магнітного поля соленоїда: Bкр = %.4e Тл.\n" +
+                            "3. Обчислено питомий заряд електрона: e/m = %.2e Кл/кг.\n" +
+                            "4. Відносна похибка (від табличного 1.76e11): ε = %.1f %%.\n" +
+                            "ВИСНОВОК: Побудовано скидну характеристику. Результати підтверджують теорію руху в схрещених полях.",
+                    i_kr_exp, B_kr, em, error);
 
-            finalResultLabel.setText(sb.toString());
+            finalResultLabel.setText(conclusion);
         } catch (Exception ignored) {}
     }
 
@@ -348,5 +421,6 @@ public class LabController65 extends BaseLabController {
         vLineSeries.getData().clear();
         idCounter = 1;
         finalResultLabel.setText("Обробка результатів: Дані очищено.");
+        icField.setText("0.0");
     }
 }

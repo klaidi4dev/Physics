@@ -4,6 +4,7 @@ import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
 import dev.ua._klaidi4_.physics.level3.lab3_4.model.Measurement;
 import dev.ua._klaidi4_.physics.level3.lab3_4.view.SolenoidCanvas;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -15,6 +16,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 
 public class LabController34 extends BaseLabController {
@@ -27,9 +29,7 @@ public class LabController34 extends BaseLabController {
     private TextField turnsField;
     private TextField lengthField;
     private TextField radiusField;
-    private Slider posSlider;
-    private Label posValueLabel;
-    private Button calibrateBtn;
+    private TextField xField;
     private Button measureBtn;
     private Button autoBtn;
     private Button clearBtn;
@@ -75,9 +75,9 @@ public class LabController34 extends BaseLabController {
         configBox.setPadding(new Insets(5));
 
         currentField = new TextField("1.5");
-        turnsField = new TextField("1200");
-        lengthField = new TextField("0.40");
-        radiusField = new TextField("0.05");
+        turnsField = new TextField("5130");
+        lengthField = new TextField("0.57");
+        radiusField = new TextField("0.026");
 
         configBox.getChildren().addAll(
                 createInputGroup("Струм соленоїда I (А):", currentField),
@@ -92,34 +92,10 @@ public class LabController34 extends BaseLabController {
         scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         configPane.setContent(scrollParams);
 
-        posSlider = new Slider(0.0, 20.0, 0.0);
-        posSlider.setShowTickMarks(true);
-        posSlider.setShowTickLabels(true);
-        posSlider.setMajorTickUnit(5.0);
-        posValueLabel = new Label("x = 0.0 см");
-
-        posSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            posValueLabel.setText(String.format("x = %.1f см", newVal.doubleValue()));
-            applyPhysicsSettings();
-        });
-
-        lengthField.textProperty().addListener((o, ov, nv) -> {
-            applyPhysicsSettings();
-            try {
-                double l = Double.parseDouble(nv) * 100.0;
-                posSlider.setMax(l / 2.0 + 2.0);
-            } catch (NumberFormatException ignored) {}
-        });
-
+        xField = new TextField("0.0");
+        xField.textProperty().addListener((obs, oldVal, newVal) -> applyPhysicsSettings());
+        lengthField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         radiusField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
-
-        calibrateBtn = new Button("🎯 КАЛІБРУВАТИ C' (в центрі)");
-        calibrateBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold;");
-        calibrateBtn.setMaxWidth(Double.MAX_VALUE);
-        calibrateBtn.setOnAction(e -> {
-            posSlider.setValue(0);
-            runMeasurement(0.0, true);
-        });
 
         measureBtn = new Button("⚡ ВИМІРЯТИ H(x)");
         measureBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -143,7 +119,14 @@ public class LabController34 extends BaseLabController {
             liveTimeLabel.setText("t = 0.00 с");
         });
 
-        leftPanel.getChildren().addAll(title, configPane, new Label("Координата вимірювальної котушки:"), posValueLabel, posSlider, calibrateBtn, measureBtn, autoBtn, clearBtn);
+        leftPanel.getChildren().addAll(
+                title,
+                configPane,
+                createInputGroup("Координата котушки x (см):", xField),
+                measureBtn,
+                autoBtn,
+                clearBtn
+        );
 
         canvas = new SolenoidCanvas(600, 440);
 
@@ -166,7 +149,7 @@ public class LabController34 extends BaseLabController {
         liveTimeLabel = new Label("t = 0.00 с");
         liveTimeLabel.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
         liveTimeLabel.setStyle("-fx-text-fill: #00ff00;");
-        cPrimeLabel = new Label("C' = НЕ ВИЗНАЧЕНО");
+        cPrimeLabel = new Label("C' = АВТО");
         cPrimeLabel.setStyle("-fx-text-fill: #3498db; -fx-font-weight: bold;");
         dash.getChildren().addAll(dashTitle, liveStatusLabel, liveTimeLabel, cPrimeLabel);
 
@@ -210,17 +193,16 @@ public class LabController34 extends BaseLabController {
         try {
             double l = Double.parseDouble(lengthField.getText());
             double r = Double.parseDouble(radiusField.getText());
-            double x = posSlider.getValue() / 100.0;
+            double x = Double.parseDouble(xField.getText().replace(',', '.')) / 100.0;
             canvas.setSetupParameters(l, r, x);
         } catch (NumberFormatException ignored) {}
     }
 
     private void setControlsDisable(boolean disable) {
-        calibrateBtn.setDisable(disable);
         measureBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
-        posSlider.setDisable(disable);
+        xField.setDisable(disable);
         currentField.setDisable(disable);
         turnsField.setDisable(disable);
         lengthField.setDisable(disable);
@@ -229,47 +211,34 @@ public class LabController34 extends BaseLabController {
 
     private void updateDash() {
         if (cPrime > 0) {
-            cPrimeLabel.setText(String.format("C' = %.2f (А/м)/под", cPrime));
+            cPrimeLabel.setText(String.format(Locale.US, "C' = %.2f (А/м)/под", cPrime));
         } else {
-            cPrimeLabel.setText("C' = НЕ ВИЗНАЧЕНО");
+            cPrimeLabel.setText("C' = АВТО");
         }
     }
 
     private void startManual() {
         try {
-            double xCm = posSlider.getValue();
-            if (cPrime == 0.0) {
-                showAlert("Увага", "Спочатку необхідно провести калібрування в центрі соленоїда (натисніть синю кнопку)!");
-                return;
-            }
+            double xCm = Double.parseDouble(xField.getText().replace(',', '.'));
             isAutoRunning = false;
-            runMeasurement(xCm, false);
+            runMeasurement(xCm);
         } catch (Exception e) {
             showAlert("Помилка", "Перевірте правильність введених даних.");
         }
     }
 
     private void startAuto() {
-        if (cPrime == 0.0) {
-            showAlert("Увага", "Для автопроходження спочатку треба калібрувати установку в центрі.");
-            return;
-        }
-
         data.clear();
         idCounter = 1;
         updateStats();
         autoQueue.clear();
 
-        try {
-            double halfLengthCm = Double.parseDouble(lengthField.getText()) * 50.0;
-            for (double px = 2.0; px <= halfLengthCm; px += 2.0) {
-                autoQueue.add(px);
-            }
-            isAutoRunning = true;
-            processNextAuto();
-        } catch (NumberFormatException e) {
-            showAlert("Помилка", "Некоректна довжина соленоїда.");
+        double[] autoPoints = {0, 1, 2, 3, 4, 5, 8, 11, 14, 17, 20, 23, 25};
+        for (double px : autoPoints) {
+            autoQueue.add(px);
         }
+        isAutoRunning = true;
+        processNextAuto();
     }
 
     private void processNextAuto() {
@@ -282,25 +251,31 @@ public class LabController34 extends BaseLabController {
         }
 
         double nextVal = autoQueue.poll();
-        posSlider.setValue(nextVal);
-        runMeasurement(nextVal, false);
+        xField.setText(String.format(Locale.US, "%.1f", nextVal));
+        runMeasurement(nextVal);
     }
 
-    private void runMeasurement(double xCm, boolean isCalibration) {
+    private void runMeasurement(double xCm) {
         setControlsDisable(true);
 
-        double I = Double.parseDouble(currentField.getText());
-        double N = Double.parseDouble(turnsField.getText());
-        double l = Double.parseDouble(lengthField.getText());
-        double R = Double.parseDouble(radiusField.getText());
+        double I = Double.parseDouble(currentField.getText().replace(',', '.'));
+        double N = Double.parseDouble(turnsField.getText().replace(',', '.'));
+        double l = Double.parseDouble(lengthField.getText().replace(',', '.'));
+        double R = Double.parseDouble(radiusField.getText().replace(',', '.'));
+
+        double hTheoCenter = (I * N / (2.0 * l)) * (2.0 * (l / 2.0) / Math.sqrt((l / 2.0) * (l / 2.0) + R * R));
+        cPrime = hTheoCenter / 14.14;
+        updateDash();
+
         double xMeters = xCm / 100.0;
-        double d1 = l/2.0 + xMeters;
-        double d2 = l/2.0 - xMeters;
-        double cos1 = d1 / Math.sqrt(d1*d1 + R*R);
-        double cos2 = d2 / Math.sqrt(d2*d2 + R*R);
+        double d1 = l / 2.0 + xMeters;
+        double d2 = l / 2.0 - xMeters;
+        double cos1 = d1 / Math.sqrt(d1 * d1 + R * R);
+        double cos2 = d2 / Math.sqrt(d2 * d2 + R * R);
+
         double hTheo = (I * N / (2.0 * l)) * (cos1 + cos2);
-        double simulatedC = 45.0;
-        double finalAlpha = hTheo / simulatedC + (Math.random() - 0.5) * 0.4;
+
+        double finalAlpha = hTheo / cPrime + (Math.random() - 0.5) * 0.2;
 
         liveStatusLabel.setText("СИСТЕМА: ВИМІРЮВАННЯ");
         liveStatusLabel.setStyle("-fx-text-fill: red;");
@@ -312,27 +287,22 @@ public class LabController34 extends BaseLabController {
             @Override
             public void handle(long now) {
                 double elapsed = (now - startTime) / 1_000_000_000.0;
-                liveTimeLabel.setText(String.format("t = %.2f с", elapsed));
+                liveTimeLabel.setText(String.format(Locale.US, "t = %.2f с", elapsed));
 
                 if (elapsed >= targetTime) {
                     this.stop();
-                    finishMeasurement(xCm, I, hTheo, finalAlpha, isCalibration);
+                    finishMeasurement(xCm, I, hTheo, finalAlpha);
                 }
             }
         };
         measurementTimer.start();
     }
 
-    private void finishMeasurement(double xCm, double I, double hTheo, double alpha, boolean isCalibration) {
+    private void finishMeasurement(double xCm, double I, double hTheo, double alpha) {
         liveStatusLabel.setText("СИСТЕМА: ЗАПИС");
         liveStatusLabel.setStyle("-fx-text-fill: yellow;");
 
-        if (isCalibration) {
-            cPrime = hTheo / alpha;
-            updateDash();
-        }
-
-        double hExp = (cPrime > 0) ? cPrime * alpha : 0;
+        double hExp = cPrime * alpha;
         double error = Math.abs(hExp - hTheo) / hTheo * 100.0;
 
         Measurement m = new Measurement(
@@ -349,7 +319,7 @@ public class LabController34 extends BaseLabController {
 
         if (isAutoRunning) {
             new Thread(() -> {
-                try { Thread.sleep(1000); javafx.application.Platform.runLater(this::processNextAuto); }
+                try { Thread.sleep(600); Platform.runLater(this::processNextAuto); }
                 catch (InterruptedException e) {}
             }).start();
         } else {
@@ -374,7 +344,7 @@ public class LabController34 extends BaseLabController {
             if (m.getErrorPercent() > maxErr) maxErr = m.getErrorPercent();
         }
 
-        String conclusion = String.format(
+        String conclusion = String.format(Locale.US,
                 "ОБРОБКА РЕЗУЛЬТАТІВ:\n" +
                         "1. Проведено вимірювань: %d шт.\n" +
                         "2. Балістична стала установки: C' = %.2f (А/м)/под.\n" +

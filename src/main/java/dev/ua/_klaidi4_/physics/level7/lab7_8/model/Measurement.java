@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Measurement {
     private int id;
-    private String liquidName;
+    private String liquid;
     private double h;
     private double alpha;
 }

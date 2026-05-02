@@ -1,11 +1,7 @@
-// ============================================================================
-// 1. DashboardController.java
-// Шлях: src/main/java/dev/ua/_klaidi4_/physics/core/DashboardController.java
-// ============================================================================
-
 package dev.ua._klaidi4_.physics.core;
 
 import dev.ua._klaidi4_.physics.core.brigade.BrigadeConfig;
+import dev.ua._klaidi4_.physics.core.utils.DocumentationManager; // Доданий імпорт нашого менеджера
 import dev.ua._klaidi4_.physics.level1.lab1_1.controller.LabController11;
 import dev.ua._klaidi4_.physics.level1.lab1_10.controller.LabController110;
 import dev.ua._klaidi4_.physics.level1.lab1_11.controller.LabController111;
@@ -21,10 +17,8 @@ import dev.ua._klaidi4_.physics.level1.lab1_7.controller.LabController17;
 import dev.ua._klaidi4_.physics.level1.lab1_8.controller.LabController18;
 import dev.ua._klaidi4_.physics.level1.lab1_9.controller.LabController19;
 
-import dev.ua._klaidi4_.physics.level2.lab222.controller.LabController222;
+import dev.ua._klaidi4_.physics.level2.lab2_2.controller.LabController222;
 import dev.ua._klaidi4_.physics.level2.lab2_1.controller.LabController21;
-import dev.ua._klaidi4_.physics.level2.lab2_2.controller.LabController22;
-import dev.ua._klaidi4_.physics.level2.lab2_3.controller.LabController23;
 import dev.ua._klaidi4_.physics.level2.lab2_4.controller.LabController24;
 import dev.ua._klaidi4_.physics.level2.lab2_5.controller.LabController25;
 import dev.ua._klaidi4_.physics.level2.lab2_6.controller.LabController26;
@@ -65,8 +59,12 @@ import dev.ua._klaidi4_.physics.level7.lab7_6.controller.LabController76;
 import dev.ua._klaidi4_.physics.level7.lab7_7.controller.LabController77;
 import dev.ua._klaidi4_.physics.level7.lab7_8.controller.LabController78;
 
+import dev.ua._klaidi4_.physics.level8.lab8_1.controller.LabController81;
+import dev.ua._klaidi4_.physics.level8.lab8_2.controller.LabController82;
+import dev.ua._klaidi4_.physics.level8.lab8_3.controller.LabController83;
 import dev.ua._klaidi4_.physics.level8.lab8_4.controller.LabController84;
 
+import dev.ua._klaidi4_.physics.level8.lab8_5.controller.LabController85;
 import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -93,9 +91,12 @@ public class DashboardController extends BorderPane {
     private ScrollPane contentScrollPane;
     private VBox contentArea;
     private LabModule currentLab = null;
+    private String currentLabId = null;
     private List<String> allowedLabs;
     private List<Button> categoryButtons = new ArrayList<>();
     private final Runnable onChangeBrigade;
+
+    private Button instructionBtn;
 
     public static void setCurrentBrigade(String brigade) {
         currentBrigade = brigade;
@@ -134,6 +135,18 @@ public class DashboardController extends BorderPane {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        instructionBtn = new Button("📖 Інструкція");
+        instructionBtn.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        instructionBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16 8 16;");
+        instructionBtn.setCursor(Cursor.HAND);
+        instructionBtn.setVisible(false);
+        instructionBtn.setManaged(false);
+
+        instructionBtn.setOnMouseEntered(e -> instructionBtn.setStyle("-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16 8 16;"));
+        instructionBtn.setOnMouseExited(e -> instructionBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16 8 16;"));
+
+        instructionBtn.setOnAction(e -> DocumentationManager.openInstruction(currentLabId));
+
         Button changeBrigadeBtn = new Button("🔄 Змінити бригаду");
         changeBrigadeBtn.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
         changeBrigadeBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16 8 16;");
@@ -149,7 +162,7 @@ public class DashboardController extends BorderPane {
         changeBrigadeBtn.setOnMouseEntered(e -> changeBrigadeBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16 8 16;"));
         changeBrigadeBtn.setOnMouseExited(e -> changeBrigadeBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16 8 16;"));
 
-        navBar.getChildren().addAll(homeBtn, appTitle, spacer, changeBrigadeBtn);
+        navBar.getChildren().addAll(homeBtn, appTitle, spacer, instructionBtn, changeBrigadeBtn);
         this.setTop(navBar);
 
         mainDashboardView = new BorderPane();
@@ -194,10 +207,8 @@ public class DashboardController extends BorderPane {
         );
 
         registerCategory("Частина 2: Електрика",
-                createLabCard("222", "Електростатичне поле", "Дослідження електростатичного поля методом моделювання на провідному папері.", LabController222::new),
                 createLabCard("2-1", "Електростатичне поле", "Дослідження електростатичного поля методом моделювання на провідному папері.", LabController21::new),
-                createLabCard("2-2", "Сполучення конденсаторів", "Перевірка законів паралельного та послідовного сполучення.", LabController22::new),
-                createLabCard("2-3", "Діелектрична проникність", "Визначення діелектричної проникності сегнетоелектриків.", LabController23::new),
+                createLabCard("2-2", "Ємність та сегнетоелектрики", "Комплексна робота: вимірювання ємності конденсаторів, перевірка законів їх з'єднання та визначення діелектричної проникності.", LabController222::new),
                 createLabCard("2-4", "Точка Кюрі", "Дослідження температурної залежності властивостей сегнетоелектриків.", LabController24::new),
                 createLabCard("2-5", "Визначення ЕРС", "Вимірювання електрорушійної сили джерел струму компенсаційним методом.", LabController25::new),
                 createLabCard("2-6", "Опір та температура", "Вимірювання опорів (Міст Уітстона) і залежності опору металу від температури.", LabController26::new)
@@ -250,9 +261,23 @@ public class DashboardController extends BorderPane {
         );
 
         registerCategory("Частина 8: Тверде тіло",
-                createLabCard("8-4", "Дослідження p-n-переходу", "Вивчення вольт-амперної характеристики напівпровідникового діода.", LabController84::new)
+                createLabCard("8-1", "Енергія активації напівпровідників", "Дослідження температурної залежності електропровідності та визначення енергії активації.", LabController81::new),
+                createLabCard("8-2", "Ефект Холла", "Вивчення ефекту Холла в напівпровідниках та визначення концентрації вільних носіїв струму.", LabController82::new),
+                createLabCard("8-3", "Фотоелектричні явища", "Вивчення законів внутрішнього фотоефекту та зняття характеристик напівпровідникового фотоопору.", LabController83::new),
+                createLabCard("8-4", "Дослідження p-n-переходу", "Вивчення вольт-амперної характеристики напівпровідникового діода.", LabController84::new),
+                createLabCard("8-5", "Тунельний діод", "Принцип роботи та вольт-амперна характеристика тунельного діода.", LabController85::new)
         );
+        Region spacerBottom = new Region();
+        VBox.setVgrow(spacerBottom, Priority.ALWAYS);
 
+        Label authorsLabel = new Label("Created by _Klaidi4_, Ankai, 7ei");
+        authorsLabel.setFont(Font.font("Segoe UI", 12));
+        authorsLabel.setStyle("-fx-text-fill: #94a3b8;");
+        authorsLabel.setWrapText(true);
+        authorsLabel.setAlignment(Pos.CENTER);
+        authorsLabel.setMaxWidth(Double.MAX_VALUE);
+        authorsLabel.setPadding(new Insets(20, 10, 10, 10));
+        sidebar.getChildren().addAll(spacerBottom, authorsLabel);
         if (!categoryButtons.isEmpty()) {
             categoryButtons.get(0).fire();
         } else {
@@ -387,7 +412,7 @@ public class DashboardController extends BorderPane {
         card.setOnMouseClicked(e -> {
             LabModule module = moduleInstantiator.get();
             if (module != null) {
-                launchLab(module);
+                launchLab(module, number);
             }
         });
         return card;
@@ -398,12 +423,21 @@ public class DashboardController extends BorderPane {
             currentLab.shutdown();
             currentLab = null;
         }
+        currentLabId = null;
+
+        instructionBtn.setVisible(false);
+        instructionBtn.setManaged(false);
+
         this.setCenter(mainDashboardView);
     }
 
-    private void launchLab(LabModule lab) {
+    private void launchLab(LabModule lab, String labId) {
         if (currentLab != null) currentLab.shutdown();
         currentLab = lab;
+        currentLabId = labId;
+
+        instructionBtn.setVisible(true);
+        instructionBtn.setManaged(true);
 
         FadeTransition fadeIn = new FadeTransition(Duration.millis(300), lab.getRoot());
         fadeIn.setFromValue(0.0);

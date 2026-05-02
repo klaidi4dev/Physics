@@ -18,6 +18,7 @@ import javafx.scene.text.FontWeight;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 public class LabController62 extends BaseLabController {
 
@@ -26,18 +27,17 @@ public class LabController62 extends BaseLabController {
     private ObservableList<Measurement> data;
     private int idCounter = 1;
     private ComboBox<String> sampleComboBox;
-    private Slider timeSlider;
-    private Slider refActivitySlider;
-    private Slider unkActivitySlider;
-    private Slider efficiencySlider;
-    private Slider bgRateSlider;
-    private Label timeValueLabel;
-    private Label refActivityLabel;
-    private Label unkActivityLabel;
-    private Label efficiencyLabel;
-    private Label bgRateLabel;
+    private TextField timeField;
+    private TextField refActivityField;
+    private TextField unkActivityField;
+    private TextField efficiencyField;
+    private TextField bgRateField;
+    private double currentTimeValue = 100.0;
+    private double currentRefActivityValue = 2000.0;
+    private double currentUnkActivityValue = 3850.0;
+    private double currentEfficiencyValue = 1.5;
+    private double currentBgRateValue = 1.2;
     private Button measureBtn;
-    private Button calcBtn;
     private Button autoBtn;
     private Button clearBtn;
     private Label liveStepLabel;
@@ -50,7 +50,6 @@ public class LabController62 extends BaseLabController {
     private Double nBg = null;
     private Double nRef = null;
     private Double nUnk = null;
-
     private AnimationTimer measureTimer;
     private AnimationTimer autoTimer;
     private Queue<Integer> autoQueue = new LinkedList<>();
@@ -97,57 +96,46 @@ public class LabController62 extends BaseLabController {
         sampleComboBox.setMaxWidth(Double.MAX_VALUE);
         sampleComboBox.setOnAction(e -> applyPhysicsSettings());
 
-        timeValueLabel = new Label("Час вимірювання t: 100 с");
-        timeSlider = new Slider(10.0, 300.0, 100.0);
-        timeSlider.setShowTickMarks(true);
-        timeSlider.setMajorTickUnit(50.0);
-        timeSlider.valueProperty().addListener((o, ov, nv) -> {
-            timeValueLabel.setText(String.format(Locale.US, "Час вимірювання t: %.0f с", nv.doubleValue()));
+        timeField = createNumberField(currentTimeValue, val -> {
+            currentTimeValue = val;
             if (!isMeasuring) {
-                liveTimerLabel.setText(String.format(Locale.US, "Таймер: 0 / %.0f с", nv.doubleValue()));
+                liveTimerLabel.setText(String.format(Locale.US, "Таймер: 0 / %.0f с", currentTimeValue));
             }
         });
 
         Label envSettingsLabel = new Label("Налаштування середовища:");
         envSettingsLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-padding: 10 0 0 0;");
 
-        refActivityLabel = new Label("Активність Еталону (A_ет): 2000 Бк");
-        refActivitySlider = new Slider(500.0, 5000.0, 2000.0);
-        refActivitySlider.setShowTickMarks(true);
-        refActivitySlider.valueProperty().addListener((o, ov, nv) -> {
-            refActivityLabel.setText(String.format(Locale.US, "Активність Еталону (A_ет): %.0f Бк", nv.doubleValue()));
+        refActivityField = createNumberField(currentRefActivityValue, val -> {
+            currentRefActivityValue = val;
             resetVariables(); updateStats();
         });
 
-        unkActivityLabel = new Label("Активність Досліду (Справжня): 3850 Бк");
-        unkActivitySlider = new Slider(1000.0, 10000.0, 3850.0);
-        unkActivitySlider.setShowTickMarks(true);
-        unkActivitySlider.valueProperty().addListener((o, ov, nv) -> {
-            unkActivityLabel.setText(String.format(Locale.US, "Активність Досліду (Справжня): %.0f Бк", nv.doubleValue()));
+        unkActivityField = createNumberField(currentUnkActivityValue, val -> {
+            currentUnkActivityValue = val;
             resetVariables(); updateStats();
         });
 
-        efficiencyLabel = new Label("Ефективність лічильника: 1.5 %");
-        efficiencySlider = new Slider(0.1, 10.0, 1.5);
-        efficiencySlider.setShowTickMarks(true);
-        efficiencySlider.valueProperty().addListener((o, ov, nv) -> {
-            efficiencyLabel.setText(String.format(Locale.US, "Ефективність лічильника: %.1f %%", nv.doubleValue()));
+        efficiencyField = createNumberField(currentEfficiencyValue, val -> {
+            currentEfficiencyValue = val;
             resetVariables(); updateStats();
         });
 
-        bgRateLabel = new Label("Радіаційний фон: 1.2 імп/с");
-        bgRateSlider = new Slider(0.1, 5.0, 1.2);
-        bgRateSlider.setShowTickMarks(true);
-        bgRateSlider.valueProperty().addListener((o, ov, nv) -> {
-            bgRateLabel.setText(String.format(Locale.US, "Радіаційний фон: %.1f імп/с", nv.doubleValue()));
+        bgRateField = createNumberField(currentBgRateValue, val -> {
+            currentBgRateValue = val;
             resetVariables(); updateStats();
         });
 
         configBox.getChildren().addAll(
-                studentLabel, createInputGroup("Об'єкт:", sampleComboBox), timeValueLabel, timeSlider,
+                studentLabel,
+                createInputGroup("Об'єкт:", sampleComboBox),
+                createInputGroup("Час вимірювання t (с):", timeField),
                 new Separator(),
-                envSettingsLabel, refActivityLabel, refActivitySlider, unkActivityLabel, unkActivitySlider,
-                efficiencyLabel, efficiencySlider, bgRateLabel, bgRateSlider
+                envSettingsLabel,
+                createInputGroup("Активність Еталону (Бк):", refActivityField),
+                createInputGroup("Активність Досліду (Бк):", unkActivityField),
+                createInputGroup("Ефективність лічильника (%):", efficiencyField),
+                createInputGroup("Радіаційний фон (імп/с):", bgRateField)
         );
 
         ScrollPane scrollParams = new ScrollPane(configBox);
@@ -160,12 +148,6 @@ public class LabController62 extends BaseLabController {
         measureBtn.setStyle("-fx-background-color: #ff007f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10;");
         measureBtn.setMaxWidth(Double.MAX_VALUE);
         measureBtn.setOnAction(e -> startSingleMeasurement());
-
-        calcBtn = new Button("📝 ОБЧИСЛИТИ АКТИВНІСТЬ");
-        calcBtn.setStyle("-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold;");
-        calcBtn.setMaxWidth(Double.MAX_VALUE);
-        calcBtn.setDisable(true);
-        calcBtn.setOnAction(e -> executeCalculation());
 
         autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ ЛАБИ");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -182,7 +164,7 @@ public class LabController62 extends BaseLabController {
             updateStats();
         });
 
-        leftPanel.getChildren().addAll(title, configPane, measureBtn, calcBtn, autoBtn, clearBtn);
+        leftPanel.getChildren().addAll(title, configPane, measureBtn, autoBtn, clearBtn);
 
         canvas = new BetaDecayCanvas(600, 440);
 
@@ -233,7 +215,7 @@ public class LabController62 extends BaseLabController {
 
         TableColumn<Measurement, Integer> idCol = new TableColumn<>("№");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        TableColumn<Measurement, String> typeCol = new TableColumn<>("Об'єкт вимірювання");
+        TableColumn<Measurement, String> typeCol = new TableColumn<>("Об'єкт");
         typeCol.setCellValueFactory(new PropertyValueFactory<>("sampleType"));
         TableColumn<Measurement, Integer> timeCol = new TableColumn<>("Час t (с)");
         timeCol.setCellValueFactory(new PropertyValueFactory<>("timeSec"));
@@ -257,6 +239,21 @@ public class LabController62 extends BaseLabController {
         updateStats();
     }
 
+    private TextField createNumberField(double initialValue, Consumer<Double> onChange) {
+        TextField field = new TextField(String.valueOf(initialValue));
+        field.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*(\\.\\d*)?")) {
+                field.setText(newValue.replaceAll("[^\\d.]", ""));
+            } else if (!newValue.isEmpty() && !newValue.equals(".")) {
+                try {
+                    double val = Double.parseDouble(newValue);
+                    onChange.accept(val);
+                } catch (NumberFormatException ignored) {}
+            }
+        });
+        return field;
+    }
+
     private void applyPhysicsSettings() {
         int sampleType = sampleComboBox.getSelectionModel().getSelectedIndex();
         canvas.setPhysicsParameters(isMeasuring, sampleType);
@@ -267,24 +264,27 @@ public class LabController62 extends BaseLabController {
         bgCountLabel.setText("N_ф (Фон): ---");
         refCountLabel.setText("N_ет (Еталон): ---");
         unkCountLabel.setText("N_д (Дослід): ---");
-        calcBtn.setDisable(true);
     }
 
     private void setControlsDisable(boolean disable) {
         sampleComboBox.setDisable(disable);
-        timeSlider.setDisable(disable);
-        refActivitySlider.setDisable(disable);
-        unkActivitySlider.setDisable(disable);
-        efficiencySlider.setDisable(disable);
-        bgRateSlider.setDisable(disable);
+        timeField.setDisable(disable);
+        refActivityField.setDisable(disable);
+        unkActivityField.setDisable(disable);
+        efficiencyField.setDisable(disable);
+        bgRateField.setDisable(disable);
         measureBtn.setDisable(disable);
-        calcBtn.setDisable(disable || (nBg == null || nRef == null || nUnk == null));
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
     }
 
     private void startSingleMeasurement() {
-        double targetTime = timeSlider.getValue();
+        if (currentTimeValue <= 0) {
+            showAlert("Помилка", "Час вимірювання має бути більшим за 0.");
+            return;
+        }
+
+        double targetTime = currentTimeValue;
         int sampleType = sampleComboBox.getSelectionModel().getSelectedIndex();
 
         isMeasuring = true;
@@ -315,19 +315,13 @@ public class LabController62 extends BaseLabController {
     }
 
     private int generateCount(int sampleType, double timeSec) {
-        double bgRate = bgRateSlider.getValue();
-        double eff = efficiencySlider.getValue() / 100.0;
-        double ratePerSec = bgRate;
-
-        if (sampleType == 1) {
-            ratePerSec += refActivitySlider.getValue() * eff;
-        } else if (sampleType == 2) {
-            ratePerSec += unkActivitySlider.getValue() * eff;
-        }
+        double ratePerSec = currentBgRateValue;
+        double eff = currentEfficiencyValue / 100.0;
+        if (sampleType == 1) ratePerSec += currentRefActivityValue * eff;
+        else if (sampleType == 2) ratePerSec += currentUnkActivityValue * eff;
 
         double expectedTotal = ratePerSec * timeSec;
         double noise = (Math.random() - 0.5) * Math.sqrt(expectedTotal) * 2;
-
         return Math.max(0, (int) Math.round(expectedTotal + noise));
     }
 
@@ -335,13 +329,11 @@ public class LabController62 extends BaseLabController {
         isMeasuring = false;
         liveStepLabel.setText("Статус: ГОТОВО");
         liveStepLabel.setStyle("-fx-text-fill: #00ffcc; -fx-font-weight: bold;");
-        liveTimerLabel.setText(String.format(Locale.US, "Таймер: %.0f / %.0f с", timeSec, timeSec));
 
         int finalCount = generateCount(sampleType, timeSec);
         liveCountLabel.setText(String.format("Імпульси N: %d", finalCount));
 
         String typeName = sampleComboBox.getValue().split(" ")[0];
-
         double normalizedCount = finalCount * (100.0 / timeSec);
 
         if (sampleType == 0) {
@@ -355,37 +347,35 @@ public class LabController62 extends BaseLabController {
             unkCountLabel.setText(String.format(Locale.US, "N_д (Дослід): %d", finalCount));
         }
 
-        double actToShow = (sampleType == 1) ? refActivitySlider.getValue() : 0.0;
+        double actToShow = (sampleType == 1) ? currentRefActivityValue : 0.0;
         data.add(new Measurement(idCounter++, typeName, (int)timeSec, finalCount, actToShow));
+
+        if (nBg != null && nRef != null && nUnk != null) {
+            performAutomaticCalculation();
+        }
 
         updateStats();
         applyPhysicsSettings();
         setControlsDisable(false);
     }
 
-    private void executeCalculation() {
-        if (nBg == null || nRef == null || nUnk == null) {
-            showAlert("Помилка", "Для розрахунку необхідні всі три значення: N_ф, N_ет, N_д.");
+    private void performAutomaticCalculation() {
+        if (!showCalculations) {
+            finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
             return;
         }
-
-        double aRef = refActivitySlider.getValue();
-        double aUnkTrue = unkActivitySlider.getValue();
 
         double num = nUnk - nBg;
         double den = nRef - nBg;
 
-        if (den <= 0) {
-            showAlert("Помилка", "Некоректні дані: еталон не перевищує фон.");
-            return;
-        }
+        if (den <= 1) return;
 
-        double calculatedActivity = (num / den) * aRef;
-        double error = Math.abs(calculatedActivity - aUnkTrue) / aUnkTrue * 100.0;
+        double calculatedActivity = (num / den) * currentRefActivityValue;
+        double error = Math.abs(calculatedActivity - currentUnkActivityValue) / currentUnkActivityValue * 100.0;
 
         for (int i = data.size() - 1; i >= 0; i--) {
             Measurement m = data.get(i);
-            if (m.getSampleType().equals("Досліджуваний")) {
+            if (m.getSampleType().contains("Дослід")) {
                 m.setActivity(Math.round(calculatedActivity * 10.0) / 10.0);
                 table.refresh();
                 break;
@@ -393,48 +383,35 @@ public class LabController62 extends BaseLabController {
         }
 
         String conclusion = String.format(Locale.US,
-                "ОБРОБКА РЕЗУЛЬТАТІВ:\n" +
-                        "1. Робоча формула: A_д = ((N_д - N_ф) / (N_ет - N_ф)) · A_ет.\n" +
-                        "2. Справжня активність (з налаштувань): %.1f Бк.\n" +
-                        "3. Розрахована активність: A_д = %.1f Бк.\n" +
-                        "ВИСНОВОК: Відносна похибка становить ε = %.1f %%. Вона залежить від тривалості вимірювання (чим більше t, тим менший вплив шуму).",
-                aUnkTrue, calculatedActivity, error
+                "АВТОМАТИЧНИЙ РОЗРАХУНОК:\n" +
+                        "A_д = ((N_д - N_ф) / (N_ет - N_ф)) · A_ет = %.1f Бк.\n" +
+                        "Справжнє значення: %.1f Бк. Похибка: %.1f %%.",
+                calculatedActivity, currentUnkActivityValue, error
         );
         finalResultLabel.setText(conclusion);
-
-        calcBtn.setDisable(true);
     }
 
     private void startAutoMode() {
         data.clear();
         idCounter = 1;
         resetVariables();
-        updateStats();
         autoQueue.clear();
-
         autoQueue.add(0);
         autoQueue.add(1);
         autoQueue.add(2);
-
+        timeField.setText("100");
         processNextAuto();
     }
 
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
-            liveStepLabel.setStyle("-fx-text-fill: #a3e635; -fx-font-weight: bold;");
-
-            Platform.runLater(this::executeCalculation);
             setControlsDisable(false);
             return;
         }
-
         int nextSample = autoQueue.poll();
         sampleComboBox.getSelectionModel().select(nextSample);
-        timeSlider.setValue(100.0);
-
         Platform.runLater(this::startSingleMeasurement);
-
         autoTimer = new AnimationTimer() {
             long start = System.nanoTime();
             @Override
@@ -448,17 +425,14 @@ public class LabController62 extends BaseLabController {
         autoTimer.start();
     }
 
+
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");
-            return;
-        }
-        if (!showCalculations) {
+        } else if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
-            return;
-        }
-        if (nBg == null || nRef == null || nUnk == null) {
-            finalResultLabel.setText("Обробка результатів: [Зберіть усі три показники та натисніть 'ОБЧИСЛИТИ АКТИВНІСТЬ']");
+        } else if (nBg == null || nRef == null || nUnk == null) {
+            finalResultLabel.setText("Зберіть усі три показники для автоматичного розрахунку.");
         }
     }
 }

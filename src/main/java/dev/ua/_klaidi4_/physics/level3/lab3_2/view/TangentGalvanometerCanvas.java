@@ -18,9 +18,7 @@ public class TangentGalvanometerCanvas extends Canvas {
     private double currentAngle = 0;
     private double needleVelocity = 0;
     private double measuredAngle = 0;
-
     private boolean isRunning = false;
-
     private AnimationTimer timer;
     private long lastTime = 0;
     private Runnable onFinish;
@@ -48,9 +46,11 @@ public class TangentGalvanometerCanvas extends Canvas {
     public void startSimulation() {
         double Hm = (turnsN * currentI) / (2.0 * radiusR);
         targetAngle = Math.toDegrees(Math.atan2(Hm, earthH0));
+
         double frictionNoise = (Math.random() - 0.5) * 0.6;
         targetAngle += frictionNoise;
         this.measuredAngle = targetAngle;
+
         needleVelocity += (Math.random() - 0.5) * 40.0;
 
         this.isRunning = true;
@@ -104,36 +104,39 @@ public class TangentGalvanometerCanvas extends Canvas {
         double w = getWidth();
         double h = getHeight();
 
-        gc.setFill(Color.web("#e0e0e0"));
+        gc.setFill(Color.web("#eceff1"));
         gc.fillRect(0, 0, w, h);
 
         double centerX = w / 2;
         double centerY = h / 2;
+        double coilWidth = 24;
+        double coilLength = 340;
 
-        double coilVisualRadius = 160;
-        gc.setStroke(Color.web("#cddc39"));
-        gc.setLineWidth(12);
-        gc.strokeOval(centerX - coilVisualRadius, centerY - coilVisualRadius, coilVisualRadius * 2, coilVisualRadius * 2);
+        gc.setFill(Color.web("#cfd8dc"));
+        gc.fillRoundRect(centerX - coilWidth/2, centerY - coilLength/2, coilWidth, coilLength, 10, 10);
+        gc.setStroke(Color.web("#90a4ae"));
+        gc.setLineWidth(2);
+        gc.strokeRoundRect(centerX - coilWidth/2, centerY - coilLength/2, coilWidth, coilLength, 10, 10);
 
-        gc.setStroke(Color.web("#757575"));
-        gc.setLineWidth(4);
-        gc.strokeOval(centerX - coilVisualRadius - 8, centerY - coilVisualRadius - 8, (coilVisualRadius + 8) * 2, (coilVisualRadius + 8) * 2);
-        gc.strokeOval(centerX - coilVisualRadius + 8, centerY - coilVisualRadius + 8, (coilVisualRadius - 8) * 2, (coilVisualRadius - 8) * 2);
+        gc.setStroke(Color.web("#f57f17"));
+        gc.setLineWidth(6);
+        gc.strokeLine(centerX - 4, centerY - coilLength/2 + 2, centerX - 4, centerY + coilLength/2 - 2);
+        gc.strokeLine(centerX + 4, centerY - coilLength/2 + 2, centerX + 4, centerY + coilLength/2 - 2);
 
-        double compassRadius = 100;
+        double compassRadius = 110;
+        gc.setFill(Color.color(0,0,0, 0.2));
+        gc.fillOval(centerX - compassRadius + 3, centerY - compassRadius + 3, compassRadius * 2, compassRadius * 2);
         gc.setFill(Color.WHITE);
         gc.fillOval(centerX - compassRadius, centerY - compassRadius, compassRadius * 2, compassRadius * 2);
-
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
+        gc.setStroke(Color.web("#455a64"));
+        gc.setLineWidth(4);
         gc.strokeOval(centerX - compassRadius, centerY - compassRadius, compassRadius * 2, compassRadius * 2);
-
         gc.setFont(Font.font("System", FontWeight.BOLD, 14));
         gc.setTextAlign(TextAlignment.CENTER);
 
         for (int i = 0; i < 360; i += 5) {
             double angleRad = Math.toRadians(i - 90);
-            double length = (i % 30 == 0) ? 10 : (i % 10 == 0) ? 7 : 4;
+            double length = (i % 30 == 0) ? 12 : (i % 10 == 0) ? 8 : 4;
 
             double x1 = centerX + compassRadius * Math.cos(angleRad);
             double y1 = centerY + compassRadius * Math.sin(angleRad);
@@ -146,27 +149,30 @@ public class TangentGalvanometerCanvas extends Canvas {
 
             if (i % 30 == 0) {
                 int labelVal = i <= 90 ? i : i <= 180 ? 180 - i : i <= 270 ? i - 180 : 360 - i;
-                double tx = centerX + (compassRadius - 22) * Math.cos(angleRad);
-                double ty = centerY + (compassRadius - 22) * Math.sin(angleRad) + 5;
+                double tx = centerX + (compassRadius - 25) * Math.cos(angleRad);
+                double ty = centerY + (compassRadius - 25) * Math.sin(angleRad) + 5;
                 gc.setFill(Color.BLACK);
                 gc.fillText(String.valueOf(labelVal), tx, ty);
             }
         }
 
         gc.setFill(Color.RED);
-        gc.fillText("Пн (С)", centerX, centerY - compassRadius - 5);
+        gc.fillText("Пн (N)", centerX, centerY - compassRadius - 15);
+        gc.setFill(Color.BLUE);
+        gc.fillText("Пд (S)", centerX, centerY + compassRadius + 25);
 
         gc.save();
         gc.translate(centerX, centerY);
         gc.rotate(currentAngle);
-
         gc.setFill(Color.RED);
-        gc.fillPolygon(new double[]{-4, 4, 0}, new double[]{0, 0, -compassRadius + 30}, 3);
+        gc.fillPolygon(new double[]{-5, 5, 0}, new double[]{0, 0, -compassRadius + 35}, 3);
         gc.setFill(Color.BLUE);
-        gc.fillPolygon(new double[]{-4, 4, 0}, new double[]{0, 0, compassRadius - 30}, 3);
-
+        gc.fillPolygon(new double[]{-5, 5, 0}, new double[]{0, 0, compassRadius - 35}, 3);
         gc.setFill(Color.GOLD);
-        gc.fillOval(-4, -4, 8, 8);
+        gc.fillOval(-5, -5, 10, 10);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.strokeOval(-5, -5, 10, 10);
 
         gc.restore();
     }

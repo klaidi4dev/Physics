@@ -8,20 +8,19 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.ArcType;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public class GalvanometerCanvas extends Canvas {
 
     private double l0 = 20.0;
-    private double currentI = 1.5;
-    private double x = 0.0;
+    private double xPos = 0.0;
     private double targetN = 0;
     private double currentN = 0;
-    private double measuredN = 0;
     private boolean isRunning = false;
     private double animTime = 0;
     private AnimationTimer timer;
     private long lastTime = 0;
-    private Runnable onPulsePeak;
     private Runnable onFinish;
 
     public GalvanometerCanvas(double width, double height) {
@@ -29,41 +28,17 @@ public class GalvanometerCanvas extends Canvas {
         startAnimation();
     }
 
-    public void setParameters(double l0, double currentI, double x) {
+    public void updatePhysics(double l0, double xPos) {
         this.l0 = l0;
-        this.currentI = currentI;
-        this.x = x;
-        resetSystem();
-    }
-
-    public void setCallbacks(Runnable onPulsePeak, Runnable onFinish) {
-        this.onPulsePeak = onPulsePeak;
-        this.onFinish = onFinish;
-    }
-
-    public void resetSystem() {
-        this.currentN = 0;
-        this.animTime = 0;
-        this.isRunning = false;
+        this.xPos = xPos;
         draw();
     }
 
-    public void startSimulation() {
-        resetSystem();
-
-        double k = 1400.0;
-        double xFactor = 1.0 / (1.0 + 0.08 * x * x);
-        targetN = (k * currentI / l0) * xFactor;
-
-        targetN += (Math.random() - 0.5) * 0.8;
-        if (targetN < 0) targetN = Math.abs(targetN);
-
-        this.measuredN = targetN;
+    public void playPulse(double n, Runnable onFinish) {
+        this.targetN = n;
+        this.onFinish = onFinish;
+        this.animTime = 0;
         this.isRunning = true;
-    }
-
-    public double getMeasuredN() {
-        return measuredN;
     }
 
     public void stopAnimation() {
@@ -91,18 +66,18 @@ public class GalvanometerCanvas extends Canvas {
 
     private void update(double dt) {
         animTime += dt;
+        double tPeak = 0.15;
 
-        double tPeak = 0.4;
         currentN = targetN * (animTime / tPeak) * Math.exp(1 - animTime / tPeak);
 
-        if (animTime >= tPeak && animTime - dt < tPeak) {
-            if (onPulsePeak != null) onPulsePeak.run();
-        }
-
-        if (animTime >= 2.0) {
+        if (animTime >= 1.5) {
             currentN = 0;
             isRunning = false;
-            if (onFinish != null) onFinish.run();
+            if (onFinish != null) {
+                Runnable callback = onFinish;
+                onFinish = null;
+                callback.run();
+            }
         }
     }
 
@@ -119,33 +94,37 @@ public class GalvanometerCanvas extends Canvas {
         for (int i = 0; i < h; i += 20) gc.strokeLine(0, i, w, i);
 
         double centerX = w / 2;
-
         double magnetY = 90;
+
         LinearGradient colGrad = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
                 new Stop(0, Color.web("#ced4da")), new Stop(1, Color.web("#6c757d")));
 
         gc.setFill(colGrad);
-        gc.fillRect(centerX - 100, 20, 200, 30);
-        gc.fillRect(centerX - 100, 20, 40, magnetY);
-        gc.fillRect(centerX + 60, 20, 40, magnetY);
+        gc.fillRect(centerX - 120, 20, 240, 30);
+        gc.fillRect(centerX - 120, 20, 40, magnetY);
+        gc.fillRect(centerX + 80, 20, 40, magnetY);
 
-        double visualL0 = l0 * 1.5;
-        gc.fillRect(centerX - visualL0/2 - 40, magnetY + 20, 40, 30);
-        gc.fillRect(centerX + visualL0/2, magnetY + 20, 40, 30);
+        double visualL0 = l0 * 2.0;
+        gc.setFill(Color.web("#d32f2f"));
+        gc.fillRect(centerX - visualL0/2 - 40, magnetY + 20, 40, 40);
+        gc.setFill(Color.web("#1976d2"));
+        gc.fillRect(centerX + visualL0/2, magnetY + 20, 40, 40);
 
         gc.setFill(Color.WHITE);
-        gc.fillText("N", centerX - visualL0/2 - 25, magnetY + 40);
-        gc.fillText("S", centerX + visualL0/2 + 15, magnetY + 40);
+        gc.setFont(Font.font("System", FontWeight.BOLD, 16));
+        gc.fillText("N", centerX - visualL0/2 - 25, magnetY + 45);
+        gc.fillText("S", centerX + visualL0/2 + 15, magnetY + 45);
 
-        double coilVisualX = centerX + (x * 12);
+        double coilVisualX = centerX + (xPos * 15);
         gc.setFill(Color.web("#ff9800"));
-        gc.fillRect(coilVisualX - 8, magnetY + 22, 16, 26);
+        gc.fillRect(coilVisualX - 6, magnetY + 25, 12, 30);
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
-        gc.strokeRect(coilVisualX - 8, magnetY + 22, 16, 26);
+        gc.strokeRect(coilVisualX - 6, magnetY + 25, 12, 30);
+        gc.strokeLine(coilVisualX, magnetY + 55, coilVisualX, h);
 
         double galvY = h - 30;
-        double r = 140;
+        double r = 130;
 
         gc.setFill(Color.web("#e9ecef"));
         gc.fillArc(centerX - r, galvY - r, r * 2, r * 2, 0, 180, ArcType.CHORD);
@@ -155,8 +134,8 @@ public class GalvanometerCanvas extends Canvas {
 
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
-        for (int i = -150; i <= 150; i += 10) {
-            double angle = Math.toRadians(90 - (i * 0.4));
+        for (int i = -100; i <= 100; i += 10) {
+            double angle = Math.toRadians(90 - (i * 0.6));
             double x1 = centerX + (r - 10) * Math.cos(angle);
             double y1 = galvY - (r - 10) * Math.sin(angle);
             double x2 = centerX + (r - 20) * Math.cos(angle);
@@ -164,7 +143,7 @@ public class GalvanometerCanvas extends Canvas {
             gc.strokeLine(x1, y1, x2, y2);
         }
 
-        double needleAngle = Math.toRadians(90 - (currentN * 0.4));
+        double needleAngle = Math.toRadians(90 - (currentN * 0.6));
         double needleX = centerX + (r - 15) * Math.cos(needleAngle);
         double needleY = galvY - (r - 15) * Math.sin(needleAngle);
 

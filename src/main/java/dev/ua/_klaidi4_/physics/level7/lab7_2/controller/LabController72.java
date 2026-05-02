@@ -24,16 +24,13 @@ public class LabController72 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
-
     private TextField fieldRho, fieldG, fieldPatm, fieldR, fieldMu, fieldS;
-    private Slider radiusSlider, lengthSlider, tempSlider, volumeSlider;
+    private TextField fieldRadius, fieldLength, fieldTemp, fieldVolume;
     private Button startBtn, autoBtn, clearBtn;
-
     private AnimationTimer measurementTimer;
     private long startTime;
     private double measuredTau;
     private double simulatedDuration = 3.5;
-
     private boolean isMeasuring = false;
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
@@ -93,18 +90,30 @@ public class LabController72 extends BaseLabController {
         TitledPane settingsPane = new TitledPane();
         settingsPane.setText("Налаштування експерименту");
         settingsPane.setCollapsible(false);
-        VBox settingsBox = new VBox(8);
+        VBox settingsBox = new VBox(12);
         settingsBox.setPadding(new Insets(5));
 
-        radiusSlider = createSlider("Радіус капіляра r (мм):", 0.15, 0.30, 0.20, settingsBox);
-        lengthSlider = createSlider("Довжина капіляра L (см):", 5.0, 15.0, 10.0, settingsBox);
-        tempSlider = createSlider("Температура T (К):", 280, 310, 293, settingsBox);
-        volumeSlider = createSlider("Об'єм витікання V (см³):", 20, 80, 50, settingsBox);
+        fieldRadius = new TextField("0.20");
+        fieldLength = new TextField("10.0");
+        fieldTemp = new TextField("293.0");
+        fieldVolume = new TextField("50.0");
+
+        fieldRadius.textProperty().addListener((o, old, val) -> updatePhysics());
+        fieldLength.textProperty().addListener((o, old, val) -> updatePhysics());
+        fieldTemp.textProperty().addListener((o, old, val) -> updatePhysics());
+        fieldVolume.textProperty().addListener((o, old, val) -> updatePhysics());
+
+        settingsBox.getChildren().addAll(
+                createInputGroup("Радіус капіляра r (мм):", fieldRadius),
+                createInputGroup("Довжина капіляра L (см):", fieldLength),
+                createInputGroup("Температура T (К):", fieldTemp),
+                createInputGroup("Об'єм витікання V (см³):", fieldVolume)
+        );
 
         settingsPane.setContent(settingsBox);
 
         startBtn = new Button("▶ ВІДКРИТИ КРАН (Замір)");
-        startBtn.setStyle("-fx-background-color: #0288d1; -fx-text-fill: white; -fx-font-weight: bold;");
+        startBtn.setStyle("-fx-background-color: #0288d1; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
         startBtn.setOnAction(e -> startManual());
 
@@ -168,21 +177,18 @@ public class LabController72 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
-    private Slider createSlider(String labelText, double min, double max, double val, VBox parent) {
-        Label label = new Label(labelText + " " + String.format("%.2f", val));
-        Slider slider = new Slider(min, max, val);
-        slider.valueProperty().addListener((o, old, newVal) -> {
-            label.setText(labelText + " " + String.format("%.2f", newVal.doubleValue()));
-            updatePhysics();
-        });
-        parent.getChildren().addAll(label, slider);
-        return slider;
-    }
-
     private TableColumn<Measurement, Double> createCol(String title, String property) {
         TableColumn<Measurement, Double> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
         return col;
+    }
+
+    private double getDoubleValue(TextField field, double defaultValue) {
+        try {
+            return Double.parseDouble(field.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     private void updatePhysics() {
@@ -193,7 +199,8 @@ public class LabController72 extends BaseLabController {
 
     private void startManual() {
         isAutoRunning = false;
-        runSimulation(volumeSlider.getValue());
+        double currentVolume = getDoubleValue(fieldVolume, 50.0);
+        runSimulation(currentVolume);
     }
 
     private void startAuto() {
@@ -211,7 +218,7 @@ public class LabController72 extends BaseLabController {
             return;
         }
         double nextV = autoQueue.poll();
-        volumeSlider.setValue(nextV);
+        fieldVolume.setText(String.valueOf(nextV));
         runSimulation(nextV);
     }
 
@@ -221,12 +228,13 @@ public class LabController72 extends BaseLabController {
             setControlsDisable(true);
             canvas.setMeasuring(true);
 
-            double rho = Double.parseDouble(fieldRho.getText());
-            double g = Double.parseDouble(fieldG.getText());
-            double S = Double.parseDouble(fieldS.getText());
-            double r_m = radiusSlider.getValue() * 1e-3;
-            double L_m = lengthSlider.getValue() * 1e-2;
-            double T = tempSlider.getValue();
+            double rho = getDoubleValue(fieldRho, 1000.0);
+            double g = getDoubleValue(fieldG, 9.81);
+            double S = getDoubleValue(fieldS, 0.005);
+
+            double r_m = getDoubleValue(fieldRadius, 0.20) * 1e-3;
+            double L_m = getDoubleValue(fieldLength, 10.0) * 1e-2;
+            double T = getDoubleValue(fieldTemp, 293.0);
             double V_m3 = v_cm3 * 1e-6;
 
             double h1 = 0.25;
@@ -265,12 +273,13 @@ public class LabController72 extends BaseLabController {
         canvas.setMeasuring(false);
         canvas.updateState(1.0, measuredTau, dropPct);
         try {
-            double r_m = radiusSlider.getValue() * 1e-3;
-            double L_m = lengthSlider.getValue() * 1e-2;
+            double r_m = getDoubleValue(fieldRadius, 0.20) * 1e-3;
+            double L_m = getDoubleValue(fieldLength, 10.0) * 1e-2;
             double V_m3 = V_cm3 * 1e-6;
-            double Patm = Double.parseDouble(fieldPatm.getText());
-            double R = Double.parseDouble(fieldR.getText());
-            double Mu = Double.parseDouble(fieldMu.getText());
+
+            double Patm = getDoubleValue(fieldPatm, 101325.0);
+            double R = getDoubleValue(fieldR, 8.31);
+            double Mu = getDoubleValue(fieldMu, 0.029);
 
             double calcEta = (Math.PI * Math.pow(r_m, 4) * deltaP * measuredTau) / (8.0 * V_m3 * L_m);
             double calcLambda = 1.86 * (calcEta / Patm) * Math.sqrt((R * T) / Mu);
@@ -337,10 +346,10 @@ public class LabController72 extends BaseLabController {
     }
 
     private void setControlsDisable(boolean disable) {
-        radiusSlider.setDisable(disable);
-        lengthSlider.setDisable(disable);
-        tempSlider.setDisable(disable);
-        volumeSlider.setDisable(disable);
+        fieldRadius.setDisable(disable);
+        fieldLength.setDisable(disable);
+        fieldTemp.setDisable(disable);
+        fieldVolume.setDisable(disable);
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);

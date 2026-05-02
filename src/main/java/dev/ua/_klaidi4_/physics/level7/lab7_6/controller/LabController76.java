@@ -30,8 +30,8 @@ public class LabController76 extends BaseLabController {
     private ObservableList<Measurement> data;
     private int idCounter = 1;
     private ComboBox<String> materialBox;
-    private Slider massSlider;
-    private Slider speedSlider;
+    private TextField massField;
+    private TextField speedField;
     private Button manualLogBtn;
     private Button powerBtn;
     private Button stopBtn;
@@ -47,7 +47,6 @@ public class LabController76 extends BaseLabController {
             {232.0, 230.0, 240.0, 59000.0},
             {420.0, 390.0, 410.0, 112000.0}
     };
-
     private final double P_FURNACE = 80.0;
     private final double EFFICIENCY = 0.65;
     private final double K_LOSS = 0.08;
@@ -102,21 +101,14 @@ public class LabController76 extends BaseLabController {
             updateUI();
         });
 
-        Label massLabel = new Label("Маса металу m: 0.300 кг");
-        massSlider = new Slider(0.100, 0.500, 0.300);
-        massSlider.setMajorTickUnit(0.1);
-        massSlider.setShowTickMarks(true);
-        massSlider.valueProperty().addListener((o, ov, nv) ->
-                massLabel.setText(String.format(Locale.US, "Маса металу m: %.3f кг", nv.doubleValue())));
+        massField = new TextField("0.300");
+        speedField = new TextField("5.0");
 
-        Label speedLabel = new Label("Швидкість симуляції: 5x");
-        speedSlider = new Slider(1.0, 50.0, 5.0);
-        speedSlider.setMajorTickUnit(10.0);
-        speedSlider.setShowTickMarks(true);
-        speedSlider.valueProperty().addListener((o, ov, nv) ->
-                speedLabel.setText(String.format(Locale.US, "Швидкість симуляції: %.0fx", nv.doubleValue())));
-
-        configBox.getChildren().addAll(new Label("Досліджуваний метал:"), materialBox, massLabel, massSlider, speedLabel, speedSlider);
+        configBox.getChildren().addAll(
+                createInputGroup("Досліджуваний метал:", materialBox),
+                createInputGroup("Маса металу m (кг):", massField),
+                createInputGroup("Швидкість симуляції (x):", speedField)
+        );
         configPane.setContent(configBox);
 
         manualLogBtn = new Button("📝 ЗАПИСАТИ ПОКАЗНИК");
@@ -221,12 +213,20 @@ public class LabController76 extends BaseLabController {
         updateUI();
     }
 
+    private double getDoubleValue(TextField field, double defaultValue) {
+        try {
+            return Double.parseDouble(field.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private void toggleHeater() {
         isHeaterOn = !isHeaterOn;
         if (isHeaterOn) {
             powerBtn.setText("⏹ ВИМКНУТИ ПІЧ");
             powerBtn.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8;");
-            massSlider.setDisable(true);
+            massField.setDisable(true);
             materialBox.setDisable(true);
             if (!isSimRunning) startSimulation();
         } else {
@@ -257,9 +257,9 @@ public class LabController76 extends BaseLabController {
         currentPhase = Phase.SOLID;
         lastLogTime = -999;
 
-        massSlider.setDisable(false);
+        massField.setDisable(false);
         materialBox.setDisable(false);
-        speedSlider.setDisable(false);
+        speedField.setDisable(false);
         manualLogBtn.setDisable(false);
         autoBtn.setDisable(false);
         stopBtn.setDisable(true);
@@ -289,7 +289,7 @@ public class LabController76 extends BaseLabController {
                 double dt = (now - lastTime) / 1_000_000_000.0;
                 lastTime = now;
 
-                double dtSim = dt * speedSlider.getValue();
+                double dtSim = dt * getDoubleValue(speedField, 5.0);
                 simTime += dtSim;
 
                 physicsTick(dtSim);
@@ -310,7 +310,7 @@ public class LabController76 extends BaseLabController {
         double cLiquid = MATERIALS[matIdx][2];
         double lambda = MATERIALS[matIdx][3];
 
-        double m = massSlider.getValue();
+        double m = getDoubleValue(massField, 0.300);
         double maxPhaseEnergy = lambda * m;
 
         double dQ = 0;
@@ -401,7 +401,7 @@ public class LabController76 extends BaseLabController {
         double lambda = MATERIALS[matIdx][3];
         double targetMelt = MATERIALS[matIdx][0];
 
-        double meltProg = phaseEnergy / (lambda * massSlider.getValue());
+        double meltProg = phaseEnergy / (lambda * getDoubleValue(massField, 0.300));
         canvas.updateState(isHeaterOn, currentTemp, meltProg, simTime, targetMelt);
     }
 
@@ -411,8 +411,8 @@ public class LabController76 extends BaseLabController {
         autoBtn.setDisable(true);
         manualLogBtn.setDisable(true);
         powerBtn.setDisable(true);
-        speedSlider.setValue(40.0);
-        speedSlider.setDisable(true);
+        speedField.setText("40.0");
+        speedField.setDisable(true);
 
         toggleHeater();
 
@@ -567,7 +567,7 @@ public class LabController76 extends BaseLabController {
         String matName = materialBox.getValue().split(" ")[0];
 
         double t1 = 20.0 + 273.15;
-        double m = massSlider.getValue();
+        double m = getDoubleValue(massField, 0.300);
 
         double dS1 = cSolid * m * Math.log(tk / t1);
         double dS2 = (lambda * m) / tk;

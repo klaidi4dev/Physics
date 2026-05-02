@@ -15,6 +15,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 
 public class LabController36 extends BaseLabController {
@@ -39,8 +40,6 @@ public class LabController36 extends BaseLabController {
     private Queue<AutoTestParam> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
     private String currentTaskName = "Ручний режим";
-
-    private final double FIXED_R = 10000.0;
 
     private static class AutoTestParam {
         double z, u0, f;
@@ -80,9 +79,7 @@ public class LabController36 extends BaseLabController {
         zField = new TextField("0.0");
         u0Field = new TextField("2.0");
         fField = new TextField("10000");
-
-        rField = new TextField(String.valueOf(FIXED_R));
-        rField.setDisable(true);
+        rField = new TextField("10000.0");
 
         autoStepsField = new TextField("10");
         autoStepsField.setStyle("-fx-background-color: #fff9c4; -fx-border-color: #fbc02d; -fx-border-radius: 4; -fx-padding: 6;");
@@ -92,7 +89,7 @@ public class LabController36 extends BaseLabController {
                 createInputGroup("Напруга генератора U0 (В):", u0Field),
                 createInputGroup("Частота генератора f (Гц):", fField),
                 createInputGroup("Опір резистора R (Ом):", rField),
-                createInputGroup("Кількість вимірів (для авторежиму):", autoStepsField) // Додаємо в UI
+                createInputGroup("Кількість вимірів (для авторежиму):", autoStepsField)
         );
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
@@ -197,6 +194,7 @@ public class LabController36 extends BaseLabController {
         zField.setDisable(disable);
         u0Field.setDisable(disable);
         fField.setDisable(disable);
+        rField.setDisable(disable);
         autoStepsField.setDisable(disable);
     }
 
@@ -211,9 +209,10 @@ public class LabController36 extends BaseLabController {
 
     private void startManual() {
         try {
-            Double.parseDouble(zField.getText());
-            Double.parseDouble(u0Field.getText());
-            Double.parseDouble(fField.getText());
+            Double.parseDouble(zField.getText().replace(',', '.'));
+            Double.parseDouble(u0Field.getText().replace(',', '.'));
+            Double.parseDouble(fField.getText().replace(',', '.'));
+            Double.parseDouble(rField.getText().replace(',', '.'));
             isAutoRunning = false;
             currentTaskName = "Ручні вимірювання";
             runMeasurementCycle();
@@ -224,11 +223,12 @@ public class LabController36 extends BaseLabController {
 
     private void startAutoTask(int taskNumber) {
         try {
-            int steps = Integer.parseInt(autoStepsField.getText());
+            int steps = Integer.parseInt(autoStepsField.getText().replace(',', '.'));
             if (steps < 2) {
                 showAlert("Увага", "Кількість вимірів має бути не менше 2.");
                 return;
             }
+            Double.parseDouble(rField.getText().replace(',', '.')); // Перевірка поля R
 
             clearTable();
             autoQueue.clear();
@@ -256,7 +256,7 @@ public class LabController36 extends BaseLabController {
             processNextAuto();
 
         } catch (NumberFormatException ex) {
-            showAlert("Помилка", "Введіть ціле число в поле кількості вимірів.");
+            showAlert("Помилка", "Перевірте правильність вводу кількості вимірів та опору.");
         }
     }
 
@@ -269,9 +269,9 @@ public class LabController36 extends BaseLabController {
             return;
         }
         AutoTestParam param = autoQueue.poll();
-        zField.setText(String.format(java.util.Locale.US, "%.1f", param.z));
-        u0Field.setText(String.format(java.util.Locale.US, "%.1f", param.u0));
-        fField.setText(String.format(java.util.Locale.US, "%.0f", param.f));
+        zField.setText(String.format(Locale.US, "%.1f", param.z));
+        u0Field.setText(String.format(Locale.US, "%.1f", param.u0));
+        fField.setText(String.format(Locale.US, "%.0f", param.f));
         runMeasurementCycle();
     }
 
@@ -280,28 +280,28 @@ public class LabController36 extends BaseLabController {
         liveStatusLabel.setText("Статус: ЗБІР ДАНИХ...");
         liveStatusLabel.setStyle("-fx-text-fill: cyan;");
 
-        double z = Double.parseDouble(zField.getText());
-        double u0 = Double.parseDouble(u0Field.getText());
-        double f = Double.parseDouble(fField.getText());
-
+        double z = Double.parseDouble(zField.getText().replace(',', '.'));
+        double u0 = Double.parseDouble(u0Field.getText().replace(',', '.'));
+        double f = Double.parseDouble(fField.getText().replace(',', '.'));
+        double r = Double.parseDouble(rField.getText().replace(',', '.'));
         double mTheo = 0.006 * Math.exp(-0.015 * z * z);
-        double exactEps = (2 * Math.PI * f * u0 * mTheo) / FIXED_R;
+        double exactEps = (2 * Math.PI * f * u0 * mTheo) / r;
         double noiseEps = exactEps * (Math.random() - 0.5) * 0.03;
         final double measuredEps = exactEps + noiseEps;
 
-        canvas.setOnReadyCallback(() -> Platform.runLater(() -> finalizeMeasurement(z, u0, f, measuredEps)));
+        canvas.setOnReadyCallback(() -> Platform.runLater(() -> finalizeMeasurement(z, u0, f, r, measuredEps)));
         canvas.animateDevices(z, u0, f, measuredEps);
     }
 
-    private void finalizeMeasurement(double z, double u0, double f, double eps) {
+    private void finalizeMeasurement(double z, double u0, double f, double r, double eps) {
         liveStatusLabel.setText("Статус: ВИМІР ЗАФІКСОВАНО");
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
 
-        double mExpH = (eps * FIXED_R) / (2 * Math.PI * f * u0);
+        double mExpH = (eps * r) / (2 * Math.PI * f * u0);
         double mExpMH = mExpH * 1000.0;
 
-        liveEpsLabel.setText(String.format("ε0 = %.4f В", eps));
-        liveMLabel.setText(String.format("M = %.2f мГн", mExpMH));
+        liveEpsLabel.setText(String.format(Locale.US, "ε0 = %.4f В", eps));
+        liveMLabel.setText(String.format(Locale.US, "M = %.2f мГн", mExpMH));
 
         Measurement meas = new Measurement(
                 idCounter++, z, u0, f,
@@ -346,10 +346,10 @@ public class LabController36 extends BaseLabController {
         } else if (currentTaskName.contains("Таблиця 3")) {
             analysisText = "Зі зміною частоти f значення ЕРС зростає лінійно, проте розраховане M залишається сталим.";
         } else {
-            analysisText = String.format("Проміжний аналіз: M_сер = %.2f мГн.", avgM);
+            analysisText = String.format(Locale.US, "Проміжний аналіз: M_сер = %.2f мГн.", avgM);
         }
 
-        String conclusion = String.format(
+        String conclusion = String.format(Locale.US,
                 "ОБРОБКА РЕЗУЛЬТАТІВ (%s):\n" +
                         "1. Коефіцієнт взаємної індукції M розраховано за формулою (10): M = (ε0·R) / (2π·f·U0).\n" +
                         "2. Аналіз залежностей: %s\n" +

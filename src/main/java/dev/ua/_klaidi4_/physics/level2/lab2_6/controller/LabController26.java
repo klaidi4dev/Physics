@@ -17,6 +17,8 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.Locale;
+
 public class LabController26 extends BaseLabController {
 
     private ResistanceCanvas canvas;
@@ -27,16 +29,19 @@ public class LabController26 extends BaseLabController {
     private VBox bridgePanel, thermoPanel;
     private ComboBox<String> targetResistorBox;
     private TextField fieldRetalon;
-    private Slider lengthSlider;
     private TextField lengthField;
+    private TextField maxTempField;
+    private TextField stepTempField;
     private Button heatBtn;
-    private Button autoBtn, recordBtn, calcBtn, clearBtn;
+    private Button autoBtn, recordBtn, clearBtn;
     private Label liveStatusLabel, liveModeLabel, liveIgLabel, liveTempLabel, liveRtLabel;
     private LineChart<Number, Number> chart;
     private XYChart.Series<Number, Number> dataSeries;
-    private final double REAL_R1 = 150.0;
-    private final double REAL_R2 = 300.0;
-    private final double R_COPPER_0 = 10.0;
+
+    private final double REAL_R1 = 120.2;
+    private final double REAL_R2 = 60.1;
+    private final double REAL_R3 = 180.3;
+    private final double R_COPPER_0 = 339.8;
     private final double ALPHA_COPPER = 0.0043;
 
     private int currentMode = 1;
@@ -82,7 +87,10 @@ public class LabController26 extends BaseLabController {
         bridgePanel.setPadding(new Insets(5));
 
         targetResistorBox = new ComboBox<>();
-        targetResistorBox.getItems().addAll("Резистор R1", "Резистор R2", "R1 + R2 (Послідовно)", "R1 || R2 (Паралельно)");
+        targetResistorBox.getItems().addAll(
+                "Резистор R1", "Резистор R2", "Резистор R3",
+                "Послідовне (R1+R2+R3)", "Паралельне (R1||R2||R3)"
+        );
         targetResistorBox.getSelectionModel().selectFirst();
         targetResistorBox.setMaxWidth(Double.MAX_VALUE);
         targetResistorBox.setOnAction(e -> updateBridgePhysics());
@@ -90,66 +98,56 @@ public class LabController26 extends BaseLabController {
         fieldRetalon = new TextField("100.0");
         fieldRetalon.textProperty().addListener((o, old, val) -> updateBridgePhysics());
 
-        lengthSlider = new Slider(0, 1000, 500);
-        lengthSlider.setShowTickMarks(true);
-        lengthSlider.setMajorTickUnit(200);
         lengthField = new TextField("500.0");
-
-        lengthSlider.valueProperty().addListener((o, old, val) -> {
-            if(!lengthField.isFocused()) {
-                lengthField.setText(String.format("%.1f", val.doubleValue()).replace(',', '.'));
+        lengthField.textProperty().addListener((o, old, val) -> {
+            if(lengthField.isFocused()) {
+                updateBridgePhysics();
             }
-            updateBridgePhysics();
-        });
-
-        lengthField.setOnAction(e -> {
-            try {
-                double val = Double.parseDouble(lengthField.getText().replace(',', '.'));
-                if (val >= 0 && val <= 1000) lengthSlider.setValue(val);
-            } catch (Exception ignored) {}
         });
 
         bridgePanel.getChildren().addAll(
                 createInputGroup("Об'єкт вимірювання (Rx):", targetResistorBox),
                 createInputGroup("Опір еталона Rет (Ом):", fieldRetalon),
-                new Label("Повзунок реохорда l1 (мм):"),
-                lengthSlider,
-                lengthField
+                createInputGroup("Точка контакту l1 (мм):", lengthField)
         );
 
         thermoPanel = new VBox(10);
         thermoPanel.setPadding(new Insets(5));
+
+        maxTempField = new TextField("80.0");
+        stepTempField = new TextField("5.0");
+
         heatBtn = new Button("▶ ПОЧАТИ НАГРІВАННЯ");
         heatBtn.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold;");
         heatBtn.setMaxWidth(Double.MAX_VALUE);
         heatBtn.setOnAction(e -> startHeatingManual());
-        thermoPanel.getChildren().add(heatBtn);
+
+        thermoPanel.getChildren().addAll(
+                createInputGroup("Кінцева температура (°C):", maxTempField),
+                createInputGroup("Крок нагрівання (°C):", stepTempField),
+                heatBtn
+        );
 
         VBox dynamicControlBox = new VBox(bridgePanel);
         TitledPane controlPane = new TitledPane("Параметри установки", dynamicControlBox);
         controlPane.setCollapsible(false);
-
-        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ");
-        autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
-        autoBtn.setMaxWidth(Double.MAX_VALUE);
-        autoBtn.setOnAction(e -> startAuto());
 
         recordBtn = new Button("✍ ЗАПИСАТИ ПОКАЗНИКИ");
         recordBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         recordBtn.setMaxWidth(Double.MAX_VALUE);
         recordBtn.setOnAction(e -> recordMeasurement());
 
-        calcBtn = new Button("🖩 ОБРОБИТИ РЕЗУЛЬТАТИ");
-        calcBtn.setStyle("-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold;");
-        calcBtn.setMaxWidth(Double.MAX_VALUE);
-        calcBtn.setOnAction(e -> calculateResults());
+        autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ");
+        autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
+        autoBtn.setMaxWidth(Double.MAX_VALUE);
+        autoBtn.setOnAction(e -> startAuto());
 
         clearBtn = new Button("🗑 ОЧИСТИТИ ДАНІ");
         clearBtn.setStyle("-fx-background-color: #ef6c00; -fx-text-fill: white; -fx-font-weight: bold;");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
         clearBtn.setOnAction(e -> resetAll());
 
-        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, modePane, controlPane, autoBtn, recordBtn, calcBtn, clearBtn));
+        ScrollPane scrollLeft = new ScrollPane(new VBox(10, title, modePane, controlPane, recordBtn, autoBtn, clearBtn));
         scrollLeft.setFitToWidth(true);
         scrollLeft.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         leftPanel.getChildren().add(scrollLeft);
@@ -221,13 +219,12 @@ public class LabController26 extends BaseLabController {
         table.setPrefHeight(150);
 
         VBox statsBox = createStatsBox();
-        HBox bottomHBox = new HBox(10, table, statsBox);
-        HBox.setHgrow(statsBox, Priority.ALWAYS);
-        bottomHBox.setPadding(new Insets(5));
+        VBox bottomPanel = new VBox(5, table, statsBox);
+        bottomPanel.setPadding(new Insets(5));
 
         this.setLeft(leftPanel);
         this.setCenter(centerTopPanel);
-        this.setBottom(bottomHBox);
+        this.setBottom(bottomPanel);
 
         switchMode(1);
     }
@@ -276,12 +273,23 @@ public class LabController26 extends BaseLabController {
         canvas.setMode(mode);
     }
 
+    private String getShortTargetName() {
+        int idx = targetResistorBox.getSelectionModel().getSelectedIndex();
+        if (idx == 0) return "R1";
+        if (idx == 1) return "R2";
+        if (idx == 2) return "R3";
+        if (idx == 3) return "Послідовне";
+        if (idx == 4) return "Паралельне";
+        return "R1";
+    }
+
     private double getCurrentRxReal() {
         int idx = targetResistorBox.getSelectionModel().getSelectedIndex();
         if (idx == 0) return REAL_R1;
         if (idx == 1) return REAL_R2;
-        if (idx == 2) return REAL_R1 + REAL_R2;
-        return (REAL_R1 * REAL_R2) / (REAL_R1 + REAL_R2);
+        if (idx == 2) return REAL_R3;
+        if (idx == 3) return REAL_R1 + REAL_R2 + REAL_R3;
+        return 1.0 / (1.0/REAL_R1 + 1.0/REAL_R2 + 1.0/REAL_R3);
     }
 
     private void updateBridgePhysics() {
@@ -290,36 +298,43 @@ public class LabController26 extends BaseLabController {
         double rEt = 100.0;
         try { rEt = Double.parseDouble(fieldRetalon.getText().replace(',', '.')); } catch(Exception ignored){}
 
+        double l1 = 500.0;
+        try {
+            l1 = Double.parseDouble(lengthField.getText().replace(',', '.'));
+            if(l1 < 0) l1 = 0;
+            if(l1 > 1000) l1 = 1000;
+        } catch(Exception ignored){}
+
         double rxReal = getCurrentRxReal();
-        double l1 = lengthSlider.getValue();
         double vTop = 5.0 * (rEt / (rxReal + rEt));
         double vBot = 5.0 * (1000.0 - l1) / 1000.0;
         currentIg = (vTop - vBot) / 100.0 * 1e6;
 
-        String targetName = targetResistorBox.getValue().split(" ")[0];
+        String targetName = getShortTargetName();
 
+        final double finalL1 = l1;
         Platform.runLater(() -> {
             if (Math.abs(currentIg) < 1.0) {
-                liveIgLabel.setText(String.format("Ig = %.1f мкА", currentIg));
+                liveIgLabel.setText(String.format(Locale.US, "Ig = %.1f мкА", currentIg));
                 liveIgLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-weight: bold;");
                 liveStatusLabel.setText("Статус: СКОМПЕНСОВАНО!");
             } else {
-                liveIgLabel.setText(String.format("Ig = %.1f мкА", currentIg));
+                liveIgLabel.setText(String.format(Locale.US, "Ig = %.1f мкА", currentIg));
                 liveIgLabel.setStyle("-fx-text-fill: #ff3333; -fx-font-weight: bold;");
                 liveStatusLabel.setText("Статус: НАЛАШТУВАННЯ...");
             }
-            canvas.updateBridge(l1, currentIg, targetName);
+            canvas.updateBridge(finalL1, currentIg, targetName);
         });
     }
 
     private void updateThermoPhysics() {
         double rt = R_COPPER_0 * (1 + ALPHA_COPPER * currentTemp);
-        double noise = (Math.random() - 0.5) * 0.05;
+        double noise = (Math.random() - 0.5) * 0.5;
         double measuredRt = rt + noise;
 
         Platform.runLater(() -> {
-            liveTempLabel.setText(String.format("t = %.1f °C", currentTemp));
-            liveRtLabel.setText(String.format("Rt = %.2f Ом", measuredRt));
+            liveTempLabel.setText(String.format(Locale.US, "t = %.1f °C", currentTemp));
+            liveRtLabel.setText(String.format(Locale.US, "Rt = %.2f Ом", measuredRt));
             canvas.updateThermostat(currentTemp, isAutoRunning || heatBtn.isDisabled());
         });
     }
@@ -328,12 +343,13 @@ public class LabController26 extends BaseLabController {
         modeBox.setDisable(disable);
         targetResistorBox.setDisable(disable);
         fieldRetalon.setDisable(disable);
-        lengthSlider.setDisable(disable);
         lengthField.setDisable(disable);
+        maxTempField.setDisable(disable);
+        stepTempField.setDisable(disable);
         heatBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
-        calcBtn.setDisable(disable);
+        recordBtn.setDisable(disable);
     }
 
     private void startAuto() {
@@ -355,7 +371,7 @@ public class LabController26 extends BaseLabController {
         setControlsDisable(true);
 
         new Thread(() -> {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 5; i++) {
                 final int idx = i;
                 Platform.runLater(() -> targetResistorBox.getSelectionModel().select(idx));
                 try { Thread.sleep(500); } catch (Exception ignored) {}
@@ -364,7 +380,9 @@ public class LabController26 extends BaseLabController {
                 double rxReal = getCurrentRxReal();
                 double targetL1 = 1000.0 * rxReal / (rxReal + rEt);
 
-                double current = lengthSlider.getValue();
+                double current = 500.0;
+                try { current = Double.parseDouble(lengthField.getText().replace(',', '.')); } catch (Exception ignored) {}
+
                 double step = (targetL1 > current) ? 25.0 : -25.0;
 
                 Platform.runLater(() -> liveStatusLabel.setText("Статус: ПОШУК НУЛЯ..."));
@@ -378,19 +396,19 @@ public class LabController26 extends BaseLabController {
                     currentIg = (vTop - vBot) / 100.0 * 1e6;
 
                     Platform.runLater(() -> {
-                        lengthSlider.setValue(val);
-                        liveIgLabel.setText(String.format("Ig = %.1f мкА", currentIg));
-                        canvas.updateBridge(val, currentIg, targetResistorBox.getValue().split(" ")[0]);
+                        lengthField.setText(String.format(Locale.US, "%.1f", val));
+                        liveIgLabel.setText(String.format(Locale.US, "Ig = %.1f мкА", currentIg));
+                        canvas.updateBridge(val, currentIg, getShortTargetName());
                     });
                     try { Thread.sleep(50); } catch (Exception ignored) {}
                 }
 
                 currentIg = 0.0;
                 Platform.runLater(() -> {
-                    lengthSlider.setValue(targetL1);
+                    lengthField.setText(String.format(Locale.US, "%.1f", targetL1));
                     liveIgLabel.setText("Ig = 0.0 мкА");
                     liveIgLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-weight: bold;");
-                    canvas.updateBridge(targetL1, 0.0, targetResistorBox.getValue().split(" ")[0]);
+                    canvas.updateBridge(targetL1, 0.0, getShortTargetName());
                     recordMeasurement();
                 });
                 try { Thread.sleep(1000); } catch (Exception ignored) {}
@@ -400,12 +418,23 @@ public class LabController26 extends BaseLabController {
                 isAutoRunning = false;
                 setControlsDisable(false);
                 liveStatusLabel.setText("Статус: АВТО ЗАВЕРШЕНО");
-                calculateResults();
             });
         }).start();
     }
 
     private void runAutoThermo() {
+        double maxT = 80.0;
+        double stepT = 5.0;
+        try {
+            maxT = Double.parseDouble(maxTempField.getText().replace(',', '.'));
+            stepT = Double.parseDouble(stepTempField.getText().replace(',', '.'));
+        } catch (Exception ignored) {}
+
+        if(stepT <= 0) stepT = 5.0;
+
+        final double finalMaxT = maxT;
+        final double finalStepT = stepT;
+
         data.clear();
         rebuildChartSeries();
         idCounter = 1;
@@ -416,19 +445,20 @@ public class LabController26 extends BaseLabController {
         new Thread(() -> {
             Platform.runLater(() -> liveStatusLabel.setText("Статус: НАГРІВАННЯ..."));
 
-            for (double t = 20; t <= 90; t += 5) {
+            for (double t = 20; t <= finalMaxT; t += finalStepT) {
                 if (!isAutoRunning) break;
                 currentTemp = t;
                 updateThermoPhysics();
 
                 final double tempToRecord = t;
-                final double rtToRecord = R_COPPER_0 * (1 + ALPHA_COPPER * t) + (Math.random() - 0.5) * 0.05;
+                final double rtToRecord = R_COPPER_0 * (1 + ALPHA_COPPER * t) + (Math.random() - 0.5) * 0.5;
 
                 Platform.runLater(() -> {
                     Measurement m = new Measurement(idCounter++, "Термостат", "Мідь",
                             tempToRecord, 0, 0, Math.round(rtToRecord * 100.0) / 100.0);
                     data.add(m);
                     dataSeries.getData().add(new XYChart.Data<>(m.getTemperature(), m.getResistance()));
+                    calculateResults();
                 });
                 try { Thread.sleep(600); } catch (Exception ignored) {}
             }
@@ -437,21 +467,25 @@ public class LabController26 extends BaseLabController {
                 isAutoRunning = false;
                 setControlsDisable(false);
                 liveStatusLabel.setText("Статус: ОХОЛОДЖЕННЯ");
-                canvas.updateThermostat(90.0, false);
-                calculateResults();
+                canvas.updateThermostat(finalMaxT, false);
             });
         }).start();
     }
 
     private void recordMeasurement() {
         if (currentMode == 1) {
-            String target = targetResistorBox.getValue().split(" ")[0];
-            double l1 = Math.round(lengthSlider.getValue() * 10.0) / 10.0;
+            String target = getShortTargetName();
+
+            double l1 = 500.0;
+            try { l1 = Double.parseDouble(lengthField.getText().replace(',', '.')); } catch (Exception ignored){}
+            l1 = Math.round(l1 * 10.0) / 10.0;
+
             double rEt = Double.parseDouble(fieldRetalon.getText().replace(',', '.'));
             double rxCalc = rEt * (l1 / (1000.0 - l1));
 
-            Measurement m = new Measurement(idCounter++, "Міст", target, 0, l1, rEt, Math.round(rxCalc * 100.0) / 100.0);
+            Measurement m = new Measurement(idCounter++, "Міст", target, 0, l1, rEt, Math.round(rxCalc * 10.0) / 10.0);
             data.add(m);
+            calculateResults();
         }
     }
 
@@ -463,42 +497,45 @@ public class LabController26 extends BaseLabController {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
             return;
         }
+
         if (currentMode == 1) {
-            double r1 = 0, r2 = 0, rSer = 0, rPar = 0;
+            double r1 = 0, r2 = 0, r3 = 0, rSer = 0, rPar = 0;
             for (Measurement m : data) {
-                if (m.getTarget().equals("Резистор") && m.getId() == 1) r1 = m.getResistance();
                 if (m.getTarget().equals("R1")) r1 = m.getResistance();
                 if (m.getTarget().equals("R2")) r2 = m.getResistance();
-                if (m.getTarget().equals("R1+R2")) rSer = m.getResistance();
-                if (m.getTarget().equals("R1||R2")) rPar = m.getResistance();
+                if (m.getTarget().equals("R3")) r3 = m.getResistance();
+                if (m.getTarget().equals("Послідовне")) rSer = m.getResistance();
+                if (m.getTarget().equals("Паралельне")) rPar = m.getResistance();
             }
             sb.append("Дослід 1. Перевірка законів з'єднання провідників:\n");
-            if (r1 > 0 && r2 > 0) {
-                double theorSer = r1 + r2;
-                double theorPar = (r1 * r2) / (r1 + r2);
-                sb.append(String.format("Виміряно: R1 = %.1f Ом, R2 = %.1f Ом.\n", r1, r2));
-                if (rSer > 0) sb.append(String.format("Послідовне: Експ = %.1f Ом, Теор = %.1f Ом.\n", rSer, theorSer));
-                if (rPar > 0) sb.append(String.format("Паралельне: Експ = %.1f Ом, Теор = %.1f Ом.\n", rPar, theorPar));
+            if (r1 > 0 && r2 > 0 && r3 > 0) {
+                double theorSer = r1 + r2 + r3;
+                double theorPar = 1.0 / (1.0/r1 + 1.0/r2 + 1.0/r3);
+                sb.append(String.format(Locale.US, "Виміряно: R1 = %.1f Ом, R2 = %.1f Ом, R3 = %.1f Ом.\n", r1, r2, r3));
+                if (rSer > 0) sb.append(String.format(Locale.US, "Послідовне: Експ = %.1f Ом, Теор = %.1f Ом.\n", rSer, theorSer));
+                if (rPar > 0) sb.append(String.format(Locale.US, "Паралельне: Експ = %.1f Ом, Теор = %.1f Ом.\n", rPar, theorPar));
                 sb.append("Висновок: Закони послідовного та паралельного з'єднання підтверджуються.");
             } else {
-                sb.append("Недостатньо даних для перевірки з'єднань.");
+                sb.append("Недостатньо даних для перевірки з'єднань (виміряйте R1, R2, R3).");
             }
         } else {
+            if (data.size() < 2) {
+                sb.append("Недостатньо даних для розрахунку температурного коефіцієнта.");
+                finalResultLabel.setText(sb.toString());
+                return;
+            }
             Measurement m20 = data.get(0);
-            Measurement m90 = data.get(data.size() - 1);
+            Measurement m80 = data.get(data.size() - 1);
 
             double r0Exp = m20.getResistance() / (1 + ALPHA_COPPER * m20.getTemperature());
-            double alphaExp = (m90.getResistance() - m20.getResistance()) /
-                    (m20.getResistance() * m90.getTemperature() - m90.getResistance() * m20.getTemperature());
-
-            double alphaSimple = (m90.getResistance() - r0Exp) / (r0Exp * m90.getTemperature());
+            double alphaSimple = (m80.getResistance() - r0Exp) / (r0Exp * m80.getTemperature());
 
             sb.append("Дослід 2. Залежність опору металу від температури:\n");
             sb.append("1. Побудовано лінійний графік Rt = f(t).\n");
-            sb.append(String.format("2. Шляхом екстраполяції визначено опір при 0°C: R0 = %.2f Ом.\n", r0Exp));
-            sb.append(String.format("3. Розраховано температурний коефіцієнт: α = %.5f K^-1.\n", alphaSimple));
-            sb.append(String.format("4. Табличне значення для міді: α_теор = %.4f K^-1.\n", ALPHA_COPPER));
-            sb.append("Висновок: Опір металів лінійно зростає з температурою.");
+            sb.append(String.format(Locale.US, "2. Шляхом екстраполяції визначено опір при 0°C: R0 = %.1f Ом.\n", r0Exp));
+            sb.append(String.format(Locale.US, "3. Розраховано температурний коефіцієнт: α = %.5f K^-1.\n", alphaSimple));
+            sb.append(String.format(Locale.US, "4. Табличне значення для міді: α_теор = %.4f K^-1.\n", ALPHA_COPPER));
+            sb.append("Висновок: Опір металів лінійно зростає з підвищенням температури.");
         }
 
         finalResultLabel.setText(sb.toString());
@@ -510,7 +547,7 @@ public class LabController26 extends BaseLabController {
         idCounter = 1;
         finalResultLabel.setText("Обробка результатів: -");
         if (currentMode == 1) {
-            lengthSlider.setValue(500);
+            lengthField.setText("500.0");
             updateBridgePhysics();
         } else {
             currentTemp = 20.0;

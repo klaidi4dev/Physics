@@ -128,12 +128,12 @@ public class MutualInductionCanvas extends Canvas {
         gc.fillRect(x + 20, y + 40, 70, 30);
         gc.setFill(Color.RED);
         gc.setFont(Font.font("Monospaced", FontWeight.BOLD, 16));
-        gc.fillText(String.format("%.1f V", currentU0), x + 25, y + 62);
+        gc.fillText(String.format(java.util.Locale.US, "%.1f V", currentU0), x + 25, y + 62);
 
         gc.setFill(Color.BLACK);
         gc.fillRect(x + 100, y + 40, 80, 30);
         gc.setFill(Color.RED);
-        gc.fillText(String.format("%.0f Hz", currentF), x + 105, y + 62);
+        gc.fillText(String.format(java.util.Locale.US, "%.0f Hz", currentF), x + 105, y + 62);
 
         gc.setFill(Color.web("#4b5563"));
         gc.fillOval(x + 35, y + 85, 25, 25);
@@ -253,7 +253,7 @@ public class MutualInductionCanvas extends Canvas {
         gc.stroke();
 
         gc.setStroke(Color.web("#1e40af"));
-        double l2X = (getWidth() / 2) + (currentZ * 12);
+        double l2X = (getWidth() / 2) + (currentZ * 12) - 30;
         gc.beginPath();
         gc.moveTo(470, 180);
         gc.quadraticCurveTo(470, 250, l2X, 295);

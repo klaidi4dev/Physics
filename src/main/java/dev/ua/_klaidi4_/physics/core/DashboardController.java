@@ -1,7 +1,7 @@
 package dev.ua._klaidi4_.physics.core;
 
 import dev.ua._klaidi4_.physics.core.brigade.BrigadeConfig;
-import dev.ua._klaidi4_.physics.core.utils.DocumentationManager; // Доданий імпорт нашого менеджера
+import dev.ua._klaidi4_.physics.core.utils.DocumentationManager;
 import dev.ua._klaidi4_.physics.level1.lab1_1.controller.LabController11;
 import dev.ua._klaidi4_.physics.level1.lab1_10.controller.LabController110;
 import dev.ua._klaidi4_.physics.level1.lab1_11.controller.LabController111;
@@ -30,6 +30,9 @@ import dev.ua._klaidi4_.physics.level3.lab3_4.controller.LabController34;
 import dev.ua._klaidi4_.physics.level3.lab3_5.controller.LabController35;
 import dev.ua._klaidi4_.physics.level3.lab3_6.controller.LabController36;
 
+import dev.ua._klaidi4_.physics.level3.lab3_7.controller.LabController37;
+import dev.ua._klaidi4_.physics.level3.lab3_8.controller.LabController38;
+import dev.ua._klaidi4_.physics.level3.lab3_9.controller.LabController39;
 import dev.ua._klaidi4_.physics.level4.lab4_1.controller.LabController41;
 import dev.ua._klaidi4_.physics.level4.lab4_2.controller.LabController42;
 import dev.ua._klaidi4_.physics.level4.lab4_3.controller.LabController43;
@@ -220,7 +223,10 @@ public class DashboardController extends BorderPane {
                 createLabCard("3-3", "Питомий заряд електрона", "Визначення питомого заряду електрона методом магнетного фокусування розбіжного пучка.", LabController33::new),
                 createLabCard("3-4", "Поле на осі соленоїда", "Визначення напруженості магнетного поля в різних точках вздовж осі соленоїда.", LabController34::new),
                 createLabCard("3-5", "Індуктивність соленоїда", "Визначення індуктивності соленоїда за допомогою ЛАТР.", LabController35::new),
-                createLabCard("3-6", "Взаємна індукція", "Дослідження явища взаємної індукції двох коаксіально розміщених котушок.", LabController36::new)
+                createLabCard("3-6", "Взаємна індукція", "Дослідження явища взаємної індукції двох коаксіально розміщених котушок.", LabController36::new),
+                createLabCard("3-7", "Магнітна проникність", "Визначення відносної магнетної проникності магнетиків з допомогою містка Максвелла.", LabController37::new),
+                createLabCard("3-8", "Петля гістерезису", "Дослідження кривих намагнечування та петель гістерезису феромагнетиків з допомогою осцилографа.", LabController38::new),
+                createLabCard("3-9", "Точка Кюрі", "Визначення точки Кюрі феромагнетика.", LabController39::new)
         );
 
         registerCategory("Частина 4: Коливання",

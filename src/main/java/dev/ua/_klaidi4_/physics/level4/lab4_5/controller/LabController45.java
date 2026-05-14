@@ -25,6 +25,7 @@ public class LabController45 extends BaseLabController {
     private TableView<Measurement> table;
     private ObservableList<Measurement> data;
     private int idCounter = 1;
+    private TextField nuField;
     private TextField tauField;
     private TextField l0Field;
     private TextField deltaLField;
@@ -74,6 +75,7 @@ public class LabController45 extends BaseLabController {
         VBox configBox = new VBox(12);
         configBox.setPadding(new Insets(5));
 
+        nuField = new TextField("50.0");
         tauField = new TextField("0.002");
         l0Field = new TextField("1.05");
         deltaLField = new TextField("0.05");
@@ -84,6 +86,7 @@ public class LabController45 extends BaseLabController {
         fSlider.setMajorTickUnit(5.0);
         fValueLabel = new Label("Натяг струни F = 0.5 Н");
 
+        nuField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         tauField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         l0Field.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
         deltaLField.textProperty().addListener((o, ov, nv) -> applyPhysicsSettings());
@@ -95,6 +98,7 @@ public class LabController45 extends BaseLabController {
         });
 
         configBox.getChildren().addAll(
+                createInputGroup("Частота генератора ν (Гц):", nuField),
                 createInputGroup("Лінійна густина τ (кг/м):", tauField),
                 createInputGroup("Початкова довжина l0 (м):", l0Field),
                 createInputGroup("Зміна довжини Δl (м):", deltaLField),
@@ -196,13 +200,14 @@ public class LabController45 extends BaseLabController {
 
     private void applyPhysicsSettings() {
         try {
+            double targetNu = Double.parseDouble(nuField.getText());
             double tau = Double.parseDouble(tauField.getText());
             double l0 = Double.parseDouble(l0Field.getText());
             double deltaL = Double.parseDouble(deltaLField.getText());
             double cosPhi = Double.parseDouble(cosPhiField.getText());
             double lActive = l0 - deltaL;
 
-            canvas.setPhysicsParameters(fSlider.getValue(), tau, cosPhi, lActive);
+            canvas.setPhysicsParameters(fSlider.getValue(), tau, cosPhi, lActive, targetNu);
             updateDashboard();
         } catch (NumberFormatException ignored) {}
     }
@@ -246,6 +251,7 @@ public class LabController45 extends BaseLabController {
 
     private void setControlsDisable(boolean disable) {
         fSlider.setDisable(disable);
+        nuField.setDisable(disable);
         tauField.setDisable(disable);
         l0Field.setDisable(disable);
         deltaLField.setDisable(disable);
@@ -320,8 +326,10 @@ public class LabController45 extends BaseLabController {
             double l0 = Double.parseDouble(l0Field.getText());
             double deltaL = Double.parseDouble(deltaLField.getText());
             double cosPhi = Double.parseDouble(cosPhiField.getText());
+            double targetTrueNu = Double.parseDouble(nuField.getText());
+
             double nuExp = (n / (2.0 * (l0 - deltaL))) * Math.sqrt(f / (tau * (1.0 + cosPhi)));
-            double targetTrueNu = 50.0;
+
             double error = Math.abs(nuExp - targetTrueNu) / targetTrueNu * 100.0;
 
             Measurement m = new Measurement(
@@ -373,7 +381,7 @@ public class LabController45 extends BaseLabController {
                         "1. Середня експериментальна частота генератора: ν_сер = %.2f Гц.\n" +
                         "2. Максимальна відносна похибка вимірювання: ε_max = %.1f %%.\n" +
                         "ВИСНОВОК: Зафіксовано обернено пропорційну залежність між кількістю пучностей n " +
-                        "та коренем із сили натягу струни. Отримана частота відповідає частоті живлення (≈50 Гц).",
+                        "та коренем із сили натягу струни. Отримана частота відповідає заданій частоті мультивібратора.",
                 avgNu, maxError
         );
 

@@ -4,6 +4,7 @@ module dev.ua._klaidi4_.physics {
     requires static lombok;
     requires org.apache.pdfbox;
     requires java.desktop;
+    requires javafx.web;
 
     opens dev.ua._klaidi4_.physics.level1.lab1_1.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level1.lab1_2.model to javafx.base;
@@ -31,6 +32,9 @@ module dev.ua._klaidi4_.physics {
     opens dev.ua._klaidi4_.physics.level3.lab3_4.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level3.lab3_5.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level3.lab3_6.model to javafx.base;
+    opens dev.ua._klaidi4_.physics.level3.lab3_7.model to javafx.base;
+    opens dev.ua._klaidi4_.physics.level3.lab3_8.model to javafx.base;
+    opens dev.ua._klaidi4_.physics.level3.lab3_9.model to javafx.base;
 
     opens dev.ua._klaidi4_.physics.level4.lab4_1.model to javafx.base;
     opens dev.ua._klaidi4_.physics.level4.lab4_2.model to javafx.base;

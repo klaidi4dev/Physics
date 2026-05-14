@@ -203,11 +203,24 @@ public class LabController35 extends BaseLabController {
     private TableColumn<Measurement, Double> createCol(String title, String property) {
         TableColumn<Measurement, Double> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
+
+        col.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format(Locale.US, "%.2f", item));
+                }
+            }
+        });
+
         return col;
     }
 
     private void updatePhysics() {
-        if (isAutoRunning) return;
         try {
             double u = Double.parseDouble(uField.getText().replace(',', '.'));
             double freq = Double.parseDouble(freqField.getText().replace(',', '.'));
@@ -259,10 +272,11 @@ public class LabController35 extends BaseLabController {
         Measurement m = new Measurement(
                 idCounter++,
                 coreCombo.getValue(),
-                Math.round(currentU_meas),
-                Math.round(currentI_meas * 100) / 100.0,
-                Math.round(currentP_meas * 10) / 10.0
+                currentU_meas,
+                currentI_meas,
+                currentP_meas
         );
+
         data.add(m);
         updateStats();
     }
@@ -319,6 +333,9 @@ public class LabController35 extends BaseLabController {
         clearBtn.setDisable(disable);
         freqField.setDisable(disable);
         r0Field.setDisable(disable);
+        l0Field.setDisable(disable);
+        lCoreField.setDisable(disable);
+        rCoreField.setDisable(disable);
     }
 
     private void updateStats() {
@@ -347,16 +364,23 @@ public class LabController35 extends BaseLabController {
 
             if (!noCoreData.isEmpty()) {
                 double sumZ = 0;
+                double sumR = 0;
+
                 for (Measurement m : noCoreData) {
                     sumZ += (m.getU() / m.getI());
+                    sumR += (m.getP() / (m.getI() * m.getI()));
                 }
+
                 double zAvg = sumZ / noCoreData.size();
-                double val = zAvg * zAvg - r0 * r0;
+                double rAvg = sumR / noCoreData.size();
+
+                double val = zAvg * zAvg - rAvg * rAvg;
                 double l0 = 0;
                 if (val > 0) l0 = Math.sqrt(val) / omega;
 
-                sb.append(String.format(Locale.US, "1. Без осердя: Середній повний опір Zср = %.2f Ом.\n", zAvg));
-                sb.append(String.format(Locale.US, "2. Індуктивність без осердя: L0 = %.4f Гн.\n", l0));
+                sb.append(String.format(Locale.US, "1. Без осердя: Повний опір Z0 = %.2f Ом.\n", zAvg));
+                sb.append(String.format(Locale.US, "2. Без осердя: Активний опір R0 = %.2f Ом.\n", rAvg));
+                sb.append(String.format(Locale.US, "3. Індуктивність без осердя: L0 = %.4f Гн.\n", l0));
             }
 
             if (!coreData.isEmpty()) {
@@ -372,9 +396,9 @@ public class LabController35 extends BaseLabController {
                 double lc = 0;
                 if (val > 0) lc = Math.sqrt(val) / omega;
 
-                sb.append(String.format(Locale.US, "3. З осердям: Повний опір Z' = %.2f Ом.\n", zcAvg));
-                sb.append(String.format(Locale.US, "4. Активний опір з осердям R' = %.2f Ом.\n", rcAvg));
-                sb.append(String.format(Locale.US, "5. Індуктивність з осердям L' = %.4f Гн.\n", lc));
+                sb.append(String.format(Locale.US, "4. З осердям: Повний опір Z' = %.2f Ом.\n", zcAvg));
+                sb.append(String.format(Locale.US, "5. Активний опір з осердям R' = %.2f Ом.\n", rcAvg));
+                sb.append(String.format(Locale.US, "6. Індуктивність з осердям L' = %.4f Гн.\n", lc));
             }
 
             if (!noCoreData.isEmpty() && !coreData.isEmpty()) {

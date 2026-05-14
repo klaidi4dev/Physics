@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-1 "Машина Атвуда".
+ * Клас: LabController11.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;

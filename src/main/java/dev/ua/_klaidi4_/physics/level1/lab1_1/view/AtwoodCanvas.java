@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-1 "Машина Атвуда".
+ * Клас: AtwoodCanvas.
+ * Призначення: виконує графічну візуалізацію машини Атвуда,
+ * анімацію руху вантажів та вимірювання часу руху.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_1.view;
 
 import javafx.animation.AnimationTimer;

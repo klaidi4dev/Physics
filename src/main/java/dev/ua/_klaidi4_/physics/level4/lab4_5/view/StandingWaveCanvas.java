@@ -15,7 +15,7 @@ public class StandingWaveCanvas extends Canvas {
     private double tau = 0.002;
     private double cosPhi = 0.5;
     private double lActive = 1.0;
-    private final double targetFreq = 50.0;
+    private double targetFreq = 50.0;
     private int activeN = 0;
     private double currentAmp = 0;
 
@@ -24,11 +24,12 @@ public class StandingWaveCanvas extends Canvas {
         drawFrame();
     }
 
-    public void setPhysicsParameters(double f, double tau, double cosPhi, double lActive) {
+    public void setPhysicsParameters(double f, double tau, double cosPhi, double lActive, double targetFreq) {
         this.currentF = f;
         this.tau = tau;
         this.cosPhi = cosPhi;
         this.lActive = lActive;
+        this.targetFreq = targetFreq;
         calculateResonance();
         if (!isGenerating) drawFrame();
     }

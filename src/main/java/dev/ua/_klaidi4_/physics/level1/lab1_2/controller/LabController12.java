@@ -66,7 +66,7 @@ public class LabController12 extends BaseLabController {
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
-        leftPanel.setPrefWidth(320); // Трохи розширив для комфорту текстових полів
+        leftPanel.setPrefWidth(320);
         leftPanel.setMinWidth(320);
         leftPanel.setStyle("-fx-background-color: #f4f6f8; -fx-border-color: #cfd8dc; -fx-border-width: 0 1 0 0;");
 
@@ -118,7 +118,7 @@ public class LabController12 extends BaseLabController {
                 createInputGroup("Початковий кут (°):", angleField),
                 createInputGroup("Гравітація g (м/с²):", gravityField),
                 createInputGroup("Опір повітря:", frictionField),
-                createInputGroup("Розмір вантажу:", radiusField)
+                createInputGroup("Маса :", radiusField)
         );
         physicsPane.setContent(physBox);
 
@@ -143,7 +143,6 @@ public class LabController12 extends BaseLabController {
             liveOscLabel.setText("n = 0");
         });
 
-        // Додаємо скрол для всієї панелі, щоб нічого не "напливало" при менших екранах
         ScrollPane leftScroll = new ScrollPane(new VBox(10, title, labPane, physicsPane, startBtn, autoBtn, clearBtn));
         leftScroll.setFitToWidth(true);
         leftScroll.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");

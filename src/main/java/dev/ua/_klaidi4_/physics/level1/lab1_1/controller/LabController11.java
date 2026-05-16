@@ -57,11 +57,21 @@ public class LabController11 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: LabController11.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController11() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та скидає чергу автоматичного тестування при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -69,6 +79,11 @@ public class LabController11 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління, графік та таблицю.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -206,6 +221,11 @@ public class LabController11 extends BaseLabController {
         );
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Зчитує параметри з полів введення та застосовує їх до фізичної моделі.
+     */
     private void applyPhysicsSettings() {
         try {
             double M = Double.parseDouble(bigMField.getText());
@@ -222,6 +242,11 @@ public class LabController11 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: setControlsDisable.
+     * Призначення: Блокує або розблокує елементи керування інтерфейсом під час симуляції.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -233,6 +258,11 @@ public class LabController11 extends BaseLabController {
         gravityField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: startManual.
+     * Призначення: Запускає симуляцію вручну після перевірки введених параметрів.
+     */
     private void startManual() {
         try {
             Double.parseDouble(bigMField.getText());
@@ -246,6 +276,11 @@ public class LabController11 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: startSimulation.
+     * Призначення: Запускає процес симуляції руху та оновлює таймер у реальному часі.
+     */
     private void startSimulation() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: РОЗГІН");
@@ -264,6 +299,11 @@ public class LabController11 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: startAuto.
+     * Призначення: Формує чергу параметрів та запускає режим автоматичного виконання серії дослідів.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -288,6 +328,11 @@ public class LabController11 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: processNextAuto.
+     * Призначення: Витягує наступний набір параметрів з черги та запускає черговий дослід.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -307,6 +352,11 @@ public class LabController11 extends BaseLabController {
         startSimulation();
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: finishMeasurement.
+     * Призначення: Обробляє завершення руху, розраховує результати вимірювання (з урахуванням похибки) та додає їх до таблиці.
+     */
     private void finishMeasurement() {
         try {
             double M = Double.parseDouble(bigMField.getText());
@@ -349,6 +399,11 @@ public class LabController11 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-1 "Машина Атвуда".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення, абсолютну та відносну похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

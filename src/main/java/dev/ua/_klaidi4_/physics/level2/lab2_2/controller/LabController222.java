@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+ * Клас: LabController222.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з вимірювання ємності конденсаторів, перевірки законів їх з'єднання та визначення діелектричної проникності.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_2.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -43,10 +52,20 @@ public class LabController222 extends BaseLabController {
     private boolean isAutoRunning = false;
     private int autoStep = 0;
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: LabController222.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController222() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (measurementTimer != null) measurementTimer.stop();
@@ -54,6 +73,11 @@ public class LabController222 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс: панелі параметрів, таблицю та полотно симуляції.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -217,12 +241,22 @@ public class LabController222 extends BaseLabController {
         updateCanvasVisuals();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: createCol.
+     * Призначення: Допоміжна функція для створення колонок таблиці.
+     */
     private TableColumn<Measurement, Object> createCol(String title, String prop) {
         TableColumn<Measurement, Object> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(prop));
         return col;
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: updateCanvasVisuals.
+     * Призначення: Оновлює візуальне відображення конденсатора на основі вибраних параметрів.
+     */
     private void updateCanvasVisuals() {
         try {
             if (mainTabPane == null || canvas == null) return;
@@ -243,6 +277,11 @@ public class LabController222 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: getTargetEpsilon.
+     * Призначення: Повертає значення діелектричної проникності для вибраного матеріалу.
+     */
     private double getTargetEpsilon(String material) {
         try {
             if (material.contains("BaTiO3")) return Double.parseDouble(refBaTiO3Field.getText());
@@ -251,6 +290,11 @@ public class LabController222 extends BaseLabController {
         } catch (Exception e) { return 1.0; }
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: resetAll.
+     * Призначення: Повне скидання результатів та стану лабораторної роботи.
+     */
     private void resetAll() {
         data.clear();
         idCounter = 1;
@@ -267,6 +311,11 @@ public class LabController222 extends BaseLabController {
         liveCapLabel.setText("C = 0.00 pF");
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: checkPhase2Unlock.
+     * Призначення: Перевіряє умови для переходу до другої фази (з'єднання конденсаторів).
+     */
     private void checkPhase2Unlock() {
         if (measuredC1 > 0 && measuredC2 > 0) {
             connectionCombo.setDisable(false);
@@ -275,6 +324,11 @@ public class LabController222 extends BaseLabController {
     }
 
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: startPhase1Measurement.
+     * Призначення: Запускає вимірювання ємності одиночного конденсатора.
+     */
     private void startPhase1Measurement() {
         try {
             double a = Double.parseDouble(lengthAField.getText());
@@ -287,6 +341,11 @@ public class LabController222 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: runPhase1Simulation.
+     * Призначення: Симулює процес зарядки-розрядки для вимірювання ємності.
+     */
     private void runPhase1Simulation(double aMm, double bMm, double dMm, String mat, String targetCap) {
         try {
             startPhase1Btn.setDisable(true);
@@ -322,6 +381,11 @@ public class LabController222 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: finishPhase1Measurement.
+     * Призначення: Обробляє результат вимірювання фази 1 та додає дані до таблиці.
+     */
     private void finishPhase1Measurement(double a, double b, double d, double S, String mat, double eps0, String targetCap) {
         canvas.updateDisplay(String.format("%.2f pF", targetCapacitance), false);
         liveCapLabel.setText(String.format("C = %.2f pF", targetCapacitance));
@@ -364,12 +428,22 @@ public class LabController222 extends BaseLabController {
     }
 
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: startPhase2Measurement.
+     * Призначення: Запускає вимірювання ємності комбінованого з'єднання конденсаторів.
+     */
     private void startPhase2Measurement() {
         if (measuredC1 < 0 || measuredC2 < 0) return;
         isAutoRunning = false;
         runPhase2Simulation(connectionCombo.getSelectionModel().getSelectedIndex() == 0);
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: runPhase2Simulation.
+     * Призначення: Симулює вимірювання для послідовного або паралельного з'єднання.
+     */
     private void runPhase2Simulation(boolean isParallel) {
         startPhase2Btn.setDisable(true);
         connectionCombo.setDisable(true);
@@ -403,6 +477,11 @@ public class LabController222 extends BaseLabController {
         measurementTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: finishPhase2Measurement.
+     * Призначення: Обробляє результат вимірювання фази 2 та перевіряє закони з'єднання.
+     */
     private void finishPhase2Measurement(double theoCombinedC, boolean isParallel) {
         canvas.updateDisplay(String.format("%.2f pF", targetCapacitance), false);
         liveCapLabel.setText(String.format("C = %.2f pF", targetCapacitance));
@@ -431,6 +510,11 @@ public class LabController222 extends BaseLabController {
     }
 
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: startAuto.
+     * Призначення: Ініціює автоматичне виконання всіх етапів роботи.
+     */
     private void startAuto() {
         resetAll();
         isAutoRunning = true;
@@ -438,6 +522,11 @@ public class LabController222 extends BaseLabController {
         processAutoStep();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: processAutoStep.
+     * Призначення: Керує послідовністю кроків в автоматичному режимі.
+     */
     private void processAutoStep() {
         if (!isAutoRunning) return;
 
@@ -486,6 +575,11 @@ public class LabController222 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: updateStats.
+     * Призначення: Проводить фінальний розрахунок похибок та висновків.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+ * Клас: LabController81.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -44,11 +53,21 @@ public class LabController81 extends BaseLabController {
     private final double B_CONST = 2450.0;
     private final double BOLTZMANN_K_J = 1.38e-23;
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: LabController81.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController81() {
         initUI();
         startSimulationLoop();
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (simTimer != null) {
@@ -58,6 +77,11 @@ public class LabController81 extends BaseLabController {
         isHeating = false;
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -191,6 +215,11 @@ public class LabController81 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -199,6 +228,11 @@ public class LabController81 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: toggleHeater.
+     * Призначення: Перемикає стан відповідного компонента або режиму.
+     */
     private void toggleHeater() {
         isHeating = !isHeating;
         setSettingsDisable(isHeating || isAutoMode);
@@ -217,12 +251,22 @@ public class LabController81 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: setSettingsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setSettingsDisable(boolean disable) {
         maxTempField.setDisable(disable);
         heatRateField.setDisable(disable);
         autoStepField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         clearData();
         currentTempC = 20.0;
@@ -240,18 +284,33 @@ public class LabController81 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: clearData.
+     * Призначення: Очищує зібрані дані та скидає стан.
+     */
     private void clearData() {
         data.clear();
         idCounter = 1;
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: calculateCurrentResistance.
+     * Призначення: Виконує математичні обчислення для отримання результатів.
+     */
     private double calculateCurrentResistance() {
         double tempK = currentTempC + 273.15;
         double theoreticalR = R0_KOHM * Math.exp(B_CONST / tempK);
         return theoreticalR * (1.0 + currentNoise);
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: takeMeasurement.
+     * Призначення: Знімає поточні показники і додає їх до таблиці.
+     */
     private void takeMeasurement() {
         double tempK = currentTempC + 273.15;
         double invT = (1.0 / tempK) * 1000.0;
@@ -272,10 +331,20 @@ public class LabController81 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: startSimulationLoop.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startSimulationLoop() {
         simTimer = new AnimationTimer() {
             private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -339,6 +408,11 @@ public class LabController81 extends BaseLabController {
         simTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.size() < 2) {
             finalResultLabel.setText("Обробка результатів: Недостатньо даних (мінімум 2 виміри)");

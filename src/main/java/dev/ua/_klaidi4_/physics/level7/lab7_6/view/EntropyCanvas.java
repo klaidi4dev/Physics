@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-6 "Зміна ентропії".
+ * Клас: EntropyCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_6.view;
 
 import javafx.scene.canvas.Canvas;
@@ -18,11 +27,21 @@ public class EntropyCanvas extends Canvas {
     private List<Double> timeHistory = new ArrayList<>();
     private List<Double> tempHistory = new ArrayList<>();
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: EntropyCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public EntropyCanvas(double width, double height) {
         super(width, height);
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(boolean heaterOn, double temp, double meltProg, double simTime, double tMelt) {
         this.isHeaterOn = heaterOn;
         this.temperature = temp;
@@ -38,6 +57,11 @@ public class EntropyCanvas extends Canvas {
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: resetGraph.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetGraph() {
         timeHistory.clear();
         tempHistory.clear();
@@ -45,6 +69,11 @@ public class EntropyCanvas extends Canvas {
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -57,6 +86,11 @@ public class EntropyCanvas extends Canvas {
         drawKSP4Recorder(gc, 200, 20, 380, 400);
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: drawCylindricalFurnace.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawCylindricalFurnace(GraphicsContext gc, double x, double y, double fw, double fh) {
         gc.setFill(Color.web("#37474f"));
         gc.fillRoundRect(x, y, fw, fh, 30, 30);
@@ -116,6 +150,11 @@ public class EntropyCanvas extends Canvas {
         gc.strokeLine(cutX + cutW/2, y - 50, 200, y - 50);
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: drawKSP4Recorder.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawKSP4Recorder(GraphicsContext gc, double x, double y, double w, double h) {
         gc.setFill(Color.web("#cfd8dc"));
         gc.fillRect(x, y, w, h);

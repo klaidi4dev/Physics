@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-6 "Дифракційна решітка".
+ * Клас: LabController56.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_6.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -41,11 +50,21 @@ public class LabController56 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Integer> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: LabController56.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController56() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -53,6 +72,11 @@ public class LabController56 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -209,6 +233,11 @@ public class LabController56 extends BaseLabController {
         updateButtonUI();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: handleTogglePower.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleTogglePower() {
         isPowerOn = !isPowerOn;
         if (isPowerOn) {
@@ -225,6 +254,11 @@ public class LabController56 extends BaseLabController {
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: getCurrentWavelength.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getCurrentWavelength() {
         int index = filterComboBox.getSelectionModel().getSelectedIndex();
         if (index == 0) return 589.0;
@@ -232,16 +266,31 @@ public class LabController56 extends BaseLabController {
         return 470.0;
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: getCurrentGratingD.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getCurrentGratingD() {
         int index = gratingComboBox.getSelectionModel().getSelectedIndex();
         if (index == 0) return 10000.0;
         return 20000.0;
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         canvas.setPhysicsParameters(isPowerOn, angleSlider.getValue(), getCurrentWavelength(), getCurrentGratingD());
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: resetMeasurementState.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetMeasurementState() {
         currentStep = 0;
         phiR1 = null; phiL1 = null; phiR2 = null; phiL2 = null;
@@ -258,6 +307,11 @@ public class LabController56 extends BaseLabController {
         updateButtonUI();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: updateButtonUI.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateButtonUI() {
         if (!isPowerOn) {
             recordBtn.setDisable(true);
@@ -283,6 +337,11 @@ public class LabController56 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: handleRecord.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecord() {
         double angle = angleSlider.getValue();
         double trueWave = getCurrentWavelength();
@@ -337,6 +396,11 @@ public class LabController56 extends BaseLabController {
         updateButtonUI();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: executeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void executeMeasurement(double trueWave, double d) {
         try {
             String filterName = filterComboBox.getSelectionModel().getSelectedItem().split(" ")[0];
@@ -365,6 +429,11 @@ public class LabController56 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         if (!isPowerOn) handleTogglePower();
         data.clear();
@@ -379,6 +448,11 @@ public class LabController56 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
@@ -399,6 +473,11 @@ public class LabController56 extends BaseLabController {
             long start = System.nanoTime();
             int phase = 0;
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -428,6 +507,11 @@ public class LabController56 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

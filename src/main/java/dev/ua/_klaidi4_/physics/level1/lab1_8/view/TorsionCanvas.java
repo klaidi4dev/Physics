@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+ * Клас: TorsionCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_8.view;
 
 import javafx.animation.AnimationTimer;
@@ -23,11 +32,21 @@ public class TorsionCanvas extends Canvas {
     private double swingTime = 0;
     private double exactPeriod = 2.0;
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: TorsionCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public TorsionCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: setParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setParameters(int configIndex, double r0, double a, double b, double c) {
         this.configIndex = configIndex;
         this.r0 = r0;
@@ -38,6 +57,11 @@ public class TorsionCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(double period) {
         this.exactPeriod = period;
         this.swingTime = 0;
@@ -47,13 +71,28 @@ public class TorsionCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         this.isSwinging = false;
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -68,6 +107,11 @@ public class TorsionCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         if (isSwinging) {
             swingTime += dt;
@@ -75,6 +119,11 @@ public class TorsionCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

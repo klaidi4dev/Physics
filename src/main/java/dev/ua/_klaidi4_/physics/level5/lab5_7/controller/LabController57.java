@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+ * Клас: LabController57.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_7.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -38,16 +47,31 @@ public class LabController57 extends BaseLabController {
     private Queue<Integer> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: LabController57.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController57() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -180,6 +204,11 @@ public class LabController57 extends BaseLabController {
         return col;
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         try {
             double L = Double.parseDouble(fieldDistanceL.getText());
@@ -191,6 +220,11 @@ public class LabController57 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -201,6 +235,11 @@ public class LabController57 extends BaseLabController {
         orderCombo.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: startScan.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startScan() {
         try {
             isAutoRunning = false;
@@ -227,6 +266,11 @@ public class LabController57 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -240,6 +284,11 @@ public class LabController57 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -277,6 +326,11 @@ public class LabController57 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: recordMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void recordMeasurement(double L, double d, int m, double lambdaTrue) {
         double lmExact = L * Math.tan(Math.asin((m * lambdaTrue * 1e-9) / (d * 1e-6))) * 1000;
         double noise = (Math.random() - 0.5) * 0.4;
@@ -296,6 +350,11 @@ public class LabController57 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 5-7 "Дифракція Фраунгофера".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");

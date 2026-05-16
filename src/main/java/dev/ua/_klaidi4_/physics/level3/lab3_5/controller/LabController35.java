@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+ * Клас: LabController35.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення індуктивності соленоїда за допомогою ЛАТР.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -43,16 +52,31 @@ public class LabController35 extends BaseLabController {
     private double currentI_meas;
     private double currentP_meas;
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: LabController35.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController35() {
         initUI();
         updatePhysics();
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: shutdown.
+     * Призначення: Скидає стан системи при закритті вікна.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс: схему установки, панелі керування та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -194,12 +218,22 @@ public class LabController35 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: createColStr.
+     * Призначення: Допоміжна функція для створення текстових колонок таблиці.
+     */
     private TableColumn<Measurement, String> createColStr(String title, String property) {
         TableColumn<Measurement, String> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: createCol.
+     * Призначення: Допоміжна функція для створення числових колонок таблиці з форматуванням.
+     */
     private TableColumn<Measurement, Double> createCol(String title, String property) {
         TableColumn<Measurement, Double> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
@@ -220,6 +254,11 @@ public class LabController35 extends BaseLabController {
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: updatePhysics.
+     * Призначення: Розраховує параметри змінного струму в колі соленоїда залежно від положення ЛАТР та сердечника.
+     */
     private void updatePhysics() {
         try {
             double u = Double.parseDouble(uField.getText().replace(',', '.'));
@@ -266,6 +305,11 @@ public class LabController35 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: recordPoint.
+     * Призначення: Записує поточні показники вольтметра, амперметра та ватметра до таблиці.
+     */
     private void recordPoint() {
         if (currentU_meas <= 0) return;
 
@@ -281,6 +325,11 @@ public class LabController35 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: runAuto.
+     * Призначення: Виконує автоматичне зняття вольт-амперної характеристики соленоїда.
+     */
     private void runAuto() {
         data.clear();
         idCounter = 1;
@@ -325,6 +374,11 @@ public class LabController35 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю інтерфейсу під час автоматичного вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         uField.setDisable(disable);
         coreCombo.setDisable(disable);
@@ -338,6 +392,11 @@ public class LabController35 extends BaseLabController {
         rCoreField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: updateStats.
+     * Призначення: Проводить розрахунок індуктивності та інших параметрів котушки для всієї серії вимірювань.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");

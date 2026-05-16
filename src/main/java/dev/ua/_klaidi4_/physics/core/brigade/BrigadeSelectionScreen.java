@@ -1,3 +1,11 @@
+/*
+ * Проєкт: Лабораторний практикум з фізики.
+ * Клас: BrigadeSelectionScreen.
+ * Призначення: Екран вибору бригади перед початком роботи з застосунком.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.core.brigade;
 
 import dev.ua._klaidi4_.physics.core.DashboardController;

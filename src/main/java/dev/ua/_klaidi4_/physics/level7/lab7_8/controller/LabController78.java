@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-8 "Поверхневий натяг".
+ * Клас: LabController78.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_8.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -41,11 +50,21 @@ public class LabController78 extends BaseLabController {
     private final double ALPHA_ETHANOL = 22.4;
     private final double ALPHA_GLYCERIN = 64.0;
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: LabController78.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController78() {
         initUI();
         updateLiquidInCanvas();
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -53,6 +72,11 @@ public class LabController78 extends BaseLabController {
         isAutoRunning = false;
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -171,6 +195,11 @@ public class LabController78 extends BaseLabController {
         this.setBottom(bottomPanel);
 
         uiTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 liveHLabel.setText(String.format("h = %.1f мм", canvas.getCurrentH()));
@@ -186,6 +215,11 @@ public class LabController78 extends BaseLabController {
         return col;
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: updateLiquidInCanvas.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateLiquidInCanvas() {
         String liq = liquidCombo.getValue();
         double theoreticalAlpha = ALPHA_WATER;
@@ -195,6 +229,11 @@ public class LabController78 extends BaseLabController {
         canvas.setLiquidParams(liq, theoreticalAlpha);
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: togglePumping.
+     * Призначення: Перемикає стан відповідного компонента або режиму.
+     */
     private void togglePumping() {
         isPumping = !isPumping;
         canvas.setPumping(isPumping);
@@ -216,6 +255,11 @@ public class LabController78 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: recordMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void recordMeasurement(double measuredH) {
         String currentLiq = liquidCombo.getValue();
         double alphaValue = 0.0;
@@ -243,6 +287,11 @@ public class LabController78 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: getAverageHForWater.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getAverageHForWater() {
         double sumH = 0;
         int count = 0;
@@ -255,6 +304,11 @@ public class LabController78 extends BaseLabController {
         return count > 0 ? sumH / count : 0.0;
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         data.clear();
         idCounter = 1;
@@ -276,6 +330,11 @@ public class LabController78 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty() || !isAutoRunning) {
             isAutoRunning = false;
@@ -309,6 +368,11 @@ public class LabController78 extends BaseLabController {
         });
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...\nПочніть з дистильованої води.");
@@ -359,6 +423,11 @@ public class LabController78 extends BaseLabController {
         finalResultLabel.setText(sb.toString());
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-3 "Центральний удар куль".
+ * Клас: LabController13.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з пружного та непружного удару куль, обробкою законів збереження імпульсу та енергії.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_3.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -50,11 +59,21 @@ public class LabController13 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: LabController13.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та встановлює початкові налаштування.
+     */
     public LabController13() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: shutdown.
+     * Призначення: Зупиняє роботу анімації та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -62,6 +81,11 @@ public class LabController13 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: initUI.
+     * Призначення: Ініціалізація графічного інтерфейсу: кнопок, таблиці результатів та полотна для малювання.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -203,6 +227,11 @@ public class LabController13 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Оновлює фізичні параметри (маси, кути, тип удару) на полотні симуляції.
+     */
     private void applyPhysicsSettings() {
         try {
             if (isAutoRunning) return;
@@ -223,6 +252,11 @@ public class LabController13 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю елементів інтерфейсу під час проведення досліду.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -234,6 +268,11 @@ public class LabController13 extends BaseLabController {
         angleField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: startManual.
+     * Призначення: Запускає одиничний дослід з параметрами, заданими користувачем.
+     */
     private void startManual() {
         try {
             Double.parseDouble(m1Field.getText());
@@ -252,6 +291,11 @@ public class LabController13 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: startAuto.
+     * Призначення: Запускає серію автоматичних дослідів з різними типами ударів та масами.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -266,6 +310,11 @@ public class LabController13 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний дослід з черги автоматичних тестів.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -298,6 +347,11 @@ public class LabController13 extends BaseLabController {
         canvas.startSimulation();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: onCollision.
+     * Призначення: Обробляє момент зіткнення, розраховує швидкості після удару та додає дані до таблиці.
+     */
     private void onCollision() {
         liveStatusLabel.setText("Статус: ЗІТКНЕННЯ!");
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
@@ -375,6 +429,11 @@ public class LabController13 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: updateStats.
+     * Призначення: Підбиває підсумки серії дослідів, розраховуючи середні значення та похибки.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

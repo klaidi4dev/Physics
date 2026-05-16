@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-2 "Ефект Холла".
+ * Клас: LabController82.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_2.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -48,11 +57,21 @@ public class LabController82 extends BaseLabController {
     private final double Q_E = 1.6e-19;
     private final double THEORETICAL_R_HALL = 0.0006;
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: LabController82.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController82() {
         initUI();
         startSimulationLoop();
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (simTimer != null) {
@@ -62,6 +81,11 @@ public class LabController82 extends BaseLabController {
         isPowerOn = false;
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -204,6 +228,11 @@ public class LabController82 extends BaseLabController {
         materialBox.setOnAction(e -> clearData());
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: createLabel.
+     * Призначення: Створює і повертає новий елемент інтерфейсу або об'єкт.
+     */
     private Label createLabel(String text) {
         Label label = new Label(text);
         label.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
@@ -211,6 +240,11 @@ public class LabController82 extends BaseLabController {
         return label;
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -219,6 +253,11 @@ public class LabController82 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: togglePower.
+     * Призначення: Перемикає стан відповідного компонента або режиму.
+     */
     private void togglePower() {
         isPowerOn = !isPowerOn;
         materialBox.setDisable(isPowerOn || isAutoMode);
@@ -240,6 +279,11 @@ public class LabController82 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         clearData();
         isAutoMode = true;
@@ -253,12 +297,22 @@ public class LabController82 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: clearData.
+     * Призначення: Очищує зібрані дані та скидає стан.
+     */
     private void clearData() {
         data.clear();
         idCounter = 1;
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: calculateIHall.
+     * Призначення: Виконує математичні обчислення для отримання результатів.
+     */
     private double calculateIHall(double iMain_mA, double b_T, double d_mm, boolean isPType) {
         double iMain_A = iMain_mA * 1e-3;
         double d_m = d_mm * 1e-3;
@@ -270,6 +324,11 @@ public class LabController82 extends BaseLabController {
         return (iHall_uA * sign) + currentIHallNoise;
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: takeMeasurement.
+     * Призначення: Знімає поточні показники і додає їх до таблиці.
+     */
     private void takeMeasurement() {
         if (!isPowerOn) return;
 
@@ -302,11 +361,21 @@ public class LabController82 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: startSimulationLoop.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startSimulationLoop() {
         simTimer = new AnimationTimer() {
             private long lastTime = 0;
             private double timeSinceLastAutoMeasure = 0;
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -363,6 +432,11 @@ public class LabController82 extends BaseLabController {
         simTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

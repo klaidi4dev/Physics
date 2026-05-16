@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-14 "В'язкість рідини".
+ * Клас: LabController114.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення коефіцієнта динамічної в'язкості рідини методом Стокса.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_14.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -36,10 +45,20 @@ public class LabController114 extends BaseLabController {
     private boolean isAutoRunning = false;
     private final double ETA_THEO = 1.48;
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: LabController114.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController114() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -47,6 +66,11 @@ public class LabController114 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів, таблицю та візуалізацію падіння кульки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -160,6 +184,11 @@ public class LabController114 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час проведення досліду.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -170,6 +199,11 @@ public class LabController114 extends BaseLabController {
         lField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання часу падіння кульки.
+     */
     private void startManual() {
         try {
             Double.parseDouble(rField.getText());
@@ -180,6 +214,11 @@ public class LabController114 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: startAuto.
+     * Призначення: Ініціює автоматичну серію дослідів.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -195,6 +234,11 @@ public class LabController114 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний дослід в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -207,6 +251,11 @@ public class LabController114 extends BaseLabController {
         runSimulation();
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію падіння кульки у в'язкій рідині.
+     */
     private void runSimulation() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ПАДІННЯ");
@@ -236,6 +285,11 @@ public class LabController114 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: finishMeasurement.
+     * Призначення: Обробляє завершення падіння, фіксує результати та додає дані до таблиці.
+     */
     private void finishMeasurement(double measuredTime) {
         liveTimeLabel.setText(String.format("t = %.3f с", measuredTime));
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
@@ -267,6 +321,11 @@ public class LabController114 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-14 "В'язкість рідини".
+     * Функція: updateStats.
+     * Призначення: Розраховує коефіцієнт в'язкості та проводить статистичну обробку.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

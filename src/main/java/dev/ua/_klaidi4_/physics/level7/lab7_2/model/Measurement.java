@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-2 "В'язкість газів".
+ * Клас: Measurement.
+ * Призначення: зберігає дані вимірювань, параметри фізичної моделі та
+ * результати обчислень для лабораторної роботи.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_2.model;
 
 import lombok.AllArgsConstructor;

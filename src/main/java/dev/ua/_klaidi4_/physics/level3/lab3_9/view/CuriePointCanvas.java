@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-9 "Точка Кюрі".
+ * Клас: CuriePointCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_9.view;
 
 import javafx.animation.AnimationTimer;
@@ -19,11 +28,21 @@ public class CuriePointCanvas extends Canvas {
     private long lastTime = 0;
     private double pulse = 0;
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: CuriePointCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public CuriePointCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(String material, double temperature, double current, double curieTemp, boolean heating) {
         this.material = material;
         this.temperature = temperature;
@@ -33,12 +52,27 @@ public class CuriePointCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) {
@@ -59,6 +93,11 @@ public class CuriePointCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -77,6 +116,11 @@ public class CuriePointCanvas extends Canvas {
         drawScheme(gc, 85, 275);
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: drawFurnace.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFurnace(GraphicsContext gc, double x, double y) {
         gc.setFill(Color.web("#334155"));
         gc.fillRoundRect(x, y, 250, 165, 18, 18);
@@ -127,6 +171,11 @@ public class CuriePointCanvas extends Canvas {
         gc.fillText(String.format("Tc ≈ %.0f °C", curieTemp), x + 88, y + 225);
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: drawMicroAmmeter.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawMicroAmmeter(GraphicsContext gc, double x, double y) {
         gc.setFill(Color.web("#1e293b"));
         gc.fillRoundRect(x, y, 185, 165, 18, 18);
@@ -186,6 +235,11 @@ public class CuriePointCanvas extends Canvas {
         gc.fillText(String.format("I₂ = %.1f", current), x + 45, y + 150);
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: drawScheme.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawScheme(GraphicsContext gc, double x, double y) {
         gc.setFill(Color.web("#ffffff"));
         gc.fillRoundRect(x, y, 440, 90, 12, 12);

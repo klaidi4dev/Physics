@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 6-1 "Пробіг α-частинок".
+ * Клас: AlphaDecayCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level6.lab6_1.view;
 
 import dev.ua._klaidi4_.physics.level6.lab6_1.model.Measurement;
@@ -21,11 +30,21 @@ public class AlphaDecayCanvas extends Canvas {
     private AnimationTimer timer;
     private double time = 0;
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: AlphaDecayCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public AlphaDecayCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(double x, boolean measuring, List<Measurement> data, double r0) {
         this.distanceX = x;
         this.isMeasuring = measuring;
@@ -34,9 +53,19 @@ public class AlphaDecayCanvas extends Canvas {
         this.maxAxisX = Math.max(2.0, Math.ceil(r0 * 1.5));
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -49,10 +78,20 @@ public class AlphaDecayCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

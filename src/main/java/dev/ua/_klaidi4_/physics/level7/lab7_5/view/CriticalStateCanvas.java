@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-5 "Критичний стан".
+ * Клас: CriticalStateCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_5.view;
 
 import javafx.animation.AnimationTimer;
@@ -20,29 +29,59 @@ public class CriticalStateCanvas extends Canvas {
     private final Random random = new Random();
     private double time = 0;
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: CriticalStateCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public CriticalStateCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: setPhysicsParams.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParams(double voltage, double tk, double heatRate) {
         this.voltage = voltage;
         this.actualTk = tk;
         this.heatRateMultiplier = heatRate;
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: getCurrentTemp.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getCurrentTemp() {
         return currentTemp;
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: resetTemp.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetTemp() {
         this.currentTemp = 20.0;
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -61,10 +100,20 @@ public class CriticalStateCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

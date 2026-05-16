@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+ * Клас: LabController84.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_4.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -37,17 +46,32 @@ public class LabController84 extends BaseLabController {
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: LabController84.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController84() {
         initUI();
         updateDisplayFromInput();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -183,6 +207,11 @@ public class LabController84 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -191,6 +220,11 @@ public class LabController84 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: resetAndRecalculate.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetAndRecalculate() {
         data.clear();
         idCounter = 1;
@@ -199,6 +233,11 @@ public class LabController84 extends BaseLabController {
         updateDisplayFromInput();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: calculateCurrent.
+     * Призначення: Виконує математичні обчислення для отримання результатів.
+     */
     private double calculateCurrent(DiodeType type, double u) {
         if (Math.abs(u) < 0.001) return 0.0;
 
@@ -231,6 +270,11 @@ public class LabController84 extends BaseLabController {
         return i;
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: updateDisplayFromInput.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateDisplayFromInput() {
         if (isAutoRunning) return;
 
@@ -248,6 +292,11 @@ public class LabController84 extends BaseLabController {
         canvas.updateLiveValues(u, i);
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -259,12 +308,22 @@ public class LabController84 extends BaseLabController {
         voltageField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: doManualMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void doManualMeasurement() {
         if (isAutoRunning) return;
         double u = getDoubleValue(voltageField, 0.0);
         recordMeasurement(u);
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         resetAndRecalculate();
 
@@ -276,6 +335,11 @@ public class LabController84 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -308,6 +372,11 @@ public class LabController84 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: recordMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void recordMeasurement(double u) {
         DiodeType type = diodeComboBox.getValue();
         double i = calculateCurrent(type, u);
@@ -336,6 +405,11 @@ public class LabController84 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.size() < 2) {
             finalResultLabel.setText("Обробка результатів: Недостатньо даних для аналізу...");

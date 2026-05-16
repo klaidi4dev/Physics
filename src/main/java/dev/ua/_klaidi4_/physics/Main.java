@@ -1,3 +1,11 @@
+/*
+ * Проєкт: Лабораторний практикум з фізики.
+ * Клас: Main.
+ * Призначення: Головний клас програми, що запускає застосунок та ініціалізує основне вікно.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics;
 
 import dev.ua._klaidi4_.physics.core.DashboardController;

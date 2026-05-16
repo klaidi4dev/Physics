@@ -1,7 +1,11 @@
-// ============================================================================
-// Файл: src/main/java/dev/ua/_klaidi4_/physics/core/controller/BaseLabController.java
-// ============================================================================
-
+/*
+ * Проєкт: Лабораторний практикум з фізики.
+ * Клас: BaseLabController.
+ * Призначення: Базовий контролер для лабораторних робіт, містить спільний функціонал та елементи інтерфейсу.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.core.controller;
 
 import dev.ua._klaidi4_.physics.core.LabModule;

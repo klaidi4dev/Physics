@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-3 "Метод Стокса".
+ * Клас: LabController73.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_3.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -41,11 +50,21 @@ public class LabController73 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: LabController73.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController73() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.resetSystem();
@@ -54,6 +73,11 @@ public class LabController73 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -178,6 +202,11 @@ public class LabController73 extends BaseLabController {
         this.setBottom(bottomPanel);
 
         uiTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (canvas.isTimerStarted()) {
@@ -191,6 +220,11 @@ public class LabController73 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -199,6 +233,11 @@ public class LabController73 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         if (isAutoRunning) return;
         try {
@@ -211,6 +250,11 @@ public class LabController73 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -221,6 +265,11 @@ public class LabController73 extends BaseLabController {
         densityField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: startManual.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startManual() {
         try {
             Double.parseDouble(lengthField.getText().replace(",", "."));
@@ -237,6 +286,11 @@ public class LabController73 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -252,6 +306,11 @@ public class LabController73 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -276,6 +335,11 @@ public class LabController73 extends BaseLabController {
         canvas.startSimulation();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: onMeasurementTick.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void onMeasurementTick() {
         double t = canvas.getElapsedTime();
         liveTimeLabel.setText(String.format("t = %.2f с", t));
@@ -311,6 +375,11 @@ public class LabController73 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів експерименту: Очікування вимірювань...");

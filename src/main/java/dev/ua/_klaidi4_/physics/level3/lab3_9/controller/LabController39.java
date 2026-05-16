@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-9 "Точка Кюрі".
+ * Клас: LabController39.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення точки Кюрі феромагнетика.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_9.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -55,11 +64,21 @@ public class LabController39 extends BaseLabController {
     private double curieTemp = 120;
     private double endTemp = 125;
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: LabController39.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController39() {
         initUI();
         updateMaterialSettings();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
@@ -67,6 +86,11 @@ public class LabController39 extends BaseLabController {
         if (canvas != null) canvas.stopAnimation();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс: панель параметрів, графік та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -208,6 +232,11 @@ public class LabController39 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: rebuildChartSeries.
+     * Призначення: Очищає та заново створює серії даних для графіка.
+     */
     private void rebuildChartSeries() {
         chart.getData().clear();
 
@@ -220,6 +249,11 @@ public class LabController39 extends BaseLabController {
         chart.getData().addAll(dataSeries, curiePointSeries);
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: createCol.
+     * Призначення: Допоміжна функція для створення числових колонок таблиці.
+     */
     private TableColumn<Measurement, Double> createCol(String title, String property) {
         TableColumn<Measurement, Double> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
@@ -234,18 +268,33 @@ public class LabController39 extends BaseLabController {
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: createColInt.
+     * Призначення: Створює колонку для цілих чисел.
+     */
     private TableColumn<Measurement, Integer> createColInt(String title, String property) {
         TableColumn<Measurement, Integer> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: createColString.
+     * Призначення: Створює текстову колонку.
+     */
     private TableColumn<Measurement, String> createColString(String title, String property) {
         TableColumn<Measurement, String> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: updateMaterialSettings.
+     * Призначення: Оновлює фізичні параметри моделі при зміні матеріалу осердя.
+     */
     private void updateMaterialSettings() {
         String material = materialBox.getValue();
         if (material == null) return;
@@ -274,6 +323,11 @@ public class LabController39 extends BaseLabController {
         canvas.updateState(material, temperature, current, curieTemp, false);
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: startExperiment.
+     * Призначення: Запускає процес нагрівання або охолодження зразка.
+     */
     private void startExperiment(boolean auto) {
         try {
             data.clear();
@@ -301,6 +355,11 @@ public class LabController39 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: buildTemperatureQueue.
+     * Призначення: Формує чергу температурних точок для автоматичного вимірювання.
+     */
     private void buildTemperatureQueue(double start, double end) {
         autoQueue.clear();
 
@@ -325,6 +384,11 @@ public class LabController39 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: runNextPoint.
+     * Призначення: Керує переходом до наступної температурної точки в експерименті.
+     */
     private void runNextPoint() {
         if (!isAutoRunning) return;
 
@@ -360,6 +424,11 @@ public class LabController39 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: finishExperiment.
+     * Призначення: Завершує процес вимірювання та проводить підсумковий розрахунок.
+     */
     private void finishExperiment() {
         isAutoRunning = false;
         setControlsDisable(false);
@@ -374,6 +443,11 @@ public class LabController39 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: calculateCurrent.
+     * Призначення: Розраховує струм у вторинній обмотці залежно від температури (через магнітну проникність).
+     */
     private double calculateCurrent(double temp) {
         String material = materialBox.getValue();
 
@@ -407,6 +481,11 @@ public class LabController39 extends BaseLabController {
         return result;
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: recordMeasurement.
+     * Призначення: Записує поточні показники (T, I) до таблиці та на графік.
+     */
     private void recordMeasurement() {
         Measurement m = new Measurement(
                 idCounter++,
@@ -422,6 +501,11 @@ public class LabController39 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: findCuriePoint.
+     * Призначення: Математично визначає точку Кюрі як температуру максимальної швидкості зміни струму.
+     */
     private double findCuriePoint() {
         if (data.size() < 3) return curieTemp;
 
@@ -448,6 +532,11 @@ public class LabController39 extends BaseLabController {
         return found;
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: findClosestMeasurement.
+     * Призначення: Повертає найближчий до заданої температури результат вимірювання.
+     */
     private Measurement findClosestMeasurement(double temp) {
         if (data.isEmpty()) return null;
 
@@ -465,6 +554,11 @@ public class LabController39 extends BaseLabController {
         return closest;
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю інтерфейсу під час активного експерименту.
+     */
     private void setControlsDisable(boolean disable) {
         materialBox.setDisable(disable);
         startTempField.setDisable(disable);
@@ -475,6 +569,11 @@ public class LabController39 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: clearAll.
+     * Призначення: Очищає таблицю, графік та скидає стан моделі.
+     */
     private void clearAll() {
         isAutoRunning = false;
         autoQueue.clear();
@@ -492,6 +591,11 @@ public class LabController39 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: updateStats.
+     * Призначення: Проводить фінальну обробку результатів та виводить висновок.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: очікування вимірювань...");
@@ -530,6 +634,11 @@ public class LabController39 extends BaseLabController {
         finalResultLabel.setText(text);
     }
 
+    /*
+     * Лабораторна робота № 3-9 "Точка Кюрі".
+     * Функція: round1.
+     * Призначення: Допоміжна функція для округлення до одного знака.
+     */
     private double round1(double value) {
         return Math.round(value * 10.0) / 10.0;
     }

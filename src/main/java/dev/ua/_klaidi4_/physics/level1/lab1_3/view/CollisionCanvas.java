@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-3 "Центральний удар куль".
+ * Клас: CollisionCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_3.view;
 
 import dev.ua._klaidi4_.physics.level1.lab1_3.enums.CollisionType;
@@ -30,11 +39,21 @@ public class CollisionCanvas extends Canvas {
 
     private Runnable onCollisionCallback;
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: CollisionCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public CollisionCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(CollisionType type, double l, double g, double mass1, double mass2, double angleDeg) {
         this.type = type;
         this.length = l * 500;
@@ -49,10 +68,20 @@ public class CollisionCanvas extends Canvas {
         resetSystem();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: setOnCollisionCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnCollisionCallback(Runnable callback) {
         this.onCollisionCallback = callback;
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: resetSystem.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetSystem() {
         this.currentAngle1 = startAngle1;
         this.currentAngle2 = 0;
@@ -63,13 +92,28 @@ public class CollisionCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         resetSystem();
         this.isRunning = true;
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -87,10 +131,20 @@ public class CollisionCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         double aa1 = -(gravity / (length / 100.0)) * Math.sin(currentAngle1);
         double aa2 = -(gravity / (length / 100.0)) * Math.sin(currentAngle2);
@@ -135,6 +189,11 @@ public class CollisionCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -174,6 +233,11 @@ public class CollisionCanvas extends Canvas {
         drawBob(gc, bobX2, bobY2, r2, color2);
     }
 
+    /*
+     * Лабораторна робота № 1-3 "Центральний удар куль".
+     * Функція: drawBob.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawBob(GraphicsContext gc, double x, double y, double r, Color baseColor) {
         RadialGradient grad = new RadialGradient(0, 0, x - r*0.3, y - r*0.3, r,
                 false, CycleMethod.NO_CYCLE, new Stop(0, Color.WHITE), new Stop(1, baseColor));

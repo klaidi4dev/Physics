@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-6 "Поперечні коливання струни".
+ * Клас: LabController46.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_6.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -45,11 +54,21 @@ public class LabController46 extends BaseLabController {
     private Queue<Integer> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: LabController46.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController46() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -59,6 +78,11 @@ public class LabController46 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -198,6 +222,11 @@ public class LabController46 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         try {
             double rho = Double.parseDouble(rhoField.getText());
@@ -210,6 +239,11 @@ public class LabController46 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: updateDashboard.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateDashboard() {
         if (!isGeneratorOn) {
             liveStatusLabel.setText("Генератор: ВИМКНЕНО");
@@ -234,6 +268,11 @@ public class LabController46 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: handleToggleGenerator.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleToggleGenerator() {
         isGeneratorOn = !isGeneratorOn;
         if (isGeneratorOn) {
@@ -248,6 +287,11 @@ public class LabController46 extends BaseLabController {
         updateDashboard();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         freqSlider.setDisable(disable);
         rhoField.setDisable(disable);
@@ -260,6 +304,11 @@ public class LabController46 extends BaseLabController {
         toggleGenBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: handleManualMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleManualMeasurement() {
         if (!isGeneratorOn) {
             showAlert("Увага", "Спочатку увімкніть генератор!");
@@ -274,6 +323,11 @@ public class LabController46 extends BaseLabController {
         executeMeasurement(freqSlider.getValue(), canvas.getActiveHarmonic());
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         if (!isGeneratorOn) handleToggleGenerator();
 
@@ -290,6 +344,11 @@ public class LabController46 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -316,6 +375,11 @@ public class LabController46 extends BaseLabController {
 
             long start = System.nanoTime();
             measurementTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
                 @Override
                 public void handle(long now) {
                     double elapsed = (now - start) / 1_000_000_000.0;
@@ -334,6 +398,11 @@ public class LabController46 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: executeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void executeMeasurement(double fExp, int n) {
         try {
             double rho = Double.parseDouble(rhoField.getText());
@@ -368,6 +437,11 @@ public class LabController46 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

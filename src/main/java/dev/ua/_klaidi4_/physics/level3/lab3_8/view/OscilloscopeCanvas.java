@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-8 "Петля гістерезису".
+ * Клас: OscilloscopeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_8.view;
 
 import javafx.animation.AnimationTimer;
@@ -20,6 +29,11 @@ public class OscilloscopeCanvas extends Canvas {
     private final int X_DIVS = 10;
     private final int Y_DIVS = 8;
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: OscilloscopeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public OscilloscopeCanvas(double width, double height) {
         super(width, height);
 
@@ -38,6 +52,11 @@ public class OscilloscopeCanvas extends Canvas {
         startRenderLoop();
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: setParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setParameters(double amplitude, String material) {
         this.amplitude = amplitude;
         this.material = material;
@@ -46,14 +65,29 @@ public class OscilloscopeCanvas extends Canvas {
     public double getMouseNx() { return mouseNx; }
     public double getMouseNy() { return mouseNy; }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: getPeakNx.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getPeakNx() {
         return calculateCurvePoints().stream().mapToDouble(p -> p[0]).max().orElse(0);
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: getPeakNy.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getPeakNy() {
         return calculateCurvePoints().stream().mapToDouble(p -> p[1]).max().orElse(0);
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: calculateCurvePoints.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public List<double[]> calculateCurvePoints() {
         List<double[]> points = new ArrayList<>();
         if (amplitude <= 0) {
@@ -75,8 +109,18 @@ public class OscilloscopeCanvas extends Canvas {
         return points;
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: startRenderLoop.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startRenderLoop() {
         AnimationTimer timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 draw();
@@ -85,6 +129,11 @@ public class OscilloscopeCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

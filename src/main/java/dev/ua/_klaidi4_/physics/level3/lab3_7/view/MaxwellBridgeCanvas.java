@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-7 "Магнітна проникність".
+ * Клас: MaxwellBridgeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_7.view;
 
 import javafx.animation.AnimationTimer;
@@ -19,11 +28,21 @@ public class MaxwellBridgeCanvas extends Canvas {
     private long lastTime = 0;
     private Runnable onFinish;
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: MaxwellBridgeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public MaxwellBridgeCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: animateBalance.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void animateBalance(double l1, double l2, double voltage, Runnable onFinish) {
         this.targetSlider = 100.0 * l1 / (l1 + l2);
         this.voltage = voltage;
@@ -35,6 +54,11 @@ public class MaxwellBridgeCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: reset.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void reset() {
         slider = 50;
         targetSlider = 50;
@@ -44,14 +68,29 @@ public class MaxwellBridgeCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         lastTime = 0;
 
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) {
@@ -88,6 +127,11 @@ public class MaxwellBridgeCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -134,6 +178,11 @@ public class MaxwellBridgeCanvas extends Canvas {
         drawToroid(gc, 500, 290);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: drawBlock.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawBlock(GraphicsContext gc, String text, double x, double y, String color) {
         gc.setFill(Color.web(color));
         gc.fillRoundRect(x, y, 80, 55, 10, 10);
@@ -143,6 +192,11 @@ public class MaxwellBridgeCanvas extends Canvas {
         gc.fillText(text, x + 17, y + 33);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: drawReochord.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawReochord(GraphicsContext gc, double x, double y, double width) {
         gc.setFill(Color.web("#facc15"));
         gc.fillRoundRect(x, y - 8, width, 16, 8, 8);
@@ -163,6 +217,11 @@ public class MaxwellBridgeCanvas extends Canvas {
         gc.fillText(String.format("D = %.1f под.", slider), x + 95, y + 38);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: drawIndicator.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawIndicator(GraphicsContext gc, double x, double y) {
         gc.setFill(Color.web("#111827"));
         gc.fillRoundRect(x, y, 90, 70, 10, 10);
@@ -181,6 +240,11 @@ public class MaxwellBridgeCanvas extends Canvas {
         gc.fillText("ІН", x + 38, y + 62);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: drawTransformer.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawTransformer(GraphicsContext gc, double x, double y) {
         gc.setFill(Color.web("#334155"));
         gc.fillRoundRect(x, y, 105, 90, 10, 10);
@@ -197,6 +261,11 @@ public class MaxwellBridgeCanvas extends Canvas {
         gc.fillText(String.format("%.1f V", voltage), x + 25, y + 55);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: drawToroid.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawToroid(GraphicsContext gc, double x, double y) {
         gc.setFill(Color.web("#0f172a"));
         gc.fillOval(x - 45, y - 45, 90, 90);

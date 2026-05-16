@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-4 "Згасаючі коливання".
+ * Клас: OscilloscopeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_4.view;
 
 import javafx.animation.AnimationTimer;
@@ -18,11 +27,21 @@ public class OscilloscopeCanvas extends Canvas {
     private long lastTime = 0;
     private final double U0 = 100.0;
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: OscilloscopeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public OscilloscopeCanvas(double width, double height) {
         super(width, height);
         drawGrid();
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: setSetupParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setSetupParameters(double l, double c, double rTotal, double timeScale) {
         this.l = l;
         this.c = c;
@@ -31,6 +50,11 @@ public class OscilloscopeCanvas extends Canvas {
         if (!isRunning) drawGrid();
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         this.currentTime = 0;
         this.isRunning = true;
@@ -39,6 +63,11 @@ public class OscilloscopeCanvas extends Canvas {
         drawGrid();
 
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -59,11 +88,21 @@ public class OscilloscopeCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
         isRunning = false;
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: drawGrid.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawGrid() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -87,6 +126,11 @@ public class OscilloscopeCanvas extends Canvas {
         gc.strokeLine(w / 2, 0, w / 2, h);
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: drawTrace.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawTrace() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

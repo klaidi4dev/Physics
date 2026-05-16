@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-6 "Дифракційна решітка".
+ * Клас: DiffractionCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_6.view;
 
 import javafx.animation.AnimationTimer;
@@ -14,11 +23,21 @@ public class DiffractionCanvas extends Canvas {
 
     private AnimationTimer timer;
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: DiffractionCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public DiffractionCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(boolean power, double angle, double wave, double d) {
         this.isPowerOn = power;
         this.telescopeAngle = angle;
@@ -26,8 +45,18 @@ public class DiffractionCanvas extends Canvas {
         this.gratingD = d;
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 drawFrame();
@@ -36,10 +65,20 @@ public class DiffractionCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -154,6 +193,11 @@ public class DiffractionCanvas extends Canvas {
         gc.restore();
     }
 
+    /*
+     * Лабораторна робота № 5-6 "Дифракційна решітка".
+     * Функція: getFilterColor.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private Color getFilterColor(double wave) {
         if (wave > 550) return Color.web("#FFD700");
         if (wave > 500) return Color.web("#00FF00");

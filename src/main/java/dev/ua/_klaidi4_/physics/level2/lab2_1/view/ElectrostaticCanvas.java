@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-1 "Електростатичне поле".
+ * Клас: ElectrostaticCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_1.view;
 
 import javafx.animation.AnimationTimer;
@@ -19,15 +28,30 @@ public class ElectrostaticCanvas extends Canvas {
 
     private Runnable onFinishCallback;
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: ElectrostaticCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public ElectrostaticCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: setOnFinishCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnFinishCallback(Runnable callback) {
         this.onFinishCallback = callback;
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: updatePhysicsParameters.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updatePhysicsParameters(double u, double d, double r, int n) {
         this.currentU = u;
         this.currentD = d;
@@ -38,6 +62,11 @@ public class ElectrostaticCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: resetSystem.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetSystem() {
         this.isScanning = false;
         this.scanProgress = 0.0;
@@ -45,10 +74,20 @@ public class ElectrostaticCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         resetSystem();
         this.isScanning = true;
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -67,6 +106,11 @@ public class ElectrostaticCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

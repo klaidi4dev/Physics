@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-5 "Визначення ЕРС".
+ * Клас: LabController25.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з вимірювання електрорушійної сили джерел струму компенсаційним методом.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -39,11 +48,21 @@ public class LabController25 extends BaseLabController {
     private boolean isAutoRunning = false;
     private Queue<Integer> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: LabController25.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та генерує випадкове значення невідомої ЕРС.
+     */
     public LabController25() {
         generateUnknownEx();
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та скидає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
@@ -51,11 +70,21 @@ public class LabController25 extends BaseLabController {
         if (canvas != null) canvas.stopSimulation();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: generateUnknownEx.
+     * Призначення: Генерує випадкове значення для невідомої ЕРС джерела Ex.
+     */
     private void generateUnknownEx() {
         double rawEx = 1.2 + Math.random() * 0.4;
         Ex = Math.round(rawEx * 10000.0) / 10000.0;
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: схему потенціометра, панелі керування та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -197,6 +226,11 @@ public class LabController25 extends BaseLabController {
         updatePhysics();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: updatePhysics.
+     * Призначення: Розраховує струм у колі та відхилення гальванометра на основі положення движка потенціометра.
+     */
     private void updatePhysics() {
         if (isAutoRunning) return;
 
@@ -240,6 +274,11 @@ public class LabController25 extends BaseLabController {
         });
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю елементів інтерфейсу під час виконання вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         fieldE1.setDisable(disable);
         fieldEn.setDisable(disable);
@@ -253,6 +292,11 @@ public class LabController25 extends BaseLabController {
         autoBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: startAuto.
+     * Призначення: Запускає автоматичний пошук точок компенсації для еталонного та невідомого джерел.
+     */
     private void startAuto() {
         try {
             currentE1 = Double.parseDouble(fieldE1.getText().replace(',', '.'));
@@ -305,6 +349,11 @@ public class LabController25 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: animateTextTo.
+     * Призначення: Симулює плавне переміщення движка потенціометра до точки рівноваги.
+     */
     private void animateTextTo(double targetValue, double activeE, String sourceName, double speedFactor) {
         double current = 0;
         try {
@@ -353,6 +402,11 @@ public class LabController25 extends BaseLabController {
         });
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: recordMeasurement.
+     * Призначення: Записує поточне значення положення движка (довжину l) до таблиці результатів.
+     */
     private void recordMeasurement() {
         String sourceName = rbEx.isSelected() ? "Ex" : "En";
         double l = 0;
@@ -366,6 +420,11 @@ public class LabController25 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: updateStats.
+     * Призначення: Розраховує значення невідомої ЕРС на основі компенсаційного методу та проводить статистичну обробку.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");
@@ -423,6 +482,11 @@ public class LabController25 extends BaseLabController {
         finalResultLabel.setText(sb.toString());
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: resetAll.
+     * Призначення: Повне скидання вимірювань та генерація нового значення Ex.
+     */
     private void resetAll() {
         data.clear();
         idCounter = 1;

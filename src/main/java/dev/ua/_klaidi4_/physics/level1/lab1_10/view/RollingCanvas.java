@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+ * Клас: RollingCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_10.view;
 
 import javafx.animation.AnimationTimer;
@@ -23,11 +32,21 @@ public class RollingCanvas extends Canvas {
 
     private Runnable onFinishCallback;
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: RollingCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public RollingCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: setParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setParameters(int bodyTypeIndex, double h, double s) {
         this.bodyTypeIndex = bodyTypeIndex;
         double ratio = h / s;
@@ -39,10 +58,20 @@ public class RollingCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: setOnFinishCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnFinishCallback(Runnable onFinishCallback) {
         this.onFinishCallback = onFinishCallback;
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(double calculatedTime) {
         this.exactTime = calculatedTime;
         this.simTime = 0;
@@ -54,13 +83,28 @@ public class RollingCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         this.isRolling = false;
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -75,6 +119,11 @@ public class RollingCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         if (isRolling) {
             simTime += dt;
@@ -94,6 +143,11 @@ public class RollingCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

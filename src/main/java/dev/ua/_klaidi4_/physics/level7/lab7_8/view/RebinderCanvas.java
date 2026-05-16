@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-8 "Поверхневий натяг".
+ * Клас: RebinderCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_8.view;
 
 import javafx.animation.AnimationTimer;
@@ -22,11 +31,21 @@ public class RebinderCanvas extends Canvas {
 
     private Runnable onBubblePop;
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: RebinderCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public RebinderCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: setLiquidParams.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setLiquidParams(String name, double theoreticalAlpha) {
         this.currentLiquid = name;
         this.targetH = (theoreticalAlpha / 72.8) * 150.0;
@@ -44,22 +63,47 @@ public class RebinderCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: setPumping.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPumping(boolean pumping) {
         this.isPumping = pumping;
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: getCurrentH.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getCurrentH() {
         return currentH;
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: setOnBubblePop.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnBubblePop(Runnable callback) {
         this.onBubblePop = callback;
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastUpdate = 0;
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastUpdate == 0) {
@@ -94,10 +138,20 @@ public class RebinderCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 7-8 "Поверхневий натяг".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

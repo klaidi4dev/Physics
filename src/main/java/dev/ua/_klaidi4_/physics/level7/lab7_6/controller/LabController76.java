@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-6 "Зміна ентропії".
+ * Клас: LabController76.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_6.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -61,10 +70,20 @@ public class LabController76 extends BaseLabController {
     private double lastLogTime = -999;
     private AnimationTimer simTimer;
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: LabController76.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController76() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (simTimer != null) simTimer.stop();
@@ -72,6 +91,11 @@ public class LabController76 extends BaseLabController {
         isAutoRunning = false;
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -213,6 +237,11 @@ public class LabController76 extends BaseLabController {
         updateUI();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -221,6 +250,11 @@ public class LabController76 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: toggleHeater.
+     * Призначення: Перемикає стан відповідного компонента або режиму.
+     */
     private void toggleHeater() {
         isHeaterOn = !isHeaterOn;
         if (isHeaterOn) {
@@ -235,6 +269,11 @@ public class LabController76 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: pauseSimulation.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void pauseSimulation() {
         if (simTimer != null) simTimer.stop();
         isSimRunning = false;
@@ -246,6 +285,11 @@ public class LabController76 extends BaseLabController {
         updateStatsFinal();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: resetSimulation.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetSimulation() {
         shutdown();
         isHeaterOn = false;
@@ -277,12 +321,22 @@ public class LabController76 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: startSimulation.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startSimulation() {
         isSimRunning = true;
         stopBtn.setDisable(false);
 
         simTimer = new AnimationTimer() {
             private long lastTime = 0;
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -303,6 +357,11 @@ public class LabController76 extends BaseLabController {
         simTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: physicsTick.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void physicsTick(double dtSim) {
         int matIdx = materialBox.getSelectionModel().getSelectedIndex();
         double targetMelt = MATERIALS[matIdx][0];
@@ -341,6 +400,11 @@ public class LabController76 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: getPhaseString.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private String getPhaseString() {
         if (currentPhase == Phase.MELTING) {
             return isHeaterOn ? "Плавлення" : "Кристалізація";
@@ -351,11 +415,21 @@ public class LabController76 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: forceRecordMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void forceRecordMeasurement() {
         lastLogTime = simTime;
         recordMeasurementSafe();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: handleAutoLogging.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleAutoLogging() {
         double targetMelt = MATERIALS[materialBox.getSelectionModel().getSelectedIndex()][0];
         double interval = (currentTemp >= targetMelt - 37 && currentTemp <= targetMelt + 10) ? 30.0 : 120.0;
@@ -366,6 +440,11 @@ public class LabController76 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: recordMeasurementSafe.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void recordMeasurementSafe() {
         int m = (int) (simTime / 60);
         int s = (int) (simTime % 60);
@@ -389,6 +468,11 @@ public class LabController76 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: updateUI.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateUI() {
         liveTempLabel.setText(String.format(Locale.US, "T = %.1f °C", currentTemp));
 
@@ -405,6 +489,11 @@ public class LabController76 extends BaseLabController {
         canvas.updateState(isHeaterOn, currentTemp, meltProg, simTime, targetMelt);
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         resetSimulation();
         isAutoRunning = true;
@@ -439,6 +528,11 @@ public class LabController76 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: showDetailedChart.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void showDetailedChart() {
         if (data.isEmpty()) {
             showAlert("Увага", "Немає даних для побудови графіка. Спочатку зберіть показники в таблицю.");
@@ -541,6 +635,11 @@ public class LabController76 extends BaseLabController {
         chartStage.show();
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
@@ -554,6 +653,11 @@ public class LabController76 extends BaseLabController {
         finalResultLabel.setText("Обробка результатів: Збір даних графіка T(t)... Відкрийте детальний графік для аналізу.");
     }
 
+    /*
+     * Лабораторна робота № 7-6 "Зміна ентропії".
+     * Функція: updateStatsFinal.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateStatsFinal() {
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 6-3 "Гамма-ослаблення".
+ * Клас: LabController63.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level6.lab6_3.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -51,11 +60,21 @@ public class LabController63 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Double> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: LabController63.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController63() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -64,6 +83,11 @@ public class LabController63 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -224,6 +248,11 @@ public class LabController63 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: createNumberField.
+     * Призначення: Створює і повертає новий елемент інтерфейсу або об'єкт.
+     */
     private TextField createNumberField(double initialValue, Consumer<Double> onChange) {
         TextField field = new TextField(String.valueOf(initialValue));
         field.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -239,6 +268,11 @@ public class LabController63 extends BaseLabController {
         return field;
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: getTrueMu.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getTrueMu() {
         int idx = isotopeComboBox.getSelectionModel().getSelectedIndex();
         if (idx == 0) return 0.65;
@@ -246,10 +280,20 @@ public class LabController63 extends BaseLabController {
         return 2.50;
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         canvas.setPhysicsParameters(currentXValue, getTrueMu(), isMeasuring, new ArrayList<>(data));
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         xField.setDisable(disable);
         timeField.setDisable(disable);
@@ -260,6 +304,11 @@ public class LabController63 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: startSingleMeasurement.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startSingleMeasurement() {
         if (currentTimeValue <= 0) {
             showAlert("Помилка", "Час вимірювання має бути більшим за 0.");
@@ -285,6 +334,11 @@ public class LabController63 extends BaseLabController {
 
         measureTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -305,6 +359,11 @@ public class LabController63 extends BaseLabController {
         measureTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: generateCount.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private int generateCount(double x, double timeSec) {
         double mu = getTrueMu();
         double i0PerMin = currentIntensityValue;
@@ -321,6 +380,11 @@ public class LabController63 extends BaseLabController {
         return Math.max(1, (int) Math.round(expectedTotal));
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: completeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void completeMeasurement(double x, double timeSec, String isotope) {
         isMeasuring = false;
         liveStepLabel.setText("Статус: ГОТОВО");
@@ -343,6 +407,11 @@ public class LabController63 extends BaseLabController {
         performAutomaticCalculation();
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: performAutomaticCalculation.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void performAutomaticCalculation() {
         if (data.size() < 3) return;
 
@@ -382,6 +451,11 @@ public class LabController63 extends BaseLabController {
         finalResultLabel.setText(conclusion);
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         data.clear();
         idCounter = 1;
@@ -396,6 +470,11 @@ public class LabController63 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
@@ -411,6 +490,11 @@ public class LabController63 extends BaseLabController {
 
         autoTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (!isMeasuring && ((now - start) / 1_000_000_000.0) > 1.8) {
@@ -422,6 +506,11 @@ public class LabController63 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-3 "Гамма-ослаблення".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

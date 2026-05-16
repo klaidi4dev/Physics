@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+ * Клас: LabController64.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level6.lab6_4.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -43,11 +52,21 @@ public class LabController64 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<double[]> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: LabController64.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController64() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -55,6 +74,11 @@ public class LabController64 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -193,6 +217,11 @@ public class LabController64 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: createNumberField.
+     * Призначення: Створює і повертає новий елемент інтерфейсу або об'єкт.
+     */
     private TextField createNumberField(double initialValue, Consumer<Double> onChange) {
         TextField field = new TextField(String.valueOf(initialValue));
         field.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -208,10 +237,20 @@ public class LabController64 extends BaseLabController {
         return field;
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         canvas.setStageCoordinates(currentXValue, currentYValue);
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: handleRecordCenter.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecordCenter() {
         double curX = Math.round(currentXValue * 100.0) / 100.0;
         double curY = Math.round(currentYValue * 100.0) / 100.0;
@@ -234,6 +273,11 @@ public class LabController64 extends BaseLabController {
         liveStepLabel.setStyle("-fx-text-fill: #00ffcc; -fx-font-weight: bold;");
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: handleRecordTrack.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecordTrack() {
         if (x0 == null || y0 == null) return;
 
@@ -260,6 +304,11 @@ public class LabController64 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         data.clear();
         idCounter = 1;
@@ -283,6 +332,11 @@ public class LabController64 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
@@ -299,6 +353,11 @@ public class LabController64 extends BaseLabController {
         autoTimer = new AnimationTimer() {
             private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -340,6 +399,11 @@ public class LabController64 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-4 "Фотоемульсійний метод".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty() || trackCounter <= 1) {
             finalResultLabel.setText("Обробка результатів: -");

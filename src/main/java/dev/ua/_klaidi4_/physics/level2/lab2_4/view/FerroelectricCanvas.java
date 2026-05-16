@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-4 "Точка Кюрі".
+ * Клас: FerroelectricCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_4.view;
 
 import javafx.animation.AnimationTimer;
@@ -15,19 +24,39 @@ public class FerroelectricCanvas extends Canvas {
     private AnimationTimer timer;
     private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: FerroelectricCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public FerroelectricCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: updateTemperature.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateTemperature(double temp) {
         this.targetTemperature = temp;
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         this.isHeating = true;
         if (timer != null) timer.stop();
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -44,6 +73,11 @@ public class FerroelectricCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: stopSimulation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopSimulation() {
         this.isHeating = false;
         if (timer != null) timer.stop();
@@ -51,6 +85,11 @@ public class FerroelectricCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: resetSystem.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetSystem() {
         this.isHeating = false;
         this.targetTemperature = 20.0;
@@ -59,6 +98,11 @@ public class FerroelectricCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

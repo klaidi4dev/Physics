@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-13 "Тертя кочення".
+ * Клас: LabController113.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення коефіцієнта тертя кочення методом похилої площини.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_13.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -37,10 +46,20 @@ public class LabController113 extends BaseLabController {
     private final double F_THEO = 0.00005;
     private final double EXACT_PERIOD = 1.5;
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: LabController113.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController113() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -48,6 +67,11 @@ public class LabController113 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: кнопки, таблицю та полотно симуляції коливань на похилій площині.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -163,6 +187,11 @@ public class LabController113 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час активного руху кулі.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -173,6 +202,11 @@ public class LabController113 extends BaseLabController {
         nField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання затухаючих коливань.
+     */
     private void startManual() {
         try {
             Double.parseDouble(betaField.getText());
@@ -183,6 +217,11 @@ public class LabController113 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних вимірювань для різних кутів нахилу.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -197,6 +236,11 @@ public class LabController113 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний дослід в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -209,6 +253,11 @@ public class LabController113 extends BaseLabController {
         runSimulation();
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію коливань кулі в жолобі.
+     */
     private void runSimulation() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: КОЛИВАННЯ");
@@ -267,6 +316,11 @@ public class LabController113 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: finishMeasurement.
+     * Призначення: Обробляє завершення коливань, фіксує результати та додає дані до таблиці.
+     */
     private void finishMeasurement(double anDeg, int targetOsc) {
         liveOscLabel.setText("n = " + targetOsc);
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
@@ -301,6 +355,11 @@ public class LabController113 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-13 "Тертя кочення".
+     * Функція: updateStats.
+     * Призначення: Проводить розрахунок коефіцієнта тертя кочення на основі затухання коливань.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

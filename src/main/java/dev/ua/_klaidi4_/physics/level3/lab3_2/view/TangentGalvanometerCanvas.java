@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-2 "Магнітне поле Землі".
+ * Клас: TangentGalvanometerCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_2.view;
 
 import javafx.animation.AnimationTimer;
@@ -23,15 +32,30 @@ public class TangentGalvanometerCanvas extends Canvas {
     private long lastTime = 0;
     private Runnable onFinish;
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: TangentGalvanometerCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public TangentGalvanometerCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: setEarthField.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setEarthField(double h0) {
         this.earthH0 = h0;
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: setParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setParameters(int n, double current, double r, int polarity) {
         this.turnsN = n;
         this.currentI = current * polarity;
@@ -39,10 +63,20 @@ public class TangentGalvanometerCanvas extends Canvas {
         if (!isRunning) draw();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: setCallbacks.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setCallbacks(Runnable onFinish) {
         this.onFinish = onFinish;
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         double Hm = (turnsN * currentI) / (2.0 * radiusR);
         targetAngle = Math.toDegrees(Math.atan2(Hm, earthH0));
@@ -60,16 +94,36 @@ public class TangentGalvanometerCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: getMeasuredAngle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getMeasuredAngle() {
         return measuredAngle;
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -83,6 +137,11 @@ public class TangentGalvanometerCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: updatePhysics.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void updatePhysics(double dt) {
         double springConstant = 40.0;
         double damping = 3.5;
@@ -99,6 +158,11 @@ public class TangentGalvanometerCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-7 "Маятник Обербека".
+ * Клас: LabController17.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення моменту інерції хрестоподібного маятника та перевірки основного закону динаміки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_7.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -46,11 +55,21 @@ public class LabController17 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: LabController17.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та встановлює початкові налаштування.
+     */
     public LabController17() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -58,6 +77,11 @@ public class LabController17 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: initUI.
+     * Призначення: Ініціалізація графічного інтерфейсу: панелі керування, полотна та таблиці результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -203,6 +227,11 @@ public class LabController17 extends BaseLabController {
         canvas.setOnFinishCallback(() -> Platform.runLater(this::finishMeasurement));
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Передає актуальні геометричні та масові параметри до фізичної моделі.
+     */
     private void applyPhysicsSettings() {
         try {
             double r = Double.parseDouble(rField.getText());
@@ -214,6 +243,11 @@ public class LabController17 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: setControlsDisable.
+     * Призначення: Блокує елементи інтерфейсу під час активного руху маятника.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -228,6 +262,11 @@ public class LabController17 extends BaseLabController {
         r0Field.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: startManual.
+     * Призначення: Запускає одиничне вимірювання часу падіння вантажу.
+     */
     private void startManual() {
         try {
             Double.parseDouble(mField.getText());
@@ -240,6 +279,11 @@ public class LabController17 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних дослідів з різними масами та положеннями тягарців.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -256,6 +300,11 @@ public class LabController17 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: processNextAuto.
+     * Призначення: Керує чергою автоматичних вимірювань.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -274,6 +323,11 @@ public class LabController17 extends BaseLabController {
     private double currentExactTime;
     private double currentTheoI;
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію обертального руху маятника Обербека.
+     */
     private void runSimulation() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: РУХ ВАНТАЖУ");
@@ -317,6 +371,11 @@ public class LabController17 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: finishMeasurement.
+     * Призначення: Обробляє завершення падіння, фіксує час та додає результати до таблиці.
+     */
     private void finishMeasurement() {
         double m = Double.parseDouble(mField.getText());
         double h = Double.parseDouble(hField.getText());
@@ -349,6 +408,11 @@ public class LabController17 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: updateStats.
+     * Призначення: Проводить розрахунок моменту інерції та статистичну обробку даних.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

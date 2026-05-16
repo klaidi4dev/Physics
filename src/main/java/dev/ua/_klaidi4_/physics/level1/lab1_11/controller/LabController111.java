@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-11 "Маятник Максвелла".
+ * Клас: LabController111.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення моменту інерції маятника та перевірки закону збереження енергії.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_11.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -35,10 +44,20 @@ public class LabController111 extends BaseLabController {
     private Queue<Integer> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: LabController111.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController111() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -46,6 +65,11 @@ public class LabController111 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: кнопки, таблицю та полотно симуляції.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -161,6 +185,11 @@ public class LabController111 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час активної симуляції.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -171,6 +200,11 @@ public class LabController111 extends BaseLabController {
         hField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання часу руху маятника.
+     */
     private void startManual() {
         try {
             Double.parseDouble(mField.getText());
@@ -181,6 +215,11 @@ public class LabController111 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних вимірювань.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -193,6 +232,11 @@ public class LabController111 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний дослід в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -205,6 +249,11 @@ public class LabController111 extends BaseLabController {
         runSimulation();
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію руху маятника Максвелла.
+     */
     private void runSimulation() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ПАДІННЯ");
@@ -235,6 +284,11 @@ public class LabController111 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: finishMeasurement.
+     * Призначення: Обробляє завершення вимірювання та додає дані до таблиці.
+     */
     private void finishMeasurement(double measuredTime, double iTheory) {
         liveTimeLabel.setText(String.format("t = %.3f с", measuredTime));
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
@@ -266,6 +320,11 @@ public class LabController111 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-11 "Маятник Максвелла".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку результатів вимірювань моменту інерції.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

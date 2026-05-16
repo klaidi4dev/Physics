@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+ * Клас: LabController15.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з вивчення абсолютно пружного удару за допомогою конденсаторного хронометра.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -48,10 +57,20 @@ public class LabController15 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: LabController15.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс користувача.
+     */
     public LabController15() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -59,6 +78,11 @@ public class LabController15 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: initUI.
+     * Призначення: Створює візуальні компоненти, панелі управління та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -191,6 +215,11 @@ public class LabController15 extends BaseLabController {
         );
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: setControlsDisable.
+     * Призначення: Блокує або розблокує кнопки та поля введення під час симуляції.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -202,6 +231,11 @@ public class LabController15 extends BaseLabController {
         radiusField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: startManual.
+     * Призначення: Запускає поодинокий дослід за параметрами користувача.
+     */
     private void startManual() {
         try {
             double C = Double.parseDouble(cField.getText()) * 1e-6;
@@ -218,6 +252,11 @@ public class LabController15 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: startAuto.
+     * Призначення: Формує чергу та запускає серію автоматичних вимірювань.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -239,6 +278,11 @@ public class LabController15 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: processNextAuto.
+     * Призначення: Витягує наступний набір параметрів та запускає черговий дослід в авторежимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -258,6 +302,11 @@ public class LabController15 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: runSimulation.
+     * Призначення: Ініціює візуальну симуляцію удару куль та роботи хронометра.
+     */
     private void runSimulation(double dh, double n0, double n) {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: РУХ КУЛІ");
@@ -273,6 +322,11 @@ public class LabController15 extends BaseLabController {
         canvas.startSimulation(dh, n0, n);
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: finishMeasurement.
+     * Призначення: Фіксує результати вимірювання (кількість поділок n) та додає їх у таблицю.
+     */
     private void finishMeasurement() {
         try {
             double C_mkF = Double.parseDouble(cField.getText());
@@ -313,6 +367,11 @@ public class LabController15 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: updateStats.
+     * Призначення: Розраховує час зіткнення та проводить статистичну обробку результатів.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

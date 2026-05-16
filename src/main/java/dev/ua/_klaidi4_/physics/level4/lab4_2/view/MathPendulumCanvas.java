@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-2 "Математичний маятник".
+ * Клас: MathPendulumCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_2.view;
 
 import dev.ua._klaidi4_.physics.level4.lab4_2.enums.MaterialType;
@@ -26,11 +35,21 @@ public class MathPendulumCanvas extends Canvas {
 
     private Runnable onOscillationCompleted;
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: MathPendulumCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public MathPendulumCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(MaterialType material, double l, double angleDeg) {
         this.material = material;
         this.length = l;
@@ -38,10 +57,20 @@ public class MathPendulumCanvas extends Canvas {
         resetSystem();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: setOnOscillationCompleted.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnOscillationCompleted(Runnable callback) {
         this.onOscillationCompleted = callback;
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: resetSystem.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetSystem() {
         this.currentAngle = startAngle;
         this.angularVelocity = 0;
@@ -52,23 +81,48 @@ public class MathPendulumCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         resetSystem();
         this.isRunning = true;
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: stopSimulation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopSimulation() {
         this.isRunning = false;
     }
 
     public double getElapsedTime() { return elapsedTime; }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: getFullOscillations.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public int getFullOscillations() {
         return halfSwings / 2;
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -86,6 +140,11 @@ public class MathPendulumCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         double angularAcceleration = -(gravity / length) * Math.sin(currentAngle);
         angularVelocity += angularAcceleration * dt;
@@ -101,6 +160,11 @@ public class MathPendulumCanvas extends Canvas {
         lastVelocity = angularVelocity;
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

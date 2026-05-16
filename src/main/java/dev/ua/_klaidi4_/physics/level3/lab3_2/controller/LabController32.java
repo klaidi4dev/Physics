@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-2 "Магнітне поле Землі".
+ * Клас: LabController32.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення горизонтальної складової напруженості магнітного поля Землі.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_2.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -55,11 +64,21 @@ public class LabController32 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: LabController32.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController32() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -67,6 +86,11 @@ public class LabController32 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічні елементи керування та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -220,6 +244,11 @@ public class LabController32 extends BaseLabController {
         canvas.setCallbacks(() -> Platform.runLater(this::finishMeasurement));
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Зчитує параметри з полів введення та застосовує їх до фізичної моделі.
+     */
     private void applyPhysicsSettings() {
         try {
             int n = Integer.parseInt(nComboBox.getValue());
@@ -238,6 +267,11 @@ public class LabController32 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -250,6 +284,11 @@ public class LabController32 extends BaseLabController {
         h0EarthField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: startManual.
+     * Призначення: Запускає процес вимірювання вручну після перевірки параметрів.
+     */
     private void startManual() {
         try {
             Double.parseDouble(iField.getText());
@@ -263,6 +302,11 @@ public class LabController32 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: startSimulation.
+     * Призначення: Ініціює візуальну анімацію повороту магнітної стрілки.
+     */
     private void startSimulation() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: КОЛИВАННЯ...");
@@ -283,6 +327,11 @@ public class LabController32 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: startAuto.
+     * Призначення: Запускає серію автоматичних вимірювань для різних значень струму та кількості витків.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -312,6 +361,11 @@ public class LabController32 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступне автоматичне вимірювання.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -329,6 +383,11 @@ public class LabController32 extends BaseLabController {
         startSimulation();
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: finishMeasurement.
+     * Призначення: Розраховує напруженість поля Землі на основі кута відхилення та додає дані до таблиці.
+     */
     private void finishMeasurement() {
         try {
             int n = Integer.parseInt(nComboBox.getValue());
@@ -370,6 +429,11 @@ public class LabController32 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку вимірювань та розраховує середнє значення H_землі.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");
@@ -391,6 +455,11 @@ public class LabController32 extends BaseLabController {
         finalResultLabel.setText(calculation);
     }
 
+    /*
+     * Лабораторна робота № 3-2 "Магнітне поле Землі".
+     * Функція: showAnalysisDialog.
+     * Призначення: Виводить вікно з детальним аналізом та графіками.
+     */
     private void showAnalysisDialog() {
         if (data.isEmpty()) {
             showAlert("Увага", "Спочатку проведіть вимірювання!");

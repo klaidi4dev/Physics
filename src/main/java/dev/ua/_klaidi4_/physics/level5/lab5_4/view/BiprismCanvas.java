@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-4 "Біпризма Френеля".
+ * Клас: BiprismCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_4.view;
 
 import javafx.animation.AnimationTimer;
@@ -18,11 +27,21 @@ public class BiprismCanvas extends Canvas {
     private AnimationTimer timer;
     private double time = 0;
 
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: BiprismCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public BiprismCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(boolean power, boolean lens, double lx, double mz, double wave) {
         this.isPowerOn = power;
         this.isLensInserted = lens;
@@ -31,9 +50,19 @@ public class BiprismCanvas extends Canvas {
         this.filterWavelength = wave;
     }
 
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -46,10 +75,20 @@ public class BiprismCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -156,6 +195,11 @@ public class BiprismCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: drawSlitImage.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawSlitImage(GraphicsContext gc, double x, double y, double r, double blur, Color color) {
         if (blur > 5.0) return;
 
@@ -167,6 +211,11 @@ public class BiprismCanvas extends Canvas {
         gc.strokeLine(x, y - r, x, y + r);
     }
 
+    /*
+     * Лабораторна робота № 5-4 "Біпризма Френеля".
+     * Функція: getFilterColor.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private Color getFilterColor(double wave) {
         if (wave > 600) return Color.web("#ff0033");
         if (wave > 500) return Color.web("#00ff66");

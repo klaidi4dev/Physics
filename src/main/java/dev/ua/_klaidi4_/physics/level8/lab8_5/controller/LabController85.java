@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-5 "Тунельний діод".
+ * Клас: LabController85.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -41,11 +50,21 @@ public class LabController85 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Double> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: LabController85.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController85() {
         initUI();
         canvas.updateState(0.0, "Прямий", 0.0);
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -53,6 +72,11 @@ public class LabController85 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -208,6 +232,11 @@ public class LabController85 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: createLabel.
+     * Призначення: Створює і повертає новий елемент інтерфейсу або об'єкт.
+     */
     private Label createLabel(String text) {
         Label label = new Label(text);
         label.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
@@ -215,6 +244,11 @@ public class LabController85 extends BaseLabController {
         return label;
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -223,6 +257,11 @@ public class LabController85 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: resetForModeChange.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetForModeChange() {
         data.clear();
         idCounter = 1;
@@ -232,6 +271,11 @@ public class LabController85 extends BaseLabController {
         liveModeLabel.setText("Режим: " + modeBox.getValue());
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: updateLivePreview.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateLivePreview() {
         if (isMeasuring) return;
 
@@ -244,6 +288,11 @@ public class LabController85 extends BaseLabController {
         liveCurrLabel.setText(String.format(Locale.US, "I = %.1f мкА", i));
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         materialBox.setDisable(disable);
         dopingField.setDisable(disable);
@@ -255,12 +304,22 @@ public class LabController85 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: startSingleMeasurement.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startSingleMeasurement() {
         double targetU = getDoubleValue(voltageField, 0.0);
         String mode = modeBox.getValue();
         performMeasurement(targetU, mode, false);
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: performMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void performMeasurement(double u, String mode, boolean isAuto) {
         isMeasuring = true;
         if (!isAuto) setControlsDisable(true);
@@ -299,6 +358,11 @@ public class LabController85 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         data.clear();
         idCounter = 1;
@@ -318,6 +382,11 @@ public class LabController85 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStatusLabel.setText("АВТОСЕРІЯ ЗАВЕРШЕНА");
@@ -330,6 +399,11 @@ public class LabController85 extends BaseLabController {
         performMeasurement(nextU, modeBox.getValue(), true);
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: calculateCurrent.
+     * Призначення: Виконує математичні обчислення для отримання результатів.
+     */
     private double calculateCurrent(double u, String mode) {
         double dopingMultiplier = getDoubleValue(dopingField, 1.0);
         if (dopingMultiplier < 0.01) dopingMultiplier = 0.01;
@@ -373,6 +447,11 @@ public class LabController85 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: interpolate.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private double interpolate(double x, double[] xPts, double[] yPts) {
         if (x <= xPts[0]) return yPts[0];
         if (x >= xPts[xPts.length - 1]) {
@@ -389,6 +468,11 @@ public class LabController85 extends BaseLabController {
         return 0;
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

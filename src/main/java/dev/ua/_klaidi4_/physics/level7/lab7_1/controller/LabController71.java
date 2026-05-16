@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-1 "Теплоємність газу".
+ * Клас: LabController71.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -41,11 +50,21 @@ public class LabController71 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Integer> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: LabController71.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController71() {
         initUI();
         canvas.updateState(0.0, false, 1.0);
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -54,6 +73,11 @@ public class LabController71 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -185,6 +209,11 @@ public class LabController71 extends BaseLabController {
         this.setBottom(bottomPanel);
 
         AnimationTimer uiTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 manoLabel.setText(String.format(Locale.US, "h поточне: %.1f", canvas.getCurrentPressure()));
@@ -195,6 +224,11 @@ public class LabController71 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: getTrueGamma.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getTrueGamma() {
         int idx = gasComboBox.getSelectionModel().getSelectedIndex();
         if (idx == 0) return 1.40;
@@ -202,6 +236,11 @@ public class LabController71 extends BaseLabController {
         return 1.30;
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -210,6 +249,11 @@ public class LabController71 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         gasComboBox.setDisable(disable);
         pressureField.setDisable(disable);
@@ -220,6 +264,11 @@ public class LabController71 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: startSingleMeasurement.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startSingleMeasurement() {
         isMeasuring = true;
         setControlsDisable(true);
@@ -242,6 +291,11 @@ public class LabController71 extends BaseLabController {
         measureTimer = new AnimationTimer() {
             long start = System.nanoTime();
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -274,6 +328,11 @@ public class LabController71 extends BaseLabController {
         measureTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: completeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void completeMeasurement(double h1, double h2) {
         isMeasuring = false;
 
@@ -292,6 +351,11 @@ public class LabController71 extends BaseLabController {
         setControlsDisable(false);
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         data.clear();
         idCounter = 1;
@@ -305,6 +369,11 @@ public class LabController71 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
@@ -318,6 +387,11 @@ public class LabController71 extends BaseLabController {
 
         autoTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -332,6 +406,11 @@ public class LabController71 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

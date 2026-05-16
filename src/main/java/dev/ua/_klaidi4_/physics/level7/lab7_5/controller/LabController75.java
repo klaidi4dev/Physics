@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-5 "Критичний стан".
+ * Клас: LabController75.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -48,10 +57,20 @@ public class LabController75 extends BaseLabController {
             {132.4, 111.3}
     };
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: LabController75.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController75() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -59,6 +78,11 @@ public class LabController75 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -215,6 +239,11 @@ public class LabController75 extends BaseLabController {
         this.setBottom(bottomPanel);
 
         AnimationTimer uiTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double t = canvas.getCurrentTemp();
@@ -240,6 +269,11 @@ public class LabController75 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: applyPhysicsParams.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsParams() {
         if (isAutoRunning) return;
         int subIdx = substanceBox.getSelectionModel().getSelectedIndex();
@@ -250,6 +284,11 @@ public class LabController75 extends BaseLabController {
         canvas.setPhysicsParams(voltage, tk, heatRate);
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: resetMeasurementState.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetMeasurementState() {
         tk1 = null;
         tk1SavedLabel.setText("Tк1 (нагрів): ---");
@@ -258,6 +297,11 @@ public class LabController75 extends BaseLabController {
         recordTk2Btn.setDisable(true);
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: handleRecordTk1.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecordTk1() {
         double currentT = canvas.getCurrentTemp();
         double actualTk = SUBSTANCES[substanceBox.getSelectionModel().getSelectedIndex()][0];
@@ -274,6 +318,11 @@ public class LabController75 extends BaseLabController {
         voltageSlider.setValue(0);
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: handleRecordTk2.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecordTk2() {
         double currentT = canvas.getCurrentTemp();
         double actualTk = SUBSTANCES[substanceBox.getSelectionModel().getSelectedIndex()][0];
@@ -289,6 +338,11 @@ public class LabController75 extends BaseLabController {
         resetMeasurementState();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: calculateAndSave.
+     * Призначення: Виконує математичні обчислення для отримання результатів.
+     */
     private void calculateAndSave(double t1, double t2) {
         int subIdx = substanceBox.getSelectionModel().getSelectedIndex();
         double pkAtm = SUBSTANCES[subIdx][1];
@@ -309,6 +363,11 @@ public class LabController75 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         isAutoRunning = true;
         voltageSlider.setDisable(true);
@@ -328,6 +387,11 @@ public class LabController75 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -349,6 +413,11 @@ public class LabController75 extends BaseLabController {
             int state = 0;
             long delayStart = 0;
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double t = canvas.getCurrentTemp();
@@ -385,6 +454,11 @@ public class LabController75 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-5 "Критичний стан".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");

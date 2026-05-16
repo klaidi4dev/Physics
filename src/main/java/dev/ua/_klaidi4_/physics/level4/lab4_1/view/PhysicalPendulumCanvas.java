@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-1 "Фізичний маятник".
+ * Клас: PhysicalPendulumCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_1.view;
 
 import javafx.animation.AnimationTimer;
@@ -32,19 +41,39 @@ public class PhysicalPendulumCanvas extends Canvas {
     private Runnable onReadyCallback;
     private BiConsumer<Double, Integer> timerUpdateCallback;
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: PhysicalPendulumCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public PhysicalPendulumCanvas(double width, double height) {
         super(width, height);
         drawIdle();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: setOnReadyCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnReadyCallback(Runnable cb) {
         this.onReadyCallback = cb;
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: setTimerUpdateCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setTimerUpdateCallback(BiConsumer<Double, Integer> cb) {
         this.timerUpdateCallback = cb;
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: updatePreview.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updatePreview(String axis, double xD_cm, double initAngleDeg, double mRod, double mD) {
         if (isSwinging) return;
 
@@ -57,6 +86,11 @@ public class PhysicalPendulumCanvas extends Canvas {
         drawIdle();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(String axis, double xD_cm, int n, double period, double initAngleDeg, double mRod, double mD) {
         this.axis = axis;
         this.xD_cm = xD_cm;
@@ -75,14 +109,29 @@ public class PhysicalPendulumCanvas extends Canvas {
         startRenderLoop();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         this.isSwinging = false;
         if (timer != null) timer.stop();
         drawIdle();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: startRenderLoop.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startRenderLoop() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -98,6 +147,11 @@ public class PhysicalPendulumCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         if (!isSwinging) return;
 
@@ -123,11 +177,21 @@ public class PhysicalPendulumCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: drawIdle.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawIdle() {
         currentAngleRad = maxAngleRad;
         draw();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

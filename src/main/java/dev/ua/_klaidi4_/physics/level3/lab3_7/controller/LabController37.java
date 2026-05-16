@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-7 "Магнітна проникність".
+ * Клас: LabController37.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення відносної магнетної проникності магнетиків з допомогою містка Максвелла.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_7.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -73,11 +82,21 @@ public class LabController37 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: LabController37.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController37() {
         initUI();
         updateFieldsFromToroid();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -85,6 +104,11 @@ public class LabController37 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів тороїдів, таблицю та візуалізацію містка.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -217,6 +241,11 @@ public class LabController37 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: createCol.
+     * Призначення: Допоміжна функція для створення числових колонок таблиці.
+     */
     private TableColumn<Measurement, Double> createCol(String title, String property) {
         TableColumn<Measurement, Double> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
@@ -237,18 +266,33 @@ public class LabController37 extends BaseLabController {
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: createColInt.
+     * Призначення: Створює колонку для цілих чисел.
+     */
     private TableColumn<Measurement, Integer> createColInt(String title, String property) {
         TableColumn<Measurement, Integer> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: createColString.
+     * Призначення: Створює текстову колонку таблиці.
+     */
     private TableColumn<Measurement, String> createColString(String title, String property) {
         TableColumn<Measurement, String> col = new TableColumn<>(title);
         col.setCellValueFactory(new PropertyValueFactory<>(property));
         return col;
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: getPreset.
+     * Призначення: Повертає параметри тороїда (геометрія, кількість витків) за його індексом.
+     */
     private ToroidPreset getPreset(int index, double voltage) {
         if (index == 1) {
             return new ToroidPreset("Тороїд 2", voltage, 40, 64.0, 21.5, 31.3, 19.5, 6.0, 0.252);
@@ -261,6 +305,11 @@ public class LabController37 extends BaseLabController {
         return new ToroidPreset("Тороїд 1", voltage, 30, 61.5, 24.0, 54.3, 31.5, 9.0, 0.272);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: updateFieldsFromToroid.
+     * Призначення: Оновлює поля введення параметрів при виборі іншого тороїда.
+     */
     private void updateFieldsFromToroid() {
         try {
             double voltage = Double.parseDouble(voltageField.getText().replace(',', '.'));
@@ -271,6 +320,11 @@ public class LabController37 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: startManual.
+     * Призначення: Запускає процес балансування містка вручну для вибраного тороїда.
+     */
     private void startManual() {
         try {
             double voltage = Double.parseDouble(voltageField.getText().replace(',', '.'));
@@ -282,6 +336,11 @@ public class LabController37 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: startAuto.
+     * Призначення: Ініціює автоматичне вимірювання для всіх доступних тороїдів.
+     */
     private void startAuto() {
         clearTable();
 
@@ -300,6 +359,11 @@ public class LabController37 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: processNextAuto.
+     * Призначення: Керує чергою автоматичних вимірювань.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -322,6 +386,11 @@ public class LabController37 extends BaseLabController {
         runMeasurement(preset);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: runMeasurement.
+     * Призначення: Симулює процес автоматичного балансування містка Максвелла.
+     */
     private void runMeasurement(ToroidPreset preset) {
         setControlsDisable(true);
 
@@ -335,6 +404,11 @@ public class LabController37 extends BaseLabController {
                 () -> Platform.runLater(() -> finishMeasurement(preset, l1, l2)));
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: finishMeasurement.
+     * Призначення: Розраховує індуктивність та магнітну проникність, додає дані до таблиці.
+     */
     private void finishMeasurement(ToroidPreset preset, double l1, double l2) {
         double R = Double.parseDouble(rField.getText().replace(',', '.'));
         double L = Double.parseDouble(refLField.getText().replace(',', '.')) / 1000.0;
@@ -403,6 +477,11 @@ public class LabController37 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         toroidBox.setDisable(disable);
         voltageField.setDisable(disable);
@@ -415,6 +494,11 @@ public class LabController37 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: clearTable.
+     * Призначення: Очищає таблицю результатів.
+     */
     private void clearTable() {
         data.clear();
         idCounter = 1;
@@ -428,6 +512,11 @@ public class LabController37 extends BaseLabController {
         canvas.reset();
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: updateStats.
+     * Призначення: Проводить фінальну статистичну обробку результатів вимірювань проникності.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: очікування вимірювань...");
@@ -453,6 +542,11 @@ public class LabController37 extends BaseLabController {
         finalResultLabel.setText(sb.toString());
     }
 
+    /*
+     * Лабораторна робота № 3-7 "Магнітна проникність".
+     * Функція: appendToroidStats.
+     * Призначення: Допоміжна функція для формування тексту висновку по конкретному тороїду.
+     */
     private void appendToroidStats(StringBuilder sb, String name) {
         double sumMu = 0;
         double sumLx = 0;

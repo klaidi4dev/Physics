@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-3 "Додавання коливань".
+ * Клас: OscilloscopeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_3.view;
 
 import javafx.animation.AnimationTimer;
@@ -22,11 +31,21 @@ public class OscilloscopeCanvas extends Canvas {
     private AnimationTimer timer;
     private double timeOffset = 0;
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: OscilloscopeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public OscilloscopeCanvas(double width, double height) {
         super(width, height);
         startRenderLoop();
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: setOnReadyCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnReadyCallback(Runnable cb) {
         this.onReadyCallback = cb;
     }
@@ -42,6 +61,11 @@ public class OscilloscopeCanvas extends Canvas {
         this.phaseDeg = phaseDeg;
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: startMeasurement.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startMeasurement(String mode, double f1, double f2, double a1, double a2, double phaseDeg) {
         this.mode = mode;
         this.f1 = f1;
@@ -54,14 +78,29 @@ public class OscilloscopeCanvas extends Canvas {
         this.measureDelay = 1.2;
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: startRenderLoop.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startRenderLoop() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -76,6 +115,11 @@ public class OscilloscopeCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         timeOffset += dt * 0.5;
 
@@ -91,6 +135,11 @@ public class OscilloscopeCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -162,6 +211,11 @@ public class OscilloscopeCanvas extends Canvas {
         gc.fillText(mode.equals("beats") ? "РЕЖИМ: БИТТЯ (Y = Y1 + Y2)" : "РЕЖИМ: ФІГУРИ ЛІССАЖУ", screenX + 10, screenY + 20);
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: drawBeats.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawBeats(GraphicsContext gc, double sx, double sy, double sw, double sh) {
         double fb = Math.abs(f1 - f2);
         double windowTime = (fb > 0.5) ? (2.0 / fb) : 1.0;
@@ -180,6 +234,11 @@ public class OscilloscopeCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: drawLissajous.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawLissajous(GraphicsContext gc, double sx, double sy, double sw, double sh) {
         double midX = sx + sw / 2;
         double midY = sy + sh / 2;

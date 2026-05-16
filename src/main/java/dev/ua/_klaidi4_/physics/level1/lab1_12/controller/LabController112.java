@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-12 "Гіроскоп".
+ * Клас: LabController112.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення швидкості прецесії та моменту інерції гіроскопа.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_12.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -36,10 +45,20 @@ public class LabController112 extends BaseLabController {
     private boolean isAutoRunning = false;
     private final double I_THEORY = 0.02006;
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: LabController112.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController112() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -47,6 +66,11 @@ public class LabController112 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: кнопки, таблицю та полотно симуляції прецесії.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -166,6 +190,11 @@ public class LabController112 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час активного обертання гіроскопа.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -176,6 +205,11 @@ public class LabController112 extends BaseLabController {
         angleField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання часу прецесії.
+     */
     private void startManual() {
         try {
             Double.parseDouble(mField.getText());
@@ -189,6 +223,11 @@ public class LabController112 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних вимірювань для різних мас тягарців.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -204,6 +243,11 @@ public class LabController112 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний дослід в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -216,6 +260,11 @@ public class LabController112 extends BaseLabController {
         runSimulation();
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію прецесії гіроскопа.
+     */
     private void runSimulation() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ПРЕЦЕСІЯ");
@@ -256,6 +305,11 @@ public class LabController112 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: finishMeasurement.
+     * Призначення: Обробляє завершення вимірювання часу прецесії та додає дані до таблиці.
+     */
     private void finishMeasurement(double measuredTime, double angleDeg, double torque, double Omega, double iTheory) {
         liveTimeLabel.setText(String.format("t = %.3f с", measuredTime));
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
@@ -289,6 +343,11 @@ public class LabController112 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-12 "Гіроскоп".
+     * Функція: updateStats.
+     * Призначення: Проводить розрахунок моменту інерції гіроскопа на основі закону прецесії.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

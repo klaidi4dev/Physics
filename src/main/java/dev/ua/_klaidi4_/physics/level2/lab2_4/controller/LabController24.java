@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-4 "Точка Кюрі".
+ * Клас: LabController24.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з дослідження температурної залежності властивостей сегнетоелектриків.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_4.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -40,10 +49,20 @@ public class LabController24 extends BaseLabController {
     private double baseEpsilon = 0;
     private double baseCurrent = 0;
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: LabController24.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController24() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
@@ -51,6 +70,11 @@ public class LabController24 extends BaseLabController {
         if (canvas != null) canvas.resetSystem();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс: панелі параметрів, графік залежності та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -193,6 +217,11 @@ public class LabController24 extends BaseLabController {
         calculateInitialValues();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: rebuildChartSeries.
+     * Призначення: Перебудовує серії даних графіка при зміні матеріалу.
+     */
     private void rebuildChartSeries() {
         chart.getData().clear();
         dataSeries = new XYChart.Series<>();
@@ -202,6 +231,11 @@ public class LabController24 extends BaseLabController {
         chart.getData().addAll(dataSeries, curiePointSeries);
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: resetAll.
+     * Призначення: Скидає стан вимірювань, очищає графік та таблицю.
+     */
     private void resetAll() {
         data.clear();
         rebuildChartSeries();
@@ -214,6 +248,11 @@ public class LabController24 extends BaseLabController {
         liveStatusLabel.setStyle("-fx-text-fill: yellow;");
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: calculateInitialValues.
+     * Призначення: Розраховує початкові геометричні параметри конденсатора з сегнетоелектриком.
+     */
     private void calculateInitialValues() {
         try {
             double d_m = Double.parseDouble(fieldD.getText()) / 1000.0;
@@ -231,6 +270,11 @@ public class LabController24 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: getEpsilonAtTemp.
+     * Призначення: Повертає значення діелектричної проникності матеріалу при заданій температурі.
+     */
     private double getEpsilonAtTemp(double temp) {
         double curieTemp = 120.0;
         double curieConstant = 1.0e5;
@@ -244,6 +288,11 @@ public class LabController24 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час нагрівання зразка.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -255,6 +304,11 @@ public class LabController24 extends BaseLabController {
         fieldMaxTemp.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: startManual.
+     * Призначення: Запускає процес нагрівання до цільової температури.
+     */
     private void startManual() {
         isAutoRunning = false;
         data.clear();
@@ -264,6 +318,11 @@ public class LabController24 extends BaseLabController {
         runHeatingProcess();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: startAuto.
+     * Призначення: Запускає автоматичне нагрівання від початкової до максимально допустимої температури.
+     */
     private void startAuto() {
         data.clear();
         rebuildChartSeries();
@@ -283,6 +342,11 @@ public class LabController24 extends BaseLabController {
         runHeatingProcess();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: runHeatingProcess.
+     * Призначення: Симулює поступове нагрівання зразка та зняття показників ємності.
+     */
     private void runHeatingProcess() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: НАГРІВАННЯ...");
@@ -325,6 +389,11 @@ public class LabController24 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: simulateToTemp.
+     * Призначення: Виконує вимірювання при конкретній температурі та додає точку на графік.
+     */
     private void simulateToTemp(double targetTemp) {
         currentTemp = targetTemp;
         double eps = getEpsilonAtTemp(currentTemp);
@@ -365,6 +434,11 @@ public class LabController24 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 2-4 "Точка Кюрі".
+     * Функція: updateStats.
+     * Призначення: Визначає точку Кюрі на основі отриманого графіка залежності 1/epsilon від T.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");

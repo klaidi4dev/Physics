@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+ * Клас: PendulumCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_2.view;
 
 import dev.ua._klaidi4_.physics.level1.lab1_2.enums.PendulumType;
@@ -25,11 +34,21 @@ public class PendulumCanvas extends Canvas {
     private boolean laserBroken = false;
     private double sensorFlashTimer = 0;
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: PendulumCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public PendulumCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(PendulumType type, double physicalLength, double gravity, double angleDeg, double friction, double radius) {
         this.type = type;
         this.length = type == PendulumType.MATHEMATICAL ? physicalLength * 400 : physicalLength * 450;
@@ -40,14 +59,29 @@ public class PendulumCanvas extends Canvas {
         resetAngle();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: resetAngle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetAngle() {
         this.currentAngle = startAngle;
         this.angularVelocity = 0;
         this.laserBroken = false;
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -60,10 +94,20 @@ public class PendulumCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         double oldAngle = currentAngle;
 
@@ -82,6 +126,11 @@ public class PendulumCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

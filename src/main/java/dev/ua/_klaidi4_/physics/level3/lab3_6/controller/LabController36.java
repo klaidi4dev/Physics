@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-6 "Взаємна індукція".
+ * Клас: LabController36.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з дослідження явища взаємної індукції двох коаксіально розміщених котушок.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_6.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -48,10 +57,20 @@ public class LabController36 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: LabController36.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController36() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -59,6 +78,11 @@ public class LabController36 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів, таблицю та полотно симуляції котушок.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -185,6 +209,11 @@ public class LabController36 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoTask1Btn.setDisable(disable);
@@ -198,6 +227,11 @@ public class LabController36 extends BaseLabController {
         autoStepsField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: clearTable.
+     * Призначення: Очищає таблицю результатів та скидає лічильник.
+     */
     private void clearTable() {
         data.clear();
         idCounter = 1;
@@ -207,6 +241,11 @@ public class LabController36 extends BaseLabController {
         canvas.resetToIdle();
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання взаємної індукції для заданих параметрів.
+     */
     private void startManual() {
         try {
             Double.parseDouble(zField.getText().replace(',', '.'));
@@ -221,6 +260,11 @@ public class LabController36 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: startAutoTask.
+     * Призначення: Формує чергу параметрів для автоматичного дослідження залежності від відстані або напруги.
+     */
     private void startAutoTask(int taskNumber) {
         try {
             int steps = Integer.parseInt(autoStepsField.getText().replace(',', '.'));
@@ -260,6 +304,11 @@ public class LabController36 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний крок в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -275,6 +324,11 @@ public class LabController36 extends BaseLabController {
         runMeasurementCycle();
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: runMeasurementCycle.
+     * Призначення: Ініціює візуальну анімацію процесу вимірювання.
+     */
     private void runMeasurementCycle() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ЗБІР ДАНИХ...");
@@ -293,6 +347,11 @@ public class LabController36 extends BaseLabController {
         canvas.animateDevices(z, u0, f, measuredEps);
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: finalizeMeasurement.
+     * Призначення: Розраховує взаємну індуктивність та додає дані до таблиці.
+     */
     private void finalizeMeasurement(double z, double u0, double f, double r, double eps) {
         liveStatusLabel.setText("Статус: ВИМІР ЗАФІКСОВАНО");
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
@@ -321,6 +380,11 @@ public class LabController36 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку та порівняння з теоретичним законом.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-4 "Балістичний маятник".
+ * Клас: LabController14.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення швидкості кулі за допомогою балістичного маятника.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_4.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -39,11 +48,21 @@ public class LabController14 extends BaseLabController {
     private double currentS;
     private double currentVCalc;
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: LabController14.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та встановлює початкові параметри.
+     */
     public LabController14() {
         initUI();
         resetPendulumMass();
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -51,6 +70,11 @@ public class LabController14 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: resetPendulumMass.
+     * Призначення: Скидає масу маятника до початкового стану.
+     */
     private void resetPendulumMass() {
         try {
             currentPendulumMass = Double.parseDouble(mPendField.getText());
@@ -59,6 +83,11 @@ public class LabController14 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів, полотно симуляції та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -204,6 +233,11 @@ public class LabController14 extends BaseLabController {
         );
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю кнопок та полів введення під час активного досліду.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -214,6 +248,11 @@ public class LabController14 extends BaseLabController {
         speedSlider.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: startManual.
+     * Призначення: Запускає дослід з параметрами, введеними користувачем вручну.
+     */
     private void startManual() {
         try {
             Double.parseDouble(mBulletField.getText());
@@ -225,6 +264,11 @@ public class LabController14 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних вимірювань швидкості кулі.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -240,6 +284,11 @@ public class LabController14 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний крок в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -251,6 +300,11 @@ public class LabController14 extends BaseLabController {
         runSimulation(autoQueue.poll());
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: runSimulation.
+     * Призначення: Запускає візуальну симуляцію польоту кулі та відхилення маятника.
+     */
     private void runSimulation(double simVelocity) {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ПОЛІТ КУЛІ");
@@ -272,6 +326,11 @@ public class LabController14 extends BaseLabController {
         canvas.startSimulation(maxAngle);
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: finishMeasurement.
+     * Призначення: Фіксує максимальний кут відхилення, розраховує швидкість та додає дані до таблиці.
+     */
     private void finishMeasurement() {
         double m = Double.parseDouble(mBulletField.getText());
         double l = Double.parseDouble(lengthField.getText());
@@ -304,6 +363,11 @@ public class LabController14 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: updateStats.
+     * Призначення: Проводить розрахунок середньої швидкості та похибок на основі накопичених даних.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

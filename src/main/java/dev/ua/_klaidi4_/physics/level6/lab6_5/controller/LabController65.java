@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 6-5 "Питомий заряд електрона".
+ * Клас: LabController65.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level6.lab6_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -64,10 +73,20 @@ public class LabController65 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Double> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: LabController65.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController65() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -75,6 +94,11 @@ public class LabController65 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -229,6 +253,11 @@ public class LabController65 extends BaseLabController {
         updatePhysics();
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: createNumberField.
+     * Призначення: Створює і повертає новий елемент інтерфейсу або об'єкт.
+     */
     private TextField createNumberField(double initialValue, Consumer<Double> onChange) {
         TextField field = new TextField(String.valueOf(initialValue));
         field.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -244,6 +273,11 @@ public class LabController65 extends BaseLabController {
         return field;
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: getTrueIkr.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getTrueIkr() {
         try {
             double L = Double.parseDouble(fieldL.getText());
@@ -258,6 +292,11 @@ public class LabController65 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: updatePhysics.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updatePhysics() {
         double trueIkr = getTrueIkr();
         double iaMax = 2.0 + (currentUa * 0.4);
@@ -274,6 +313,11 @@ public class LabController65 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: recordPoint.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void recordPoint(double ic) {
         for (Measurement m : data) {
             if (Math.abs(m.getIc() - ic) < 0.01) return;
@@ -296,6 +340,11 @@ public class LabController65 extends BaseLabController {
         performAnalysis();
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         clearAll();
         isAutoRunning = true;
@@ -314,6 +363,11 @@ public class LabController65 extends BaseLabController {
         autoTimer = new AnimationTimer() {
             private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -338,6 +392,11 @@ public class LabController65 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         icField.setDisable(disable);
         uaField.setDisable(disable);
@@ -350,6 +409,11 @@ public class LabController65 extends BaseLabController {
         fieldRa.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: performAnalysis.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void performAnalysis() {
         if (isAutoRunning || data.size() < 6) return;
 
@@ -413,6 +477,11 @@ public class LabController65 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: clearAll.
+     * Призначення: Очищує зібрані дані та скидає стан.
+     */
     private void clearAll() {
         data.clear();
         dataSeries.getData().clear();

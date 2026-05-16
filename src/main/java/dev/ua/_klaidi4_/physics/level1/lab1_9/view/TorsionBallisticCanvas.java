@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+ * Клас: TorsionBallisticCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_9.view;
 
 import javafx.animation.AnimationTimer;
@@ -21,15 +30,30 @@ public class TorsionBallisticCanvas extends Canvas {
 
     private Runnable onHitCallback;
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: TorsionBallisticCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public TorsionBallisticCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: setCallbacks.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setCallbacks(Runnable onHit) {
         this.onHitCallback = onHit;
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(double calculatedMaxAngleDeg) {
         this.maxAngle = Math.toRadians(calculatedMaxAngleDeg);
         this.currentAngle = 0;
@@ -42,12 +66,27 @@ public class TorsionBallisticCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -62,6 +101,11 @@ public class TorsionBallisticCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         double originX = getWidth() / 2;
         double targetRadius = 120;
@@ -81,6 +125,11 @@ public class TorsionBallisticCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-4 "Теплопровідність металів".
+ * Клас: LabController74.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_4.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -51,11 +60,21 @@ public class LabController74 extends BaseLabController {
     private AnimationTimer physicsTimer, volTimer, autoTimer;
     private Queue<Double> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: LabController74.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController74() {
         initUI();
         startPhysicsEngine();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -65,6 +84,11 @@ public class LabController74 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -214,6 +238,11 @@ public class LabController74 extends BaseLabController {
         this.setBottom(new VBox(5, table, createStatsBox()));
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -222,6 +251,11 @@ public class LabController74 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: setAllControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setAllControlsDisable(boolean disable) {
         toggleHeaterBtn.setDisable(disable);
         flowField.setDisable(disable);
@@ -233,6 +267,11 @@ public class LabController74 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: handleToggleHeater.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleToggleHeater() {
         isHeaterOn = !isHeaterOn;
         toggleHeaterBtn.setText(isHeaterOn ? "⏹ ВИМКНУТИ ПІЧ" : "⚡ УВІМКНУТИ ПІЧ");
@@ -243,9 +282,19 @@ public class LabController74 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: startPhysicsEngine.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startPhysicsEngine() {
         physicsTimer = new AnimationTimer() {
             long lastTime = 0;
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -275,6 +324,11 @@ public class LabController74 extends BaseLabController {
         physicsTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: startVolumeMeasurement.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startVolumeMeasurement() {
         double currentFlow = getDoubleValue(flowField, 0.0);
 
@@ -296,6 +350,11 @@ public class LabController74 extends BaseLabController {
 
         volTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -321,6 +380,11 @@ public class LabController74 extends BaseLabController {
         volTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: completeVolumeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void completeVolumeMeasurement(double timeSec, double t1, double t2, double t3, double t4) {
         isMeasuringVol = false;
         if (!isAutoModeActive) { setAllControlsDisable(false); liveStepLabel.setText("Статус: Замір завершено"); liveStepLabel.setStyle("-fx-text-fill: #a3e635;"); }
@@ -335,6 +399,11 @@ public class LabController74 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         isAutoModeActive = true; setAllControlsDisable(true);
         data.clear(); idCounter = 1; updateStats(); autoQueue.clear();
@@ -343,6 +412,11 @@ public class LabController74 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoModeActive = false; setAllControlsDisable(false);
@@ -354,6 +428,11 @@ public class LabController74 extends BaseLabController {
 
         autoTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if ((now - start) / 1_000_000_000.0 > 5.0) {
@@ -366,6 +445,11 @@ public class LabController74 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) { finalResultLabel.setText("Обробка результатів: -"); return; }
         if (!showCalculations) { finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]"); return; }

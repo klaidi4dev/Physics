@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-3 "Питомий заряд електрона".
+ * Клас: FocusingCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_3.view;
 
 import javafx.animation.AnimationTimer;
@@ -17,11 +26,21 @@ public class FocusingCanvas extends Canvas {
     private long lastTime = 0;
     private double phase = 0;
 
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: FocusingCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public FocusingCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(double voltage, double current, double nTurns, double length) {
         this.voltage = voltage;
         this.current = current;
@@ -29,8 +48,18 @@ public class FocusingCanvas extends Canvas {
         this.length = length;
     }
 
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -43,10 +72,20 @@ public class FocusingCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

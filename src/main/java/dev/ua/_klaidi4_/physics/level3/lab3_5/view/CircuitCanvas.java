@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+ * Клас: CircuitCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_5.view;
 
 import javafx.scene.canvas.Canvas;
@@ -13,11 +22,21 @@ public class CircuitCanvas extends Canvas {
     private double currentP = 0.0;
     private boolean hasCore = false;
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: CircuitCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public CircuitCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: updateMeters.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateMeters(double u, double i, double p, boolean core) {
         this.currentU = u;
         this.currentI = i;
@@ -26,6 +45,11 @@ public class CircuitCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -82,6 +106,11 @@ public class CircuitCanvas extends Canvas {
         drawMeter(gc, "ВАТМЕТР (W)", 420, 20, currentP, "W", "#27ae60");
     }
 
+    /*
+     * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+     * Функція: drawMeter.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawMeter(GraphicsContext gc, String title, double x, double y, double value, String unit, String colorStr) {
         gc.setFill(Color.web("#34495e"));
         gc.fillRoundRect(x, y, 100, 70, 10, 10);

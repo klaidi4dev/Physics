@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-2 "Математичний маятник".
+ * Клас: LabController42.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з вивчення законів коливання математичного маятника.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_2.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -43,11 +52,21 @@ public class LabController42 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: LabController42.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController42() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if(canvas != null) canvas.stopSimulation();
@@ -56,6 +75,11 @@ public class LabController42 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів, таблицю та візуалізацію коливань маятника.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -193,6 +217,11 @@ public class LabController42 extends BaseLabController {
         canvas.setOnOscillationCompleted(this::onOscillationTick);
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Передає актуальні параметри (довжина, матеріал) до візуальної моделі.
+     */
     private void applyPhysicsSettings() {
         if (isAutoRunning) return;
         try {
@@ -205,6 +234,11 @@ public class LabController42 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час коливань.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -215,6 +249,11 @@ public class LabController42 extends BaseLabController {
         angleSlider.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання періоду коливань вручну.
+     */
     private void startManual() {
         try {
             targetN = Integer.parseInt(nField.getText());
@@ -230,6 +269,11 @@ public class LabController42 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: startAuto.
+     * Призначення: Ініціює автоматичну серію вимірювань для різних довжин нитки.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -245,6 +289,11 @@ public class LabController42 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний крок в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -268,6 +317,11 @@ public class LabController42 extends BaseLabController {
         canvas.startSimulation();
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: onOscillationTick.
+     * Призначення: Обробляє завершення вимірювального циклу, фіксує час та додає дані до таблиці.
+     */
     private void onOscillationTick() {
         int currentN = canvas.getFullOscillations();
         if (currentN >= targetN) {
@@ -302,6 +356,11 @@ public class LabController42 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-2 "Математичний маятник".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку та перевірку законів коливань.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

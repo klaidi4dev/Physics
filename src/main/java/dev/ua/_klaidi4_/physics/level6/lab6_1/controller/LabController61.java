@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 6-1 "Пробіг α-частинок".
+ * Клас: LabController61.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level6.lab6_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -53,11 +62,21 @@ public class LabController61 extends BaseLabController {
     private final double TABLE_R0 = 0.468;
     private final double PU_FULL_ENERGY = 5.5;
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: LabController61.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController61() {
         initUI();
         updateCanvasPreview();
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -66,6 +85,11 @@ public class LabController61 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -206,6 +230,11 @@ public class LabController61 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: calculateR0.
+     * Призначення: Виконує математичні обчислення для отримання результатів.
+     */
     private double calculateR0() {
         try {
             IsotopeDef iso = sourceCombo.getValue();
@@ -219,6 +248,11 @@ public class LabController61 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: updateCanvasPreview.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateCanvasPreview() {
         if (isAutoRunning || measureBtn.isDisabled()) return;
         try {
@@ -227,6 +261,11 @@ public class LabController61 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         measureBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -237,6 +276,11 @@ public class LabController61 extends BaseLabController {
         sourceCombo.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: startManual.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startManual() {
         try {
             double x = Double.parseDouble(xField.getText().replace(',', '.'));
@@ -249,6 +293,11 @@ public class LabController61 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -268,6 +317,11 @@ public class LabController61 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -283,6 +337,11 @@ public class LabController61 extends BaseLabController {
         runMeasurement(nextX, 100);
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: getExpectedRate.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getExpectedRate(double x, double r0) {
         double mappedX = x * (TABLE_R0 / r0);
 
@@ -298,6 +357,11 @@ public class LabController61 extends BaseLabController {
         return 0;
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: runMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void runMeasurement(double xCm, int tSec) {
         setControlsDisable(true);
         liveStatusLabel.setText("СИСТЕМА: ВИМІРЮВАННЯ");
@@ -314,6 +378,11 @@ public class LabController61 extends BaseLabController {
         double animDuration = 0.5;
 
         measurementTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - startTime) / 1_000_000_000.0;
@@ -331,6 +400,11 @@ public class LabController61 extends BaseLabController {
         measurementTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: finishMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void finishMeasurement(double xCm, int tSec, int counts) {
         liveStatusLabel.setText("СИСТЕМА: ЗАПИС");
         liveStatusLabel.setStyle("-fx-text-fill: yellow;");
@@ -359,6 +433,11 @@ public class LabController61 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 6-1 "Пробіг α-частинок".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty() || isAutoRunning) {
             finalResultLabel.setText("Обробка результатів: Очікування завершення серії...");

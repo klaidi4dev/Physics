@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+ * Клас: DiodeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_4.view;
 
 import javafx.geometry.Point2D;
@@ -17,27 +26,52 @@ public class DiodeCanvas extends Canvas {
     private double currentI = 0.0;
     private List<Point2D> points = new ArrayList<>();
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: DiodeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public DiodeCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: updateLiveValues.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateLiveValues(double u, double i) {
         this.currentU = u;
         this.currentI = i;
         draw();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: addGraphPoint.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void addGraphPoint(double u, double i) {
         points.add(new Point2D(u, i));
         draw();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: clearGraph.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void clearGraph() {
         points.clear();
         draw();
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -54,6 +88,11 @@ public class DiodeCanvas extends Canvas {
         drawGraph(gc);
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: drawCircuit.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawCircuit(GraphicsContext gc) {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2.5);
@@ -107,6 +146,11 @@ public class DiodeCanvas extends Canvas {
         gc.strokeLine(240, 265, 160, 265);
     }
 
+    /*
+     * Лабораторна робота № 8-4 "Дослідження p-n-переходу".
+     * Функція: drawGraph.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawGraph(GraphicsContext gc) {
         double gx0 = 530;
         double gy0 = 360;

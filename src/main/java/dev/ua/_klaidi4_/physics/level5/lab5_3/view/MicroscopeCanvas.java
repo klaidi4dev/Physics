@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-3 "Показник заломлення".
+ * Клас: MicroscopeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_3.view;
 
 import javafx.animation.AnimationTimer;
@@ -16,11 +25,21 @@ public class MicroscopeCanvas extends Canvas {
     private AnimationTimer timer;
     private double time = 0;
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: MicroscopeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public MicroscopeCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(boolean power, double focusZ, double plateD, double trueN) {
         this.isPowerOn = power;
         this.focusZ = focusZ;
@@ -28,9 +47,19 @@ public class MicroscopeCanvas extends Canvas {
         this.trueN = trueN;
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -43,10 +72,20 @@ public class MicroscopeCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -124,6 +163,11 @@ public class MicroscopeCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: drawScratch.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawScratch(GraphicsContext gc, double cx, double cy, double r, double diff, Color color, boolean rotate) {
         double blur = Math.abs(diff);
         if (blur > 1.5) return;

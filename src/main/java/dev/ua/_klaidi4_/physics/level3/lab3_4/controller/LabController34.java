@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+ * Клас: LabController34.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення напруженості магнетного поля в різних точках вздовж осі соленоїда.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_4.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -44,11 +53,21 @@ public class LabController34 extends BaseLabController {
     private boolean isAutoRunning = false;
     private double cPrime = 0.0;
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: LabController34.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController34() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -57,6 +76,11 @@ public class LabController34 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів, таблицю та візуалізацію поля соленоїда.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -189,6 +213,11 @@ public class LabController34 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Передає актуальні параметри (струм, положення) до візуальної моделі.
+     */
     private void applyPhysicsSettings() {
         try {
             double l = Double.parseDouble(lengthField.getText());
@@ -198,6 +227,11 @@ public class LabController34 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         measureBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -209,6 +243,11 @@ public class LabController34 extends BaseLabController {
         radiusField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: updateDash.
+     * Призначення: Оновлює інформаційні мітки на панелі моніторингу.
+     */
     private void updateDash() {
         if (cPrime > 0) {
             cPrimeLabel.setText(String.format(Locale.US, "C' = %.2f (А/м)/под", cPrime));
@@ -217,6 +256,11 @@ public class LabController34 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання напруженості поля в заданій точці.
+     */
     private void startManual() {
         try {
             double xCm = Double.parseDouble(xField.getText().replace(',', '.'));
@@ -227,6 +271,11 @@ public class LabController34 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: startAuto.
+     * Призначення: Ініціює автоматичну серію вимірювань вздовж всієї осі соленоїда.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -241,6 +290,11 @@ public class LabController34 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний крок в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -255,6 +309,11 @@ public class LabController34 extends BaseLabController {
         runMeasurement(nextVal);
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: runMeasurement.
+     * Призначення: Симулює процес зондування магнітного поля датчиком Холла.
+     */
     private void runMeasurement(double xCm) {
         setControlsDisable(true);
 
@@ -298,6 +357,11 @@ public class LabController34 extends BaseLabController {
         measurementTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: finishMeasurement.
+     * Призначення: Фіксує результати вимірювання напруженості та додає запис до таблиці.
+     */
     private void finishMeasurement(double xCm, double I, double hTheo, double alpha) {
         liveStatusLabel.setText("СИСТЕМА: ЗАПИС");
         liveStatusLabel.setStyle("-fx-text-fill: yellow;");
@@ -329,6 +393,11 @@ public class LabController34 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку та аналіз розподілу поля.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

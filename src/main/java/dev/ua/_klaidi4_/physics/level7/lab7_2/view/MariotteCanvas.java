@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-2 "В'язкість газів".
+ * Клас: MariotteCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_2.view;
 
 import javafx.animation.AnimationTimer;
@@ -22,11 +31,21 @@ public class MariotteCanvas extends Canvas {
     private AnimationTimer timer;
     private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: MariotteCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public MariotteCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(double progress, double timeStr, double volumeDropPct) {
         this.progress = progress;
         this.displayedTime = timeStr;
@@ -34,6 +53,11 @@ public class MariotteCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: setMeasuring.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setMeasuring(boolean measuring) {
         this.isMeasuring = measuring;
         if (!measuring) {
@@ -42,9 +66,19 @@ public class MariotteCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startAnimation() {
         if (timer != null) timer.stop();
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -61,6 +95,11 @@ public class MariotteCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+ * Клас: SemiconductorCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_1.view;
 
 import javafx.scene.canvas.Canvas;
@@ -11,11 +20,21 @@ public class SemiconductorCanvas extends Canvas {
     private double maxTempC = 85.0;
     private boolean isHeating = false;
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: SemiconductorCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public SemiconductorCanvas(double width, double height) {
         super(width, height);
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(double tempC, boolean heating, double maxTemp) {
         this.currentTempC = tempC;
         this.isHeating = heating;
@@ -23,6 +42,11 @@ public class SemiconductorCanvas extends Canvas {
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 8-1 "Енергія активації напівпровідників".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

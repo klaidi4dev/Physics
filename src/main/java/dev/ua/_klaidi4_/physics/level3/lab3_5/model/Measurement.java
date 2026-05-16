@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-5 "Індуктивність соленоїда".
+ * Клас: Measurement.
+ * Призначення: зберігає дані вимірювань, параметри фізичної моделі та
+ * результати обчислень для лабораторної роботи.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_5.model;
 
 import lombok.AllArgsConstructor;

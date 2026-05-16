@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+ * Клас: LabController12.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з математичним та оборотним маятниками, обробкою результатів вимірювань g.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_2.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -50,11 +59,21 @@ public class LabController12 extends BaseLabController {
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: LabController12.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та встановлює початкові налаштування.
+     */
     public LabController12() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: shutdown.
+     * Призначення: Зупиняє роботу таймерів та анімації при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -63,6 +82,11 @@ public class LabController12 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: initUI.
+     * Призначення: Ініціалізація візуальних компонентів керування та таблиці результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -212,6 +236,11 @@ public class LabController12 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Передає введені користувачем фізичні параметри до графічного полотна.
+     */
     private void applyPhysicsSettings() {
         try {
             PendulumType type = typeComboBox.getSelectionModel().getSelectedIndex() == 0 ? PendulumType.MATHEMATICAL : PendulumType.PHYSICAL;
@@ -225,6 +254,11 @@ public class LabController12 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: startManual.
+     * Призначення: Запускає поодинокий дослід за параметрами, введеними вручну.
+     */
     private void startManual() {
         try {
             double l = Double.parseDouble(lengthField.getText());
@@ -237,6 +271,11 @@ public class LabController12 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних дослідів для математичного маятника.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -250,6 +289,11 @@ public class LabController12 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: processNextAuto.
+     * Призначення: Керує чергою автоматичних вимірювань, змінюючи параметри після кожного кроку.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -275,6 +319,11 @@ public class LabController12 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: runMeasurement.
+     * Призначення: Безпосередній запуск анімації коливань та таймера вимірювання часу.
+     */
     private void runMeasurement(double l, int n) {
         setControlsDisable(true);
         currentL = l;
@@ -313,6 +362,11 @@ public class LabController12 extends BaseLabController {
         measurementTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: finishMeasurement.
+     * Призначення: Обчислює результати досліду (період, g) та записує їх у таблицю.
+     */
     private void finishMeasurement(double finalTime) {
         liveStatusLabel.setText("СИСТЕМА: ЗАПИС");
         liveStatusLabel.setStyle("-fx-text-fill: yellow;");
@@ -344,6 +398,11 @@ public class LabController12 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку серії вимірювань для визначення середнього g та похибок.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");
@@ -408,6 +467,11 @@ public class LabController12 extends BaseLabController {
         finalResultLabel.setText(resultText.toString());
     }
 
+    /*
+     * Лабораторна робота № 1-2 "Прискорення вільного падіння".
+     * Функція: setControlsDisable.
+     * Призначення: Деактивує поля введення під час активного процесу вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);

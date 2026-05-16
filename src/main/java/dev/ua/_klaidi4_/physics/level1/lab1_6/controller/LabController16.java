@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-6 "Моменти інерції тіл".
+ * Клас: LabController16.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення моментів інерції тіл та перевірки теореми Штейнера за допомогою трифілярного підвісу.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_6.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -42,11 +51,21 @@ public class LabController16 extends BaseLabController {
     private boolean isAutoRunning = false;
     private int targetOscillations = 25;
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: LabController16.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController16() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: shutdown.
+     * Призначення: Припиняє роботу анімації та очищає чергу при виході.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -54,6 +73,11 @@ public class LabController16 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: initUI.
+     * Призначення: Створює графічне середовище користувача, таблиці та панелі керування.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -198,6 +222,11 @@ public class LabController16 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Передає актуальні параметри до візуальної моделі підвісу.
+     */
     private void applyPhysicsSettings() {
         try {
             int conf = configCombo.getSelectionModel().getSelectedIndex();
@@ -208,6 +237,11 @@ public class LabController16 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: setControlsDisable.
+     * Призначення: Керує активністю кнопок та полів введення під час вимірювань.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -223,6 +257,11 @@ public class LabController16 extends BaseLabController {
         oscField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: startManual.
+     * Призначення: Запускає одиничне вимірювання періоду коливань вручну.
+     */
     private void startManual() {
         try {
             Double.parseDouble(m0Field.getText());
@@ -236,6 +275,11 @@ public class LabController16 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: startAuto.
+     * Призначення: Запускає автоматичну серію дослідів для всіх конфігурацій тіл.
+     */
     private void startAuto() {
         try {
             targetOscillations = Integer.parseInt(oscField.getText());
@@ -261,6 +305,11 @@ public class LabController16 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: processNextAuto.
+     * Призначення: Вибирає наступну конфігурацію тіл для автоматичного вимірювання.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -275,6 +324,11 @@ public class LabController16 extends BaseLabController {
         runSimulation(nextConfig);
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію коливань трифілярного підвісу.
+     */
     private void runSimulation(int configIndex) {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: КОЛИВАННЯ");
@@ -338,6 +392,11 @@ public class LabController16 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: finishMeasurement.
+     * Призначення: Фіксує час коливань, розраховує період та момент інерції, додає запис до таблиці.
+     */
     private void finishMeasurement(int configIndex, double mTotal, double totalTime, double measuredPeriod) {
         canvas.stopAnimation();
         liveOscLabel.setText("Коливання: " + targetOscillations);
@@ -371,6 +430,11 @@ public class LabController16 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: updateStats.
+     * Призначення: Проводить фінальні розрахунки моментів інерції та перевірку теореми Штейнера.
+     */
     private void updateStats() {
         if (data.size() < 3) {
             finalResultLabel.setText("Зробіть заміри для всіх трьох конфігурацій (або натисніть 'Автопроходження'), щоб побачити повний аналіз.");

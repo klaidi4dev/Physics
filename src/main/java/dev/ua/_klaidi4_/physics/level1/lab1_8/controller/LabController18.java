@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+ * Клас: LabController18.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення головних моментів інерції тіла за допомогою крутильного маятника.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_8.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -42,11 +51,21 @@ public class LabController18 extends BaseLabController {
     private int targetOscillations = 10;
     private final double TORSION_CONSTANT_D = 0.008;
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: LabController18.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController18() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -54,6 +73,11 @@ public class LabController18 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: кнопки, таблицю результатів та полотно симуляції.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -195,6 +219,11 @@ public class LabController18 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Передає вибрану конфігурацію тіла до візуальної моделі маятника.
+     */
     private void applyPhysicsSettings() {
         try {
             int conf = configCombo.getSelectionModel().getSelectedIndex();
@@ -206,6 +235,11 @@ public class LabController18 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час виконання вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -220,6 +254,11 @@ public class LabController18 extends BaseLabController {
         oscField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: startManual.
+     * Призначення: Запускає одиничний дослід за параметрами користувача.
+     */
     private void startManual() {
         try {
             Double.parseDouble(m0Field.getText());
@@ -233,6 +272,11 @@ public class LabController18 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних вимірювань для всіх конфігурацій тіла.
+     */
     private void startAuto() {
         try {
             targetOscillations = Integer.parseInt(oscField.getText());
@@ -252,6 +296,11 @@ public class LabController18 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний крок в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -266,6 +315,11 @@ public class LabController18 extends BaseLabController {
         runSimulation(nextConfig);
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію крутильних коливань маятника.
+     */
     private void runSimulation(int configIndex) {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: КОЛИВАННЯ");
@@ -318,6 +372,11 @@ public class LabController18 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: finishMeasurement.
+     * Призначення: Фіксує результати вимірювання періоду та додає запис до таблиці.
+     */
     private void finishMeasurement(int configIndex, double totalTime, double measuredPeriod, double iTheory) {
         canvas.stopAnimation();
         liveOscLabel.setText("Коливання: " + targetOscillations);
@@ -361,6 +420,11 @@ public class LabController18 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-8 "Еліпсоїд інерції".
+     * Функція: updateStats.
+     * Призначення: Розраховує головні моменти інерції та проводить фінальний аналіз даних.
+     */
     private void updateStats() {
         if (data.size() < 4) {
             finalResultLabel.setText("Для повного аналізу та побудови еліпсоїда інерції потрібні всі 4 виміри (Еталон та 3 осі).");

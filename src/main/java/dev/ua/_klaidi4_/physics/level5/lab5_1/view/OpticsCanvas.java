@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+ * Клас: OpticsCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_1.view;
 
 import javafx.animation.AnimationTimer;
@@ -18,11 +27,21 @@ public class OpticsCanvas extends Canvas {
     private AnimationTimer timer;
     private double time = 0;
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: OpticsCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public OpticsCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(boolean power, double xSrc, double xScr, double xLns, double f) {
         this.isPowerOn = power;
         this.xSource = xSrc;
@@ -32,6 +51,11 @@ public class OpticsCanvas extends Canvas {
         calculateOptics();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: calculateOptics.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private void calculateOptics() {
         if (!isPowerOn) return;
 
@@ -51,13 +75,28 @@ public class OpticsCanvas extends Canvas {
         sharpnessError = Math.abs(imagePosAbsolute - xScreen);
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: getSharpnessError.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getSharpnessError() {
         return sharpnessError;
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -70,10 +109,20 @@ public class OpticsCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

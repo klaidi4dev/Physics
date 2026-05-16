@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-6 "Моменти інерції тіл".
+ * Клас: TrifilarCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_6.view;
 
 import javafx.animation.AnimationTimer;
@@ -23,11 +32,21 @@ public class TrifilarCanvas extends Canvas {
     private double exactPeriod = 2.0;
     private double simSpeed = 1.0;
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: TrifilarCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public TrifilarCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: setParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setParameters(int configIndex, double rPlatform, double rDisk, double a) {
         this.configIndex = configIndex;
         this.platformRadius = rPlatform * 750;
@@ -37,6 +56,11 @@ public class TrifilarCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(double period, double speedMultiplier) {
         this.exactPeriod = period;
         this.simSpeed = speedMultiplier;
@@ -47,13 +71,28 @@ public class TrifilarCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         this.isSwinging = false;
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -68,6 +107,11 @@ public class TrifilarCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         if (isSwinging) {
             swingTime += dt * simSpeed;
@@ -75,6 +119,11 @@ public class TrifilarCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-6 "Моменти інерції тіл".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

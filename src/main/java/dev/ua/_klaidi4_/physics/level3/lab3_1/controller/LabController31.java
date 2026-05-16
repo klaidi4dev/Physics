@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-1 "Магнітне поле".
+ * Клас: LabController31.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням вимірювань
+ * індукції магнетного поля за допомогою балістичного гальванометра.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -60,10 +69,20 @@ public class LabController31 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: LabController31.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController31() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: shutdown.
+     * Призначення: Припиняє анімацію при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -71,6 +90,11 @@ public class LabController31 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічні елементи керування та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -216,6 +240,11 @@ public class LabController31 extends BaseLabController {
         updateCanvasVisuals();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: calculateCoeffC.
+     * Призначення: Розраховує сталу балістичного гальванометра C.
+     */
     private double calculateCoeffC() {
         try {
             double R = Double.parseDouble(fieldR.getText().replace(',', '.'));
@@ -230,6 +259,11 @@ public class LabController31 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: updateCanvasVisuals.
+     * Призначення: Оновлює візуальне відображення приладів на полотні.
+     */
     private void updateCanvasVisuals() {
         if (isAutoRunning) return;
         try {
@@ -239,6 +273,11 @@ public class LabController31 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю інтерфейсу під час вимірювань.
+     */
     private void setControlsDisable(boolean disable) {
         l0Box.setDisable(disable);
         iField.setDisable(disable);
@@ -254,6 +293,11 @@ public class LabController31 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: calculateTargetN.
+     * Призначення: Прогнозує відхилення стрілки гальванометра на основі фізичної моделі.
+     */
     private double calculateTargetN(double l0, double I, double x) {
         double nMax = (l0 == 30.0) ? 41.0 : 55.0;
         double decay = 1.0;
@@ -283,6 +327,11 @@ public class LabController31 extends BaseLabController {
         return Math.round(nMax * (I / 1.0) * decay);
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: triggerMeasurement.
+     * Призначення: Запускає процес вимірювання (розмикання кола) та анімацію стрілки.
+     */
     private void triggerMeasurement() {
         try {
             double l0 = Double.parseDouble(l0Box.getValue());
@@ -326,6 +375,11 @@ public class LabController31 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: startAuto.
+     * Призначення: Запускає серію автоматичних вимірювань.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -343,6 +397,11 @@ public class LabController31 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: processNextAuto.
+     * Призначення: Керує чергою автоматичних дослідів.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -363,6 +422,11 @@ public class LabController31 extends BaseLabController {
         });
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку та розрахунок індукції.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");
@@ -392,6 +456,11 @@ public class LabController31 extends BaseLabController {
         finalResultLabel.setText(sb.toString());
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: showAnalysisDialog.
+     * Призначення: Виводить вікно з детальним аналізом та графіками.
+     */
     private void showAnalysisDialog() {
         if (data.isEmpty()) {
             showAlert("Увага", "Спочатку проведіть вимірювання або запустіть автопроходження!");

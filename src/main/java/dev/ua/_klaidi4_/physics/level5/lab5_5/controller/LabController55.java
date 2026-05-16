@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-5 "Кільця Ньютона".
+ * Клас: LabController55.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -46,11 +55,21 @@ public class LabController55 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Integer> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: LabController55.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController55() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -58,6 +77,11 @@ public class LabController55 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -226,6 +250,11 @@ public class LabController55 extends BaseLabController {
         updateButtonUI();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: handleTogglePower.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleTogglePower() {
         isPowerOn = !isPowerOn;
         if (isPowerOn) {
@@ -242,6 +271,11 @@ public class LabController55 extends BaseLabController {
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: getCurrentWavelength.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getCurrentWavelength() {
         int index = filterComboBox.getSelectionModel().getSelectedIndex();
         if (index == 0) return 650.0;
@@ -249,6 +283,11 @@ public class LabController55 extends BaseLabController {
         return 470.0;
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: getCurrentRadius.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getCurrentRadius() {
         int index = lensComboBox.getSelectionModel().getSelectedIndex();
         if (index == 0) return 800.0;
@@ -256,10 +295,20 @@ public class LabController55 extends BaseLabController {
         return 1200.0;
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         canvas.setPhysicsParameters(isPowerOn, microSlider.getValue(), getCurrentWavelength(), getCurrentRadius(), zoomSlider.getValue());
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: resetMeasurementState.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetMeasurementState() {
         currentStep = 0;
         zL5 = null;
@@ -279,6 +328,11 @@ public class LabController55 extends BaseLabController {
         updateButtonUI();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: updateButtonUI.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateButtonUI() {
         if (!isPowerOn) {
             recordBtn.setDisable(true);
@@ -304,6 +358,11 @@ public class LabController55 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: handleRecord.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecord() {
         double z = microSlider.getValue();
         double trueWave = getCurrentWavelength() / 1_000_000.0;
@@ -355,6 +414,11 @@ public class LabController55 extends BaseLabController {
         updateButtonUI();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: executeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void executeMeasurement() {
         try {
             double trueWave = getCurrentWavelength();
@@ -386,6 +450,11 @@ public class LabController55 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         if (!isPowerOn) handleTogglePower();
         data.clear();
@@ -400,6 +469,11 @@ public class LabController55 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
@@ -420,6 +494,11 @@ public class LabController55 extends BaseLabController {
             long start = System.nanoTime();
             int phase = 0;
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -460,6 +539,11 @@ public class LabController55 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

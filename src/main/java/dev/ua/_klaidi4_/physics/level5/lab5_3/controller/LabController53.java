@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-3 "Показник заломлення".
+ * Клас: LabController53.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_3.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -48,11 +57,21 @@ public class LabController53 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Integer> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: LabController53.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController53() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -60,6 +79,11 @@ public class LabController53 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -217,6 +241,11 @@ public class LabController53 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: handleTogglePower.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleTogglePower() {
         isIlluminatorOn = !isIlluminatorOn;
         if (isIlluminatorOn) {
@@ -235,6 +264,11 @@ public class LabController53 extends BaseLabController {
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         int index = plateComboBox.getSelectionModel().getSelectedIndex();
         currentD = (index == 0) ? 4.0 : (index == 1) ? 6.0 : 8.0;
@@ -247,6 +281,11 @@ public class LabController53 extends BaseLabController {
         canvas.setPhysicsParameters(isIlluminatorOn, focusZ, currentD, trueN);
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: resetMeasurementState.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetMeasurementState() {
         isMeasurementComplete = false;
         recordedTop = null;
@@ -259,6 +298,11 @@ public class LabController53 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: handleRecordTop.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecordTop() {
         if (!isIlluminatorOn) {
             showAlert("Помилка", "Спочатку увімкніть освітлювач мікроскопа.");
@@ -276,6 +320,11 @@ public class LabController53 extends BaseLabController {
         checkAndAutoCalculate();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: handleRecordBottom.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecordBottom() {
         if (!isIlluminatorOn) {
             showAlert("Помилка", "Спочатку увімкніть освітлювач мікроскопа.");
@@ -294,6 +343,11 @@ public class LabController53 extends BaseLabController {
         checkAndAutoCalculate();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: checkAndAutoCalculate.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void checkAndAutoCalculate() {
         if (recordedTop != null && recordedBottom != null) {
             double h = Math.abs(recordedBottom - recordedTop);
@@ -304,6 +358,11 @@ public class LabController53 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: executeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void executeMeasurement(double d, double z1, double z2, double h) {
         try {
             double nExp = d / h;
@@ -328,6 +387,11 @@ public class LabController53 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         if (!isIlluminatorOn) handleTogglePower();
         data.clear();
@@ -342,6 +406,11 @@ public class LabController53 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТО: ЗАВЕРШЕНО");
@@ -358,6 +427,11 @@ public class LabController53 extends BaseLabController {
             long start = System.nanoTime();
             boolean topRecorded = false;
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -385,6 +459,11 @@ public class LabController53 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-3 "Показник заломлення".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

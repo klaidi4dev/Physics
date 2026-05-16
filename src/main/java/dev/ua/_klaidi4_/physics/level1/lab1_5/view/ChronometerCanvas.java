@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+ * Клас: ChronometerCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_5.view;
 
 import javafx.animation.AnimationTimer;
@@ -28,16 +37,31 @@ public class ChronometerCanvas extends Canvas {
     private Runnable onHitCallback;
     private Runnable onFinishCallback;
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: ChronometerCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public ChronometerCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: setCallbacks.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setCallbacks(Runnable onHit, Runnable onFinish) {
         this.onHitCallback = onHit;
         this.onFinishCallback = onFinish;
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(double dh, double n0, double n) {
         double h = dh * 500;
         if (h > length) h = length;
@@ -54,12 +78,27 @@ public class ChronometerCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -74,6 +113,11 @@ public class ChronometerCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         if (isSwinging) {
             swingTime += dt;
@@ -98,6 +142,11 @@ public class ChronometerCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -139,6 +188,11 @@ public class ChronometerCanvas extends Canvas {
         drawGalvanometer(gc, w - 180, h - 160);
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: drawSphere.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawSphere(GraphicsContext gc, double x, double y, double r) {
         RadialGradient grad = new RadialGradient(0, 0, x - r * 0.3, y - r * 0.3, r,
                 false, CycleMethod.NO_CYCLE, new Stop(0, Color.WHITE), new Stop(1, Color.web("#7f8c8d")));
@@ -146,6 +200,11 @@ public class ChronometerCanvas extends Canvas {
         gc.fillOval(x - r, y - r, r * 2, r * 2);
     }
 
+    /*
+     * Лабораторна робота № 1-5 "Абсолютно пружний удар".
+     * Функція: drawGalvanometer.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawGalvanometer(GraphicsContext gc, double x, double y) {
         double width = 150;
         double height = 120;

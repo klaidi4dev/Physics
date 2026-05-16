@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 6-5 "Питомий заряд електрона".
+ * Клас: MagnetronCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level6.lab6_5.view;
 
 import javafx.animation.AnimationTimer;
@@ -20,6 +29,11 @@ public class MagnetronCanvas extends Canvas {
 
     private class Electron {
         double x, y, vx, vy;
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: Electron.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
         public Electron(double angle) {
             this.x = 2 * Math.cos(angle);
             this.y = 2 * Math.sin(angle);
@@ -28,19 +42,39 @@ public class MagnetronCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: MagnetronCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public MagnetronCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: updatePhysicsParameters.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updatePhysicsParameters(double ratio, double ua, double ic) {
         this.currentRatio = ratio;
         this.currentUa = ua;
         this.currentIc = ic;
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 updatePhysics();
@@ -50,6 +84,11 @@ public class MagnetronCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: updatePhysics.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void updatePhysics() {
         for (int i = 0; i < 5; i++) {
             electrons.add(new Electron(Math.random() * Math.PI * 2));
@@ -81,6 +120,11 @@ public class MagnetronCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -129,6 +173,11 @@ public class MagnetronCanvas extends Canvas {
             gc.fillText("РЕЖИМ ВІДСІЧІ: Хмара просторового заряду", 10, 60);
         }
     }
+    /*
+     * Лабораторна робота № 6-5 "Питомий заряд електрона".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) {
             timer.stop();

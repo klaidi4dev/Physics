@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-4 "Балістичний маятник".
+ * Клас: BallisticCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_4.view;
 
 import javafx.animation.AnimationTimer;
@@ -24,16 +33,31 @@ public class BallisticCanvas extends Canvas {
     private Runnable onHitCallback;
     private Runnable onFinishCallback;
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: BallisticCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public BallisticCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: setCallbacks.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setCallbacks(Runnable onHit, Runnable onFinish) {
         this.onHitCallback = onHit;
         this.onFinishCallback = onFinish;
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(double calculatedMaxAngle) {
         this.maxAngle = calculatedMaxAngle;
         this.currentAngle = 0;
@@ -47,12 +71,27 @@ public class BallisticCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -67,6 +106,11 @@ public class BallisticCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         double w = getWidth();
         double originX = w / 2;
@@ -94,6 +138,11 @@ public class BallisticCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-4 "Балістичний маятник".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

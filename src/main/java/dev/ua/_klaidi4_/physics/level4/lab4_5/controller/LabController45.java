@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-5 "Частота мультивібратора".
+ * Клас: LabController45.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_5.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -44,11 +53,21 @@ public class LabController45 extends BaseLabController {
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: LabController45.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController45() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -58,6 +77,11 @@ public class LabController45 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -198,6 +222,11 @@ public class LabController45 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         try {
             double targetNu = Double.parseDouble(nuField.getText());
@@ -212,6 +241,11 @@ public class LabController45 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: updateDashboard.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateDashboard() {
         if (!isGeneratorOn) {
             liveStatusLabel.setText("Генератор: ВИМКНЕНО");
@@ -236,6 +270,11 @@ public class LabController45 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: handleToggleGenerator.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleToggleGenerator() {
         isGeneratorOn = !isGeneratorOn;
         if (isGeneratorOn) {
@@ -249,6 +288,11 @@ public class LabController45 extends BaseLabController {
         updateDashboard();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         fSlider.setDisable(disable);
         nuField.setDisable(disable);
@@ -262,6 +306,11 @@ public class LabController45 extends BaseLabController {
         toggleGenBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: handleManualMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleManualMeasurement() {
         if (!isGeneratorOn) {
             showAlert("Увага", "Спочатку увімкніть генератор і налаштуйте резонанс!");
@@ -276,6 +325,11 @@ public class LabController45 extends BaseLabController {
         executeMeasurement(fSlider.getValue(), canvas.getActiveN());
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         if (!isGeneratorOn) handleToggleGenerator();
 
@@ -293,6 +347,11 @@ public class LabController45 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -308,6 +367,11 @@ public class LabController45 extends BaseLabController {
         long start = System.nanoTime();
 
         measurementTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -320,6 +384,11 @@ public class LabController45 extends BaseLabController {
         measurementTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: executeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void executeMeasurement(double f, int n) {
         try {
             double tau = Double.parseDouble(tauField.getText());
@@ -357,6 +426,11 @@ public class LabController45 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-5 "Кільця Ньютона".
+ * Клас: NewtonRingsCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_5.view;
 
 import javafx.animation.AnimationTimer;
@@ -15,11 +24,21 @@ public class NewtonRingsCanvas extends Canvas {
 
     private AnimationTimer timer;
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: NewtonRingsCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public NewtonRingsCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(boolean power, double mz, double wave, double r, double zoom) {
         this.isPowerOn = power;
         this.micrometerZ = mz;
@@ -28,9 +47,19 @@ public class NewtonRingsCanvas extends Canvas {
         this.zoom = zoom;
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -40,10 +69,20 @@ public class NewtonRingsCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -156,6 +195,11 @@ public class NewtonRingsCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-5 "Кільця Ньютона".
+     * Функція: getFilterColor.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private Color getFilterColor(double wave) {
         if (wave > 600) return Color.web("#ff0033");
         if (wave > 500) return Color.web("#00ff66");

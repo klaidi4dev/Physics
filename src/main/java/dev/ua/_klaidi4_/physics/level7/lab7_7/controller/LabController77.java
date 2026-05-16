@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-7 "Розподіл Максвелла".
+ * Клас: LabController77.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_7.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -44,15 +53,30 @@ public class LabController77 extends BaseLabController {
 
     private final double[] RECOMMENDED_V = {0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 8.0, 10.0, 15.0};
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: LabController77.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController77() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -186,6 +210,11 @@ public class LabController77 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -194,6 +223,11 @@ public class LabController77 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: updateAdvancedParams.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateAdvancedParams() {
         if (canvas != null) {
             canvas.setAdvancedParams(
@@ -204,6 +238,11 @@ public class LabController77 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: togglePower.
+     * Призначення: Перемикає стан відповідного компонента або режиму.
+     */
     private void togglePower() {
         isPowerOn = !isPowerOn;
         if (isPowerOn) {
@@ -230,6 +269,11 @@ public class LabController77 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: resetLab.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetLab() {
         data.clear();
         idCounter = 1;
@@ -239,6 +283,11 @@ public class LabController77 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: recordMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void recordMeasurement() {
         double v = Math.round(getDoubleValue(voltageField, 0.0) * 10.0) / 10.0;
 
@@ -273,6 +322,11 @@ public class LabController77 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         resetLab();
         if (!isPowerOn) togglePower();
@@ -301,6 +355,11 @@ public class LabController77 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: processAndShowCharts.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processAndShowCharts() {
         if (data.size() < 5) {
             showAlert("Помилка", "Зберіть мінімум 5 точок для побудови графіка та диференціювання.");
@@ -342,6 +401,11 @@ public class LabController77 extends BaseLabController {
         drawDistributionCharts(derivatives, alpha, c);
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: drawDistributionCharts.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void drawDistributionCharts(List<Double> derivatives, double alpha, double cScale) {
         Stage chartStage = new Stage();
         chartStage.setTitle("Обробка результатів - Лабораторна 7.7");
@@ -397,6 +461,11 @@ public class LabController77 extends BaseLabController {
         chartStage.show();
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: updateStatsFinal.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateStatsFinal(double alpha, double c) {
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");

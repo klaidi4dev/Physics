@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-6 "Поперечні коливання струни".
+ * Клас: StringResonanceCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_6.view;
 
 import javafx.animation.AnimationTimer;
@@ -21,11 +30,21 @@ public class StringResonanceCanvas extends Canvas {
     private int activeHarmonic = 0;
     private double currentAmp = 0;
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: StringResonanceCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public StringResonanceCanvas(double width, double height) {
         super(width, height);
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(double l, double d, double rho, double f, double genFreq) {
         this.length = l;
         this.diameter = d;
@@ -36,6 +55,11 @@ public class StringResonanceCanvas extends Canvas {
         if (!isGenerating) drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: toggleGenerator.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void toggleGenerator(boolean state) {
         this.isGenerating = state;
         if (state) {
@@ -47,6 +71,11 @@ public class StringResonanceCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: calculateResonance.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private void calculateResonance() {
         double maxAmp = 0;
         int bestN = 0;
@@ -66,9 +95,19 @@ public class StringResonanceCanvas extends Canvas {
         this.currentAmp = maxAmp;
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         lastTime = System.nanoTime();
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 double dt = (now - lastTime) / 1_000_000_000.0;
@@ -80,20 +119,40 @@ public class StringResonanceCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
         isGenerating = false;
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: getCurrentAmp.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getCurrentAmp() {
         return currentAmp;
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: getActiveHarmonic.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public int getActiveHarmonic() {
         return activeHarmonic;
     }
 
+    /*
+     * Лабораторна робота № 4-6 "Поперечні коливання струни".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

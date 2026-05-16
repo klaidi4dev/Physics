@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-6 "Взаємна індукція".
+ * Клас: MutualInductionCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_6.view;
 
 import javafx.animation.AnimationTimer;
@@ -25,15 +34,30 @@ public class MutualInductionCanvas extends Canvas {
 
     private Runnable onReadyCallback;
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: MutualInductionCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public MutualInductionCanvas(double width, double height) {
         super(width, height);
         startRenderLoop();
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: setOnReadyCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnReadyCallback(Runnable cb) {
         this.onReadyCallback = cb;
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: animateDevices.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void animateDevices(double zCm, double u0, double f, double eps) {
         this.targetZ = zCm;
         this.currentU0 = u0;
@@ -43,6 +67,11 @@ public class MutualInductionCanvas extends Canvas {
         this.isAnimating = true;
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: resetToIdle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetToIdle() {
         this.currentEpsAmp = 0;
         this.currentU0 = 0;
@@ -52,12 +81,27 @@ public class MutualInductionCanvas extends Canvas {
         this.isAnimating = false;
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: startRenderLoop.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startRenderLoop() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -72,6 +116,11 @@ public class MutualInductionCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         double speed = (currentF > 0) ? (5 + (currentF / 2000.0)) : 0;
         oscPhase += dt * speed;
@@ -93,6 +142,11 @@ public class MutualInductionCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -111,6 +165,11 @@ public class MutualInductionCanvas extends Canvas {
         drawCoilsAndRuler(gc, w / 2, 320);
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: drawAudioGenerator.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawAudioGenerator(GraphicsContext gc, double x, double y) {
         double gw = 200;
         double gh = 120;
@@ -143,6 +202,11 @@ public class MutualInductionCanvas extends Canvas {
         gc.strokeLine(x + 137.5, y + 85, x + 137.5, y + 97.5);
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: drawOscilloscope.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawOscilloscope(GraphicsContext gc, double x, double y) {
         double ow = 220;
         double oh = 160;
@@ -186,6 +250,11 @@ public class MutualInductionCanvas extends Canvas {
         gc.fillText("ОСЦИЛОГРАФ С1-83", x + 50, y + oh - 10);
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: drawCoilsAndRuler.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawCoilsAndRuler(GraphicsContext gc, double centerX, double centerY) {
         double rulerWidth = 400;
         double rulerX = centerX - rulerWidth / 2;
@@ -243,6 +312,11 @@ public class MutualInductionCanvas extends Canvas {
         gc.strokeLine(l2X + l2Width/2, centerY + l2Height/2, l2X + l2Width/2, rulerY);
     }
 
+    /*
+     * Лабораторна робота № 3-6 "Взаємна індукція".
+     * Функція: drawWires.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawWires(GraphicsContext gc) {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(3);

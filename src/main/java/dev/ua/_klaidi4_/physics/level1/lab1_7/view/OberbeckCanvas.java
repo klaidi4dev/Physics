@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-7 "Маятник Обербека".
+ * Клас: OberbeckCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_7.view;
 
 import javafx.animation.AnimationTimer;
@@ -25,11 +34,21 @@ public class OberbeckCanvas extends Canvas {
 
     private Runnable onFinishCallback;
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: OberbeckCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public OberbeckCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: setParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setParameters(double r, double bigR, double h) {
         this.r = r;
         this.bigR = bigR;
@@ -39,10 +58,20 @@ public class OberbeckCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: setOnFinishCallback.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnFinishCallback(Runnable onFinishCallback) {
         this.onFinishCallback = onFinishCallback;
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation(double calculatedTime, double speedMultiplier) {
         this.exactTime = calculatedTime;
         this.simSpeedMultiplier = speedMultiplier;
@@ -55,13 +84,28 @@ public class OberbeckCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         this.isRunning = false;
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -76,6 +120,11 @@ public class OberbeckCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         if (isRunning) {
             simTime += dt * simSpeedMultiplier;
@@ -94,6 +143,11 @@ public class OberbeckCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-7 "Маятник Обербека".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double width = getWidth();

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-8 "Петля гістерезису".
+ * Клас: LabController38.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з дослідження кривих намагнечування та петель гістерезису феромагнетиків з допомогою осцилографа.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_8.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -39,15 +48,30 @@ public class LabController38 extends BaseLabController {
     private Button analyzeBtn;
     private Button clearBtn;
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: LabController38.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController38() {
         initUI();
         updatePhysics();
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: shutdown.
+     * Призначення: Скидає стан системи при закритті вікна.
+     */
     @Override
     public void shutdown() {
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс: панель параметрів осцилографа та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -182,24 +206,44 @@ public class LabController38 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: updatePhysics.
+     * Призначення: Оновлює візуалізацію петлі гістерезису на основі введених параметрів.
+     */
     private void updatePhysics() {
         if (canvas != null) {
             canvas.setParameters(ampSlider.getValue(), materialBox.getValue());
         }
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: recordPeakMeasurement.
+     * Призначення: Записує координати пікової точки петлі (максимальне намагнечування).
+     */
     private void recordPeakMeasurement() {
         double nx = canvas.getPeakNx();
         double ny = canvas.getPeakNy();
         saveMeasurement("Завд. 1 (Основна крива)", nx, ny);
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: recordHoverMeasurement.
+     * Призначення: Записує координати поточної точки під курсором на екрані осцилографа.
+     */
     private void recordHoverMeasurement() {
         double nx = canvas.getMouseNx();
         double ny = canvas.getMouseNy();
         saveMeasurement("Завд. 2 (Петля)", nx, ny);
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: saveMeasurement.
+     * Призначення: Розраховує напруженість H та індукцію B на основі поділок сітки та додає дані до таблиці.
+     */
     private void saveMeasurement(String task, double nx, double ny) {
         try {
             double cx = Double.parseDouble(cxField.getText().replace(',', '.'));
@@ -215,6 +259,11 @@ public class LabController38 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: runAuto.
+     * Призначення: Виконує автоматичне зняття основної кривої намагнечування для різних напруг.
+     */
     private void runAuto() {
         data.clear();
         idCounter = 1;
@@ -257,6 +306,11 @@ public class LabController38 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: updateStats.
+     * Призначення: Розраховує відносну магнітну проникність на основі виміряних значень.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка: Очікування даних...");
@@ -281,6 +335,11 @@ public class LabController38 extends BaseLabController {
         finalResultLabel.setText(sb.toString());
     }
 
+    /*
+     * Лабораторна робота № 3-8 "Петля гістерезису".
+     * Функція: showAnalysisDialog.
+     * Призначення: Виводить вікно з графічним представленням отриманих результатів.
+     */
     private void showAnalysisDialog() {
         if (data.isEmpty()) {
             showAlert("Увага", "Немає даних для побудови графіків.");

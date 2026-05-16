@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-6 "Опір та температура".
+ * Клас: LabController26.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням вимірювань
+ * опорів за допомогою містка Уітстона та дослідженням залежності опору від температури.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_6.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -49,17 +58,32 @@ public class LabController26 extends BaseLabController {
     private double currentTemp = 20.0;
     private boolean isAutoRunning = false;
 
-    public LabController26() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: LabController26.
+         * Призначення: Конструктор класу, ініціалізує інтерфейс та встановлює початковий режим роботи.
+         */
+        public LabController26() {
         initUI();
     }
 
+        /*
+     * Лабораторна робота № 2-6 "Опір та температура".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та скидає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
         if (canvas != null) canvas.stopSimulation();
     }
 
-    private void initUI() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: initUI.
+         * Призначення: Ініціалізує графічний інтерфейс: панелі керування, графік та таблицю результатів.
+         */
+        private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
         leftPanel.setPrefWidth(320);
@@ -229,14 +253,24 @@ public class LabController26 extends BaseLabController {
         switchMode(1);
     }
 
-    private void rebuildChartSeries() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: rebuildChartSeries.
+         * Призначення: Перебудовує серію даних на графіку залежності R(t).
+         */
+        private void rebuildChartSeries() {
         chart.getData().clear();
         dataSeries = new XYChart.Series<>();
         dataSeries.setName("Залежність Rt = f(t)");
         chart.getData().add(dataSeries);
     }
 
-    private void switchMode(int mode) {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: switchMode.
+         * Призначення: Перемикає режим роботи між вимірюванням опорів містком та дослідженням термозалежності.
+         */
+        private void switchMode(int mode) {
         this.currentMode = mode;
         TitledPane ctrlPane = (TitledPane) ((VBox)((ScrollPane)leftPanel.getChildren().get(0)).getContent()).getChildren().get(2);
         VBox dynBox = (VBox) ctrlPane.getContent();
@@ -273,7 +307,12 @@ public class LabController26 extends BaseLabController {
         canvas.setMode(mode);
     }
 
-    private String getShortTargetName() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: getShortTargetName.
+         * Призначення: Повертає коротку назву вибраного об'єкта вимірювання.
+         */
+        private String getShortTargetName() {
         int idx = targetResistorBox.getSelectionModel().getSelectedIndex();
         if (idx == 0) return "R1";
         if (idx == 1) return "R2";
@@ -283,7 +322,12 @@ public class LabController26 extends BaseLabController {
         return "R1";
     }
 
-    private double getCurrentRxReal() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: getCurrentRxReal.
+         * Призначення: Розраховує реальний опір зразка з урахуванням температури та матеріалу.
+         */
+        private double getCurrentRxReal() {
         int idx = targetResistorBox.getSelectionModel().getSelectedIndex();
         if (idx == 0) return REAL_R1;
         if (idx == 1) return REAL_R2;
@@ -292,7 +336,12 @@ public class LabController26 extends BaseLabController {
         return 1.0 / (1.0/REAL_R1 + 1.0/REAL_R2 + 1.0/REAL_R3);
     }
 
-    private void updateBridgePhysics() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: updateBridgePhysics.
+         * Призначення: Розраховує розбаланс містка Уітстона та оновлює показники приладів.
+         */
+        private void updateBridgePhysics() {
         if (currentMode != 1 || isAutoRunning) return;
 
         double rEt = 100.0;
@@ -327,7 +376,12 @@ public class LabController26 extends BaseLabController {
         });
     }
 
-    private void updateThermoPhysics() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: updateThermoPhysics.
+         * Призначення: Оновлює фізичні параметри в режимі нагрівання.
+         */
+        private void updateThermoPhysics() {
         double rt = R_COPPER_0 * (1 + ALPHA_COPPER * currentTemp);
         double noise = (Math.random() - 0.5) * 0.5;
         double measuredRt = rt + noise;
@@ -339,7 +393,12 @@ public class LabController26 extends BaseLabController {
         });
     }
 
-    private void setControlsDisable(boolean disable) {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: setControlsDisable.
+         * Призначення: Блокує або розблокує елементи керування під час вимірювань.
+         */
+        private void setControlsDisable(boolean disable) {
         modeBox.setDisable(disable);
         targetResistorBox.setDisable(disable);
         fieldRetalon.setDisable(disable);
@@ -352,7 +411,12 @@ public class LabController26 extends BaseLabController {
         recordBtn.setDisable(disable);
     }
 
-    private void startAuto() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: startAuto.
+         * Призначення: Запускає автоматичне виконання вимірювань для поточного режиму.
+         */
+        private void startAuto() {
         if (currentMode == 1) {
             runAutoBridge();
         } else {
@@ -360,11 +424,21 @@ public class LabController26 extends BaseLabController {
         }
     }
 
-    private void startHeatingManual() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: startHeatingManual.
+         * Призначення: Запускає процес нагрівання в ручному режимі.
+         */
+        private void startHeatingManual() {
         runAutoThermo();
     }
 
-    private void runAutoBridge() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: runAutoBridge.
+         * Призначення: Симулює автоматичне балансування містка Уітстона.
+         */
+        private void runAutoBridge() {
         data.clear();
         idCounter = 1;
         isAutoRunning = true;
@@ -422,7 +496,12 @@ public class LabController26 extends BaseLabController {
         }).start();
     }
 
-    private void runAutoThermo() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: runAutoThermo.
+         * Призначення: Виконує серію автоматичних вимірювань опору при різних температурах.
+         */
+        private void runAutoThermo() {
         double maxT = 80.0;
         double stepT = 5.0;
         try {
@@ -472,7 +551,12 @@ public class LabController26 extends BaseLabController {
         }).start();
     }
 
-    private void recordMeasurement() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: recordMeasurement.
+         * Призначення: Записує поточний результат вимірювання до таблиці та на графік.
+         */
+        private void recordMeasurement() {
         if (currentMode == 1) {
             String target = getShortTargetName();
 
@@ -489,7 +573,12 @@ public class LabController26 extends BaseLabController {
         }
     }
 
-    private void calculateResults() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: calculateResults.
+         * Призначення: Проводить фінальну статистичну обробку та розрахунок термічного коефіцієнта опору.
+         */
+        private void calculateResults() {
         if (data.isEmpty()) return;
 
         StringBuilder sb = new StringBuilder("ОБРОБКА РЕЗУЛЬТАТІВ:\n");
@@ -541,7 +630,12 @@ public class LabController26 extends BaseLabController {
         finalResultLabel.setText(sb.toString());
     }
 
-    private void resetAll() {
+        /*
+         * Лабораторна робота № 2-6 "Опір та температура".
+         * Функція: resetAll.
+         * Призначення: Скидає всі вимірювання, очищає таблицю та графік.
+         */
+        private void resetAll() {
         data.clear();
         rebuildChartSeries();
         idCounter = 1;

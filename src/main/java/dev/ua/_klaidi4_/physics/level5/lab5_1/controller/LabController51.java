@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+ * Клас: LabController51.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level5.lab5_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -48,11 +57,21 @@ public class LabController51 extends BaseLabController {
     private final double F1 = 12.0;
     private final double F2 = 18.0;
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: LabController51.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController51() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -60,6 +79,11 @@ public class LabController51 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -221,6 +245,11 @@ public class LabController51 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: getTheoreticalF.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getTheoreticalF() {
         int index = modeComboBox.getSelectionModel().getSelectedIndex();
         if (index == 0) return F1;
@@ -228,6 +257,11 @@ public class LabController51 extends BaseLabController {
         return (F1 * F2) / (F1 + F2);
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: handleTogglePower.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleTogglePower() {
         isIlluminatorOn = !isIlluminatorOn;
         if (isIlluminatorOn) {
@@ -247,6 +281,11 @@ public class LabController51 extends BaseLabController {
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         double xSrc = sourceSlider.getValue();
         double xScr = screenSlider.getValue();
@@ -257,6 +296,11 @@ public class LabController51 extends BaseLabController {
         updateDashboard(xSrc, xScr, f);
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: updateDashboard.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateDashboard(double xSrc, double xScr, double f) {
         if (!isIlluminatorOn) return;
 
@@ -281,6 +325,11 @@ public class LabController51 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: resetMeasurementState.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetMeasurementState() {
         firstX = null;
         isWaitingForSecondX = false;
@@ -291,6 +340,11 @@ public class LabController51 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: handleRecordPosition.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void handleRecordPosition() {
         if (!isIlluminatorOn) {
             showAlert("Помилка", "Увімкніть освітлювач.");
@@ -329,6 +383,11 @@ public class LabController51 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         if (!isIlluminatorOn) handleTogglePower();
         data.clear();
@@ -343,6 +402,11 @@ public class LabController51 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТО: ГОТОВО");
@@ -367,6 +431,11 @@ public class LabController51 extends BaseLabController {
 
         autoTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -389,6 +458,11 @@ public class LabController51 extends BaseLabController {
         autoTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: executeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void executeMeasurement(double d, double x1, double x2, double a, double fTheo) {
         try {
             double fExp = (d * d - a * a) / (4 * d);
@@ -413,6 +487,11 @@ public class LabController51 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 5-1 "Фокусна віддаль лінз".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

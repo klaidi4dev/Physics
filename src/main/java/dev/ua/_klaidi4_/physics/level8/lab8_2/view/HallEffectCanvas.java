@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-2 "Ефект Холла".
+ * Клас: HallEffectCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_2.view;
 
 import javafx.scene.canvas.Canvas;
@@ -30,6 +39,11 @@ public class HallEffectCanvas extends Canvas {
 
     private List<Particle> particles = new ArrayList<>();
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: HallEffectCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public HallEffectCanvas(double width, double height) {
         super(width, height);
         for (int i = 0; i < 25; i++) {
@@ -38,6 +52,11 @@ public class HallEffectCanvas extends Canvas {
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(double iMain, double magneticField, boolean pType, boolean powerOn, double dt) {
         this.currentIMain = iMain;
         this.currentB = magneticField;
@@ -47,6 +66,11 @@ public class HallEffectCanvas extends Canvas {
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: updateParticles.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void updateParticles(double dt) {
         if (!isPowerOn || currentIMain <= 0) {
             return;
@@ -75,6 +99,11 @@ public class HallEffectCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -159,6 +188,11 @@ public class HallEffectCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-2 "Ефект Холла".
+     * Функція: drawArrow.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawArrow(GraphicsContext gc, double x1, double y1, double x2, double y2) {
         gc.strokeLine(x1, y1, x2, y2);
         double angle = Math.atan2(y2 - y1, x2 - x1);

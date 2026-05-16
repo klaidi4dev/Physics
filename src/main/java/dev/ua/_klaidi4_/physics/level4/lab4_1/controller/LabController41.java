@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-1 "Фізичний маятник".
+ * Клас: LabController41.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з вивчення коливань фізичного (оборотного) маятника та визначення прискорення вільного падіння g.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -54,10 +63,20 @@ public class LabController41 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: LabController41.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс.
+     */
     public LabController41() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -65,6 +84,11 @@ public class LabController41 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів, таблицю та візуалізацію коливань маятника.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -198,6 +222,11 @@ public class LabController41 extends BaseLabController {
         Platform.runLater(this::updateCanvasPreview);
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: updateCanvasPreview.
+     * Призначення: Оновлює візуальне положення призм та тягарця на маятнику.
+     */
     private void updateCanvasPreview() {
         if (isAutoRunning || startBtn.isDisabled()) return;
 
@@ -216,6 +245,11 @@ public class LabController41 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: createLabel.
+     * Призначення: Допоміжна функція для створення текстових міток.
+     */
     private Label createLabel(String text) {
         Label label = new Label(text);
         label.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
@@ -223,6 +257,11 @@ public class LabController41 extends BaseLabController {
         return label;
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: clearData.
+     * Призначення: Очищає таблицю результатів та скидає лічильник дослідів.
+     */
     private void clearData() {
         data.clear();
         idCounter = 1;
@@ -231,6 +270,11 @@ public class LabController41 extends BaseLabController {
         liveOscLabel.setText("n = 0");
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час активних коливань.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoTaskBtn.setDisable(disable);
@@ -243,6 +287,11 @@ public class LabController41 extends BaseLabController {
         mDField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання періоду коливань для поточної конфігурації.
+     */
     private void startManual() {
         try {
             Double.parseDouble(xDField.getText());
@@ -257,6 +306,11 @@ public class LabController41 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: startAutoTask.
+     * Призначення: Ініціює автоматичне зняття залежності періоду від положення тягарця для обох осей.
+     */
     private void startAutoTask() {
         clearData();
         autoQueue.clear();
@@ -271,6 +325,11 @@ public class LabController41 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний дослід в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -291,6 +350,11 @@ public class LabController41 extends BaseLabController {
         runMeasurement();
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: runMeasurement.
+     * Призначення: Запускає фізичну симуляцію коливань маятника та відлік часу.
+     */
     private void runMeasurement() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: КОЛИВАННЯ...");
@@ -332,6 +396,11 @@ public class LabController41 extends BaseLabController {
         canvas.startSimulation(axisStr, xD_cm, n, measuredPeriod, initAngle, userMRod, userMD);
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: finalizeMeasurement.
+     * Призначення: Обробляє завершення коливань, розраховує період та додає дані до таблиці.
+     */
     private void finalizeMeasurement(String axis, double xD, int n, double period) {
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
@@ -355,6 +424,11 @@ public class LabController41 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-1 "Фізичний маятник".
+     * Функція: updateStats.
+     * Призначення: Проводить аналіз результатів: пошук точок синхронізму та розрахунок прискорення g.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

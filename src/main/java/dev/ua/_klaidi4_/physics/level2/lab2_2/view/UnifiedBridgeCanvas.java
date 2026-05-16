@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+ * Клас: UnifiedBridgeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_2.view;
 
 import javafx.scene.canvas.Canvas;
@@ -17,22 +26,42 @@ public class UnifiedBridgeCanvas extends Canvas {
     private boolean isMeasuring = false;
     private String currentMode = "C1"; // "C1", "C2", "Parallel", "Series"
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: UnifiedBridgeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public UnifiedBridgeCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: updateDisplay.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateDisplay(String text, boolean measuring) {
         this.currentDisplay = text;
         this.isMeasuring = measuring;
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: setMode.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setMode(String mode) {
         this.currentMode = mode;
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: updateSample.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateSample(double thicknessMm, String materialType) {
         this.sampleThickness = thicknessMm;
         if (materialType != null) {
@@ -46,6 +75,11 @@ public class UnifiedBridgeCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -172,6 +206,11 @@ public class UnifiedBridgeCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-2 "Ємність та сегнетоелектрики".
+     * Функція: drawSimpleCapacitor.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawSimpleCapacitor(GraphicsContext gc, double x, double y, String label) {
         Color capColor = isMeasuring ? Color.web("#1565c0") : Color.BLACK;
         double gap = 8;

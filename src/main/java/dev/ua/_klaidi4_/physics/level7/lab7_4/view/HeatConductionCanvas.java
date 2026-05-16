@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-4 "Теплопровідність металів".
+ * Клас: HeatConductionCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_4.view;
 
 import javafx.animation.AnimationTimer;
@@ -31,6 +40,11 @@ public class HeatConductionCanvas extends Canvas {
     private double time = 0;
     private List<double[]> particles = new ArrayList<>();
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: HeatConductionCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public HeatConductionCanvas(double width, double height) {
         super(width, height);
         for (int i = 0; i < 50; i++) {
@@ -41,6 +55,11 @@ public class HeatConductionCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(boolean heater, double flow, double t1, double t2, double t3, double t4, double hTemp, double k) {
         this.isHeaterOn = heater;
         this.waterFlowRate = flow;
@@ -52,14 +71,29 @@ public class HeatConductionCanvas extends Canvas {
         this.currentK = k;
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: updateVolumeState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateVolumeState(boolean isMeasuring, double currentVolume) {
         this.isMeasuringVol = isMeasuring;
         this.currentVolumeMl = currentVolume;
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastTime = 0;
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -72,10 +106,20 @@ public class HeatConductionCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame(double dt) {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -224,6 +268,11 @@ public class HeatConductionCanvas extends Canvas {
         drawThermometer(gc, heaterX - 20, centerY - 15, t4, "t4");
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: drawThermometer.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawThermometer(GraphicsContext gc, double x, double y, double temp, String label) {
         gc.setFill(Color.web("#cbd5e1"));
         gc.fillRoundRect(x - 4, y - 80, 8, 80, 8, 8);
@@ -241,6 +290,11 @@ public class HeatConductionCanvas extends Canvas {
         gc.fillText(String.format(Locale.US, "%s: %.1f°", label, temp), x - 15, y - 90);
     }
 
+    /*
+     * Лабораторна робота № 7-4 "Теплопровідність металів".
+     * Функція: getTemperatureColor.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private Color getTemperatureColor(double temp) {
         double ratio = Math.max(0, Math.min(1.0, (temp - 20) / 80.0));
         return Color.color(0.3 + ratio * 0.7, 0.4, 0.8 - ratio * 0.6);

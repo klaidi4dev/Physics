@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-4 "Згасаючі коливання".
+ * Клас: LabController44.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_4.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -45,11 +54,21 @@ public class LabController44 extends BaseLabController {
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: LabController44.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController44() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -58,6 +77,11 @@ public class LabController44 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -216,6 +240,11 @@ public class LabController44 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         try {
             double cFarads = Double.parseDouble(cField.getText()) * 1e-6;
@@ -236,6 +265,11 @@ public class LabController44 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         measureBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -248,11 +282,21 @@ public class LabController44 extends BaseLabController {
         timeScaleCombo.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: startManual.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startManual() {
         isAutoRunning = false;
         runSimulation(rdSlider.getValue());
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -273,6 +317,11 @@ public class LabController44 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -287,6 +336,11 @@ public class LabController44 extends BaseLabController {
         runSimulation(nextVal);
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: runSimulation.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void runSimulation(double targetRd) {
         setControlsDisable(true);
         applyPhysicsSettings();
@@ -298,6 +352,11 @@ public class LabController44 extends BaseLabController {
         startTime = System.nanoTime();
 
         measurementTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - startTime) / 1_000_000_000.0;
@@ -312,6 +371,11 @@ public class LabController44 extends BaseLabController {
         measurementTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: finishMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void finishMeasurement(double rd) {
         liveStatusLabel.setText("СИСТЕМА: ЗАПИС");
         liveStatusLabel.setStyle("-fx-text-fill: yellow;");
@@ -378,6 +442,11 @@ public class LabController44 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-4 "Згасаючі коливання".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

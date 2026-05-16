@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 6-2 "Активність β-джерела".
+ * Клас: LabController62.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level6.lab6_2.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -54,11 +63,21 @@ public class LabController62 extends BaseLabController {
     private AnimationTimer autoTimer;
     private Queue<Integer> autoQueue = new LinkedList<>();
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: LabController62.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController62() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -67,6 +86,11 @@ public class LabController62 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -239,6 +263,11 @@ public class LabController62 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: createNumberField.
+     * Призначення: Створює і повертає новий елемент інтерфейсу або об'єкт.
+     */
     private TextField createNumberField(double initialValue, Consumer<Double> onChange) {
         TextField field = new TextField(String.valueOf(initialValue));
         field.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -254,11 +283,21 @@ public class LabController62 extends BaseLabController {
         return field;
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Застосовує поточні налаштування до симуляції.
+     */
     private void applyPhysicsSettings() {
         int sampleType = sampleComboBox.getSelectionModel().getSelectedIndex();
         canvas.setPhysicsParameters(isMeasuring, sampleType);
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: resetVariables.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void resetVariables() {
         nBg = null; nRef = null; nUnk = null;
         bgCountLabel.setText("N_ф (Фон): ---");
@@ -266,6 +305,11 @@ public class LabController62 extends BaseLabController {
         unkCountLabel.setText("N_д (Дослід): ---");
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         sampleComboBox.setDisable(disable);
         timeField.setDisable(disable);
@@ -278,6 +322,11 @@ public class LabController62 extends BaseLabController {
         clearBtn.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: startSingleMeasurement.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startSingleMeasurement() {
         if (currentTimeValue <= 0) {
             showAlert("Помилка", "Час вимірювання має бути більшим за 0.");
@@ -295,6 +344,11 @@ public class LabController62 extends BaseLabController {
 
         measureTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 double elapsed = (now - start) / 1_000_000_000.0;
@@ -314,6 +368,11 @@ public class LabController62 extends BaseLabController {
         measureTimer.start();
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: generateCount.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private int generateCount(int sampleType, double timeSec) {
         double ratePerSec = currentBgRateValue;
         double eff = currentEfficiencyValue / 100.0;
@@ -325,6 +384,11 @@ public class LabController62 extends BaseLabController {
         return Math.max(0, (int) Math.round(expectedTotal + noise));
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: completeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void completeMeasurement(int sampleType, double timeSec) {
         isMeasuring = false;
         liveStepLabel.setText("Статус: ГОТОВО");
@@ -359,6 +423,11 @@ public class LabController62 extends BaseLabController {
         setControlsDisable(false);
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: performAutomaticCalculation.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void performAutomaticCalculation() {
         if (!showCalculations) {
             finalResultLabel.setText("Обробка результатів: [Приховано для самостійного розрахунку]");
@@ -391,6 +460,11 @@ public class LabController62 extends BaseLabController {
         finalResultLabel.setText(conclusion);
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         data.clear();
         idCounter = 1;
@@ -403,6 +477,11 @@ public class LabController62 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             liveStepLabel.setText("АВТОПРОХОДЖЕННЯ ЗАВЕРШЕНО");
@@ -414,6 +493,11 @@ public class LabController62 extends BaseLabController {
         Platform.runLater(this::startSingleMeasurement);
         autoTimer = new AnimationTimer() {
             long start = System.nanoTime();
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
             @Override
             public void handle(long now) {
                 if (!isMeasuring && ((now - start) / 1_000_000_000.0) > 1.8) {
@@ -426,6 +510,11 @@ public class LabController62 extends BaseLabController {
     }
 
 
+    /*
+     * Лабораторна робота № 6-2 "Активність β-джерела".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

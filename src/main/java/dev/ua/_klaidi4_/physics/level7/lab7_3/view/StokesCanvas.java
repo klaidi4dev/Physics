@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-3 "Метод Стокса".
+ * Клас: StokesCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_3.view;
 
 import dev.ua._klaidi4_.physics.level7.lab7_3.enums.LiquidType;
@@ -25,11 +34,21 @@ public class StokesCanvas extends Canvas {
     private double elapsedTime = 0;
     private Runnable onMeasurementCompleted;
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: StokesCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public StokesCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(LiquidType liquid, double rMm, double distanceM, double bDensity) {
         this.liquid = liquid;
         this.ballRadius = rMm / 1000.0;
@@ -38,10 +57,20 @@ public class StokesCanvas extends Canvas {
         resetSystem();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: setOnMeasurementCompleted.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setOnMeasurementCompleted(Runnable callback) {
         this.onMeasurementCompleted = callback;
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: resetSystem.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetSystem() {
         this.positionY = 0;
         this.velocity = 0;
@@ -51,6 +80,11 @@ public class StokesCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         resetSystem();
         this.isRunning = true;
@@ -60,8 +94,18 @@ public class StokesCanvas extends Canvas {
 
     public boolean isTimerStarted() { return timerStarted; }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -79,6 +123,11 @@ public class StokesCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         double buoyantFactor = 1.0 - liquid.getDensity() / ballDensity;
         double dragFactor = (9.0 * liquid.getTheoreticalViscosity()) / (2.0 * ballRadius * ballRadius * ballDensity);
@@ -110,6 +159,11 @@ public class StokesCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-3 "Метод Стокса".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

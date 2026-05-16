@@ -1,3 +1,11 @@
+/*
+ * Проєкт: Лабораторний практикум з фізики.
+ * Клас: WebInstructionWindow.
+ * Призначення: Вікно для відображення HTML-інструкцій до конкретної лабораторної роботи.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.core.utils;
 
 import javafx.concurrent.Worker;

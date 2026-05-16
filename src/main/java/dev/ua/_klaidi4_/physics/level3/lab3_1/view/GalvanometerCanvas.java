@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-1 "Магнітне поле".
+ * Клас: GalvanometerCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_1.view;
 
 import javafx.animation.AnimationTimer;
@@ -23,17 +32,32 @@ public class GalvanometerCanvas extends Canvas {
     private long lastTime = 0;
     private Runnable onFinish;
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: GalvanometerCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public GalvanometerCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: updatePhysics.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updatePhysics(double l0, double xPos) {
         this.l0 = l0;
         this.xPos = xPos;
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: playPulse.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void playPulse(double n, Runnable onFinish) {
         this.targetN = n;
         this.onFinish = onFinish;
@@ -41,12 +65,27 @@ public class GalvanometerCanvas extends Canvas {
         this.isRunning = true;
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -64,6 +103,11 @@ public class GalvanometerCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: update.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void update(double dt) {
         animTime += dt;
         double tPeak = 0.15;
@@ -81,6 +125,11 @@ public class GalvanometerCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-1 "Магнітне поле".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

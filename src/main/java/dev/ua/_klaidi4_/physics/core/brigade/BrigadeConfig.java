@@ -1,3 +1,11 @@
+/*
+ * Проєкт: Лабораторний практикум з фізики.
+ * Клас: BrigadeConfig.
+ * Призначення: Клас для конфігурації доступних лабораторних робіт залежно від обраної бригади.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.core.brigade;
 
 import java.util.*;

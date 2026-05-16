@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-5 "Частота мультивібратора".
+ * Клас: StandingWaveCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_5.view;
 
 import javafx.animation.AnimationTimer;
@@ -19,11 +28,21 @@ public class StandingWaveCanvas extends Canvas {
     private int activeN = 0;
     private double currentAmp = 0;
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: StandingWaveCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public StandingWaveCanvas(double width, double height) {
         super(width, height);
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: setPhysicsParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setPhysicsParameters(double f, double tau, double cosPhi, double lActive, double targetFreq) {
         this.currentF = f;
         this.tau = tau;
@@ -34,6 +53,11 @@ public class StandingWaveCanvas extends Canvas {
         if (!isGenerating) drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: toggleGenerator.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void toggleGenerator(boolean state) {
         this.isGenerating = state;
         if (state) {
@@ -45,6 +69,11 @@ public class StandingWaveCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: calculateResonance.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private void calculateResonance() {
         int bestN = 0;
         double maxAmp = 0;
@@ -63,9 +92,19 @@ public class StandingWaveCanvas extends Canvas {
         this.currentAmp = maxAmp;
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         lastTime = System.nanoTime();
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 double dt = (now - lastTime) / 1_000_000_000.0;
@@ -77,20 +116,40 @@ public class StandingWaveCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
         isGenerating = false;
         drawFrame();
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: getCurrentAmp.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getCurrentAmp() {
         return currentAmp;
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: getActiveN.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public int getActiveN() {
         return activeN;
     }
 
+    /*
+     * Лабораторна робота № 4-5 "Частота мультивібратора".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

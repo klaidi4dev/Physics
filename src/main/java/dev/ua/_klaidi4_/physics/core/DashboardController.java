@@ -1,3 +1,11 @@
+/*
+ * Проєкт: Лабораторний практикум з фізики.
+ * Клас: DashboardController.
+ * Призначення: Головне меню програми, яке відповідає за навігацію між лабораторними роботами.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.core;
 
 import dev.ua._klaidi4_.physics.core.brigade.BrigadeConfig;

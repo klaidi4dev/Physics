@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-7 "Розподіл Максвелла".
+ * Клас: MaxwellCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_7.view;
 
 import javafx.animation.AnimationTimer;
@@ -37,22 +46,42 @@ public class MaxwellCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: MaxwellCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public MaxwellCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(boolean power, double voltage) {
         this.isPowerOn = power;
         this.currentVoltage = voltage;
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: setAdvancedParams.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setAdvancedParams(double temp, double emission, double speed) {
         this.cathodeTemp = temp;
         this.emissionIntensity = emission;
         this.simSpeed = speed;
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: getCurrentIa.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getCurrentIa() {
         if (!isPowerOn) return 0.0;
 
@@ -68,10 +97,20 @@ public class MaxwellCanvas extends Canvas {
         return Math.max(0.1, current);
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
             private long lastUpdate = 0;
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (now - lastUpdate > 16_000_000) {
@@ -84,10 +123,20 @@ public class MaxwellCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: updateElectrons.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void updateElectrons() {
         if (!isPowerOn) {
             electrons.clear();
@@ -138,6 +187,11 @@ public class MaxwellCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-7 "Розподіл Максвелла".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-2 "В'язкість газів".
+ * Клас: LabController72.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_2.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -35,11 +44,21 @@ public class LabController72 extends BaseLabController {
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: LabController72.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController72() {
         initUI();
         updatePhysics();
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (measurementTimer != null) measurementTimer.stop();
@@ -47,6 +66,11 @@ public class LabController72 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -183,6 +207,11 @@ public class LabController72 extends BaseLabController {
         return col;
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: getDoubleValue.
+     * Призначення: Повертає необхідне значення параметра або об'єкта.
+     */
     private double getDoubleValue(TextField field, double defaultValue) {
         try {
             return Double.parseDouble(field.getText().replace(",", "."));
@@ -191,18 +220,33 @@ public class LabController72 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: updatePhysics.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updatePhysics() {
         if (canvas != null && !isMeasuring) {
             canvas.updateState(0, 0, 0);
         }
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: startManual.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startManual() {
         isAutoRunning = false;
         double currentVolume = getDoubleValue(fieldVolume, 50.0);
         runSimulation(currentVolume);
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: startAuto.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAuto() {
         data.clear(); idCounter = 1;
         autoQueue.clear();
@@ -211,6 +255,11 @@ public class LabController72 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -222,6 +271,11 @@ public class LabController72 extends BaseLabController {
         runSimulation(nextV);
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: runSimulation.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void runSimulation(double v_cm3) {
         try {
             isMeasuring = true;
@@ -249,6 +303,11 @@ public class LabController72 extends BaseLabController {
             startTime = System.nanoTime();
 
             measurementTimer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: handle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
                 @Override
                 public void handle(long now) {
                     double elapsed = (now - startTime) / 1_000_000_000.0;
@@ -268,6 +327,11 @@ public class LabController72 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: finishMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void finishMeasurement(double V_cm3, double h1, double h2, double deltaP, double T, double dropPct, double eta_true) {
         isMeasuring = false;
         canvas.setMeasuring(false);
@@ -309,10 +373,20 @@ public class LabController72 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: updateConclusions.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateConclusions() {
         updateConclusions(1.81e-5);
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: updateConclusions.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateConclusions(double etaTrue) {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування вимірювань...");
@@ -345,6 +419,11 @@ public class LabController72 extends BaseLabController {
         finalResultLabel.setText(sb.toString());
     }
 
+    /*
+     * Лабораторна робота № 7-2 "В'язкість газів".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         fieldRadius.setDisable(disable);
         fieldLength.setDisable(disable);

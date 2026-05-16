@@ -1,3 +1,11 @@
+/*
+ * Проєкт: Лабораторний практикум з фізики.
+ * Клас: DocumentationManager.
+ * Призначення: Клас для роботи з документацією та інструкціями до лабораторних робіт.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.core.utils;
 
 import javafx.application.Platform;

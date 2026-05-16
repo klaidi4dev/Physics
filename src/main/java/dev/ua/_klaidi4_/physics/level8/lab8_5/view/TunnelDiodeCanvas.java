@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-5 "Тунельний діод".
+ * Клас: TunnelDiodeCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_5.view;
 
 import javafx.animation.AnimationTimer;
@@ -30,19 +39,39 @@ public class TunnelDiodeCanvas extends Canvas {
 
     private List<Electron> electrons = new ArrayList<>();
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: TunnelDiodeCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public TunnelDiodeCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(double voltage, String mode, double current) {
         this.targetU = mode.equals("Прямий") ? voltage : -voltage;
         this.mode = mode;
         this.currentI = current;
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 currentU += (targetU - currentU) * 0.1;
@@ -53,10 +82,20 @@ public class TunnelDiodeCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: updateParticles.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     private void updateParticles() {
         double w = getWidth();
         double h = getHeight();
@@ -97,6 +136,11 @@ public class TunnelDiodeCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-5 "Тунельний діод".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

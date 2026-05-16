@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+ * Клас: SolenoidCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level3.lab3_4.view;
 
 import javafx.animation.AnimationTimer;
@@ -22,11 +31,21 @@ public class SolenoidCanvas extends Canvas {
     private double elapsedMeasureTime = 0;
     private boolean isMeasuring = false;
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: SolenoidCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public SolenoidCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: setSetupParameters.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setSetupParameters(double length, double radius, double probePos) {
         this.length = length;
         this.radius = radius;
@@ -36,6 +55,11 @@ public class SolenoidCanvas extends Canvas {
         }
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: triggerMeasurement.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void triggerMeasurement(double maxAlpha) {
         this.targetAlpha = maxAlpha;
         this.currentAlpha = 0;
@@ -46,8 +70,18 @@ public class SolenoidCanvas extends Canvas {
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -75,11 +109,21 @@ public class SolenoidCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
         isMeasuring = false;
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -141,6 +185,11 @@ public class SolenoidCanvas extends Canvas {
         drawGalvanometer(gc, w / 2, h - 60);
     }
 
+    /*
+     * Лабораторна робота № 3-4 "Поле на осі соленоїда".
+     * Функція: drawGalvanometer.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawGalvanometer(GraphicsContext gc, double cx, double cy) {
         gc.setFill(Color.web("#2c3e50"));
         gc.fillRoundRect(cx - 120, cy - 40, 240, 80, 10, 10);

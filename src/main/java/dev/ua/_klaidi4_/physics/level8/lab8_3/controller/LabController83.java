@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-3 "Фотоелектричні явища".
+ * Клас: LabController83.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_3.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -30,11 +39,21 @@ public class LabController83 extends BaseLabController {
     private final double LIGHT_INTENSITY_CD = 1.8;
     private final double AREA_S_M2 = 2.78e-5;
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: LabController83.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController83() {
         initUI();
         canvas.setTarget(10.0, 30.0);
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) {
@@ -43,6 +62,11 @@ public class LabController83 extends BaseLabController {
         isAutoRunning = false;
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(10);
         leftPanel.setPadding(new Insets(10));
@@ -126,6 +150,11 @@ public class LabController83 extends BaseLabController {
         distanceField.textProperty().addListener((obs, oldVal, newVal) -> updateLivePreview());
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: updateLivePreview.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateLivePreview() {
         if (isAutoRunning) return;
         try {
@@ -140,11 +169,21 @@ public class LabController83 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: calculatePhysicsModel.
+     * Призначення: Виконує математичні обчислення для отримання результатів.
+     */
     private double calculatePhysicsModel(double u, double r_cm) {
         if (r_cm <= 0 || u <= 0) return 0;
         return (u / 10.0) * Math.pow(10.0 / r_cm, 1.8) * 0.1;
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: doManualMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void doManualMeasurement() {
         if (isAutoRunning) return;
         try {
@@ -156,6 +195,11 @@ public class LabController83 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: recordMeasurementExact.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void recordMeasurementExact(double u, double r_cm) {
         double rawCurrent = calculatePhysicsModel(u, r_cm);
 
@@ -179,6 +223,11 @@ public class LabController83 extends BaseLabController {
         });
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: clearData.
+     * Призначення: Очищує зібрані дані та скидає стан.
+     */
     private void clearData() {
         if (isAutoRunning) return;
         data.clear();
@@ -186,6 +235,11 @@ public class LabController83 extends BaseLabController {
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: startAutoMode.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoMode() {
         if (isAutoRunning) return;
         isAutoRunning = true;
@@ -253,6 +307,11 @@ public class LabController83 extends BaseLabController {
         autoThread.start();
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

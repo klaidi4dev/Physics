@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-5 "Визначення ЕРС".
+ * Клас: CompensationCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_5.view;
 
 import javafx.animation.AnimationTimer;
@@ -19,11 +28,21 @@ public class CompensationCanvas extends Canvas {
     private AnimationTimer timer;
     private long lastTime = 0;
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: CompensationCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public CompensationCanvas(double width, double height) {
         super(width, height);
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: updatePhysics.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updatePhysics(double sliderPos, double maxPos, double currentG, String source, double e1) {
         this.sliderPosition = sliderPos;
         this.maxSliderPosition = maxPos;
@@ -32,9 +51,19 @@ public class CompensationCanvas extends Canvas {
         this.currentE1 = e1;
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: startSimulation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     public void startSimulation() {
         if (timer != null) timer.stop();
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -55,6 +84,11 @@ public class CompensationCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: resetSystem.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public void resetSystem() {
         this.targetCurrent = 0.0;
         this.displayedCurrent = 0.0;
@@ -63,10 +97,20 @@ public class CompensationCanvas extends Canvas {
         draw();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: stopSimulation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopSimulation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 2-5 "Визначення ЕРС".
+     * Функція: draw.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

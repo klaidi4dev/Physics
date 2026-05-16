@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+ * Клас: LabController19.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення швидкості кулі за допомогою крутильного балістичного маятника.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_9.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -51,10 +60,20 @@ public class LabController19 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: LabController19.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController19() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -62,6 +81,11 @@ public class LabController19 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель параметрів, полотно симуляції та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -202,6 +226,11 @@ public class LabController19 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час виконання вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -215,6 +244,11 @@ public class LabController19 extends BaseLabController {
         vField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: startManual.
+     * Призначення: Запускає поодинокий дослід за параметрами користувача.
+     */
     private void startManual() {
         try {
             Double.parseDouble(mBulletField.getText());
@@ -227,6 +261,11 @@ public class LabController19 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: startAuto.
+     * Призначення: Ініціює серію автоматичних вимірювань швидкості кулі.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -243,6 +282,11 @@ public class LabController19 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний крок в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -254,6 +298,11 @@ public class LabController19 extends BaseLabController {
         runSimulation(autoQueue.poll());
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію польоту кулі та крутильних коливань маятника.
+     */
     private void runSimulation(AutoTestParam autoParam) {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ПОСТРІЛ");
@@ -299,6 +348,11 @@ public class LabController19 extends BaseLabController {
         canvas.startSimulation(finalPhiDeg);
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: finishMeasurement.
+     * Призначення: Фіксує результати вимірювання періоду та кута відхилення, додає запис до таблиці.
+     */
     private void finishMeasurement(double t1, double t2, double phiDeg) {
         canvas.stopAnimation();
 
@@ -340,6 +394,11 @@ public class LabController19 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-9 "Крутильний балістичний маятник".
+     * Функція: updateStats.
+     * Призначення: Розраховує швидкість кулі та проводить статистичну обробку результатів.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

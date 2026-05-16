@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 2-1 "Електростатичне поле".
+ * Клас: LabController21.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з дослідження електростатичного поля методом моделювання на провідному папері.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level2.lab2_1.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -40,10 +49,20 @@ public class LabController21 extends BaseLabController {
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: LabController21.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та встановлює початкові значення.
+     */
     public LabController21() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію при закритті модуля.
+     */
     @Override
     public void shutdown() {
         isAutoRunning = false;
@@ -51,6 +70,11 @@ public class LabController21 extends BaseLabController {
         if (canvas != null) canvas.resetSystem();
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панель налаштувань, таблицю результатів та полотно для візуалізації поля.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -169,11 +193,21 @@ public class LabController21 extends BaseLabController {
         canvas.setOnFinishCallback(this::onCanvasFinished);
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: parseVoltage.
+     * Призначення: Зчитує напругу U0 з поля введення.
+     */
     private double parseVoltage() {
         try { return Double.parseDouble(voltageField.getText()); }
         catch (Exception e) { return 20.0; }
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: parseMeasurements.
+     * Призначення: Зчитує кількість вимірювань N з поля введення.
+     */
     private int parseMeasurements() {
         try {
             int n = Integer.parseInt(numMeasurementsField.getText());
@@ -183,6 +217,11 @@ public class LabController21 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: resetAndRecalculate.
+     * Призначення: Скидає стан вимірювань та оновлює візуалізацію поля.
+     */
     private void resetAndRecalculate() {
         data.clear();
         idCounter = 1;
@@ -191,6 +230,11 @@ public class LabController21 extends BaseLabController {
         updateDisplayFromInput();
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: updateDisplayFromInput.
+     * Призначення: Оновлює інформаційні мітки на основі введених параметрів.
+     */
     private void updateDisplayFromInput() {
         if (isAutoRunning) return;
         try {
@@ -203,6 +247,11 @@ public class LabController21 extends BaseLabController {
         } catch (NumberFormatException ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час вимірювання.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -214,11 +263,21 @@ public class LabController21 extends BaseLabController {
         scaleCombo.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: startManual.
+     * Призначення: Запускає процес вимірювання потенціалів вручну.
+     */
     private void startManual() {
         if (isAutoRunning) return;
         startMeasurement(parseVoltage());
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: startAuto.
+     * Призначення: Ініціює автоматичну серію вимірювань для заданої напруги.
+     */
     private void startAuto() {
         try {
             Double.parseDouble(distField.getText());
@@ -238,6 +297,11 @@ public class LabController21 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступне автоматичне вимірювання.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -255,6 +319,11 @@ public class LabController21 extends BaseLabController {
     private double recordedU, recordedD, recordedR;
     private int recordedN;
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: startMeasurement.
+     * Призначення: Запускає анімацію зондування поля щупом для визначення еквіпотенціалей.
+     */
     private void startMeasurement(double u) {
         try {
             double d = Double.parseDouble(distField.getText());
@@ -282,12 +351,22 @@ public class LabController21 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: onCanvasFinished.
+     * Призначення: Обробляє завершення анімації зондування та переходить до запису даних.
+     */
     private void onCanvasFinished() {
         Platform.runLater(() -> {
             recordMeasurementData(recordedU, recordedD / 100.0, recordedR / 100.0, recordedN);
         });
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: recordMeasurementData.
+     * Призначення: Розраховує напруженість поля та потенціал, додає результати до таблиці.
+     */
     private void recordMeasurementData(double u0, double d, double r, int n) {
         double currentX = 0;
         double currentPhi = 0;
@@ -332,6 +411,11 @@ public class LabController21 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 2-1 "Електростатичне поле".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичну обробку вимірювань та порівнює експериментальні дані з теоретичними.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: Очікування моделювання...");

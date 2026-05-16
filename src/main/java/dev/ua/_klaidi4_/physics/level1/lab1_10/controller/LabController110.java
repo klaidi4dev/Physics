@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+ * Клас: LabController110.
+ * Призначення: керує інтерфейсом лабораторної роботи, проведенням дослідів
+ * з визначення моменту інерції тіл методом скочування з похилої площини.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level1.lab1_10.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -48,11 +57,21 @@ public class LabController110 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: LabController110.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та встановлює початкові налаштування.
+     */
     public LabController110() {
         initUI();
         applyPhysicsSettings();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: shutdown.
+     * Призначення: Зупиняє анімацію та очищає чергу при закритті модуля.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -60,6 +79,11 @@ public class LabController110 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: initUI.
+     * Призначення: Створює графічний інтерфейс: панелі керування, полотно симуляції та таблицю результатів.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -194,6 +218,11 @@ public class LabController110 extends BaseLabController {
         this.setBottom(bottomPanel);
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: applyPhysicsSettings.
+     * Призначення: Передає актуальні геометричні параметри похилої площини до візуальної моделі.
+     */
     private void applyPhysicsSettings() {
         try {
             int bodyIndex = bodyCombo.getSelectionModel().getSelectedIndex();
@@ -203,6 +232,11 @@ public class LabController110 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: setControlsDisable.
+     * Призначення: Керує доступністю полів введення під час активного руху тіла.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
@@ -214,6 +248,11 @@ public class LabController110 extends BaseLabController {
         sField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: startManual.
+     * Призначення: Запускає поодиноке вимірювання часу скочування тіла.
+     */
     private void startManual() {
         try {
             Double.parseDouble(mField.getText());
@@ -227,6 +266,11 @@ public class LabController110 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: startAuto.
+     * Призначення: Ініціює автоматичну серію дослідів для всіх типів тіл.
+     */
     private void startAuto() {
         data.clear();
         idCounter = 1;
@@ -244,6 +288,11 @@ public class LabController110 extends BaseLabController {
         processNextAuto();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: processNextAuto.
+     * Призначення: Виконує наступний крок в автоматичному режимі.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -263,6 +312,11 @@ public class LabController110 extends BaseLabController {
         runSimulation(param.bodyIdx);
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: runSimulation.
+     * Призначення: Запускає фізичну симуляцію руху тіла по похилій площині.
+     */
     private void runSimulation(int bodyIndex) {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: СКОЧУВАННЯ");
@@ -299,6 +353,11 @@ public class LabController110 extends BaseLabController {
         }).start();
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: finishMeasurement.
+     * Призначення: Фіксує час скочування, розраховує експериментальний момент інерції та додає дані до таблиці.
+     */
     private void finishMeasurement(int bodyIndex, double measuredTime, double iTheory) {
         liveTimeLabel.setText(String.format("t = %.3f с", measuredTime));
         liveStatusLabel.setText("Статус: ЗАВЕРШЕНО");
@@ -331,6 +390,11 @@ public class LabController110 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 1-10 "Момент інерції: Скочування тіл".
+     * Функція: updateStats.
+     * Призначення: Проводить статистичний аналіз отриманих результатів вимірювань.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

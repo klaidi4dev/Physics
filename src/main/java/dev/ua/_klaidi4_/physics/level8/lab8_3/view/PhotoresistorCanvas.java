@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 8-3 "Фотоелектричні явища".
+ * Клас: PhotoresistorCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level8.lab8_3.view;
 
 import javafx.animation.AnimationTimer;
@@ -22,18 +31,38 @@ public class PhotoresistorCanvas extends Canvas {
     private AnimationTimer timer;
     private double timeOffset = 0.0;
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: PhotoresistorCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public PhotoresistorCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: setTarget.
+     * Призначення: Встановлює фізичні параметри або обробники подій для візуалізації.
+     */
     public void setTarget(double u, double r) {
         this.targetU = u;
         this.targetR = r;
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 timeOffset += 0.1;
@@ -48,10 +77,20 @@ public class PhotoresistorCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: calculatePhysicsForDisplay.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     private void calculatePhysicsForDisplay() {
         if (currentR <= 0 || currentU <= 0.5) {
             currentI = 0;
@@ -60,6 +99,11 @@ public class PhotoresistorCanvas extends Canvas {
         currentI = (currentU / 10.0) * Math.pow(10.0 / currentR, 1.8) * 0.1;
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();
@@ -131,6 +175,11 @@ public class PhotoresistorCanvas extends Canvas {
         gc.strokeLine(lampX + 10, 60, 140, 60);
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: drawMount.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawMount(GraphicsContext gc, double x, double y) {
         gc.setFill(Color.web("#64748b"));
         gc.fillPolygon(
@@ -142,6 +191,11 @@ public class PhotoresistorCanvas extends Canvas {
         gc.fillRect(x - 3, y - 40, 6, 40);
     }
 
+    /*
+     * Лабораторна робота № 8-3 "Фотоелектричні явища".
+     * Функція: drawDigitalDisplay.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawDigitalDisplay(GraphicsContext gc, double x, double y, String label, String value, String ledColor) {
         gc.setFill(Color.web("#1e293b"));
         gc.fillRoundRect(x, y, 180, 65, 8, 8);

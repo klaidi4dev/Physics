@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 4-3 "Додавання коливань".
+ * Клас: LabController43.
+ * Призначення: керує інтерфейсом лабораторної роботи, запуском досліду,
+ * введенням параметрів, таблицею результатів та обробкою вимірювань.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level4.lab4_3.controller;
 
 import dev.ua._klaidi4_.physics.core.controller.BaseLabController;
@@ -50,10 +59,20 @@ public class LabController43 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: LabController43.
+     * Призначення: Конструктор класу, ініціалізує інтерфейс та налаштування.
+     */
     public LabController43() {
         initUI();
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: shutdown.
+     * Призначення: Зупиняє процеси та очищує ресурси при закритті вікна.
+     */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
@@ -61,6 +80,11 @@ public class LabController43 extends BaseLabController {
         autoQueue.clear();
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: initUI.
+     * Призначення: Ініціалізує графічний інтерфейс користувача, створює панелі управління та графіки.
+     */
     private void initUI() {
         leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -215,6 +239,11 @@ public class LabController43 extends BaseLabController {
         Platform.runLater(this::updateCanvasPreview);
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: createLabel.
+     * Призначення: Створює і повертає новий елемент інтерфейсу або об'єкт.
+     */
     private Label createLabel(String text) {
         Label label = new Label(text);
         label.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
@@ -222,6 +251,11 @@ public class LabController43 extends BaseLabController {
         return label;
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: updateCanvasPreview.
+     * Призначення: Оновлює дані, статистику або графічний інтерфейс.
+     */
     private void updateCanvasPreview() {
         if (isAutoRunning || startBtn.isDisabled()) return;
 
@@ -240,12 +274,22 @@ public class LabController43 extends BaseLabController {
         } catch (Exception ignored) {}
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: clearTable.
+     * Призначення: Очищує зібрані дані та скидає стан.
+     */
     private void clearTable() {
         data.clear();
         idCounter = 1;
         updateStats();
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: setControlsDisable.
+     * Призначення: Встановлює нове значення для вказаного параметра.
+     */
     private void setControlsDisable(boolean disable) {
         startBtn.setDisable(disable);
         autoTask1Btn.setDisable(disable);
@@ -260,6 +304,11 @@ public class LabController43 extends BaseLabController {
         autoStepsField.setDisable(disable);
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: startManual.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startManual() {
         try {
             Double.parseDouble(f1Field.getText());
@@ -276,6 +325,11 @@ public class LabController43 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: startAutoTask.
+     * Призначення: Запускає процес симуляції або відповідний режим роботи.
+     */
     private void startAutoTask(int taskNum) {
         try {
             int steps = Integer.parseInt(autoStepsField.getText());
@@ -312,6 +366,11 @@ public class LabController43 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: processNextAuto.
+     * Призначення: Обробляє поточний крок симуляції або дію користувача.
+     */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
             isAutoRunning = false;
@@ -331,6 +390,11 @@ public class LabController43 extends BaseLabController {
         runMeasurementCycle();
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: runMeasurementCycle.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void runMeasurementCycle() {
         setControlsDisable(true);
         liveStatusLabel.setText("Статус: ЗБІР ДАНИХ...");
@@ -347,6 +411,11 @@ public class LabController43 extends BaseLabController {
         canvas.startMeasurement(isLissajous ? "lissajous" : "beats", f1, f2, a1, a2, phase);
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: finalizeMeasurement.
+     * Призначення: Виконує обробку відповідних параметрів та логіки лабораторної роботи.
+     */
     private void finalizeMeasurement(boolean isLissajous, double f1, double f2, double phase) {
         liveStatusLabel.setText("Статус: ЗАФІКСОВАНО");
         liveStatusLabel.setStyle("-fx-text-fill: #00ff00;");
@@ -370,6 +439,11 @@ public class LabController43 extends BaseLabController {
         }
     }
 
+    /*
+     * Лабораторна робота № 4-3 "Додавання коливань".
+     * Функція: updateStats.
+     * Призначення: Розраховує середні значення та похибки на основі даних у таблиці.
+     */
     private void updateStats() {
         if (data.isEmpty()) {
             finalResultLabel.setText("Обробка результатів: -");

@@ -1,3 +1,12 @@
+/*
+ * Лабораторна робота № 7-1 "Теплоємність газу".
+ * Клас: ThermodynamicsCanvas.
+ * Призначення: відповідає за графічне відображення симуляції, анімацію
+ * фізичного процесу та відмальовку компонентів установки.
+ *
+ * Автор: Остапенко Максим (_Klaidi4_)
+ * Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_)
+ */
 package dev.ua._klaidi4_.physics.level7.lab7_1.view;
 
 import javafx.animation.AnimationTimer;
@@ -14,23 +23,48 @@ public class ThermodynamicsCanvas extends Canvas {
     private double heatRate = 1.0;
     private AnimationTimer timer;
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: ThermodynamicsCanvas.
+     * Призначення: Конструктор класу, ініціалізує початкові параметри та стан об'єкта.
+     */
     public ThermodynamicsCanvas(double width, double height) {
         super(width, height);
         startAnimation();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: updateState.
+     * Призначення: Оновлює графічні елементи та анімацію на основі нових даних.
+     */
     public void updateState(double targetH, boolean valveOpen, double heatRate) {
         this.targetPressureDiff = targetH;
         this.isValveOpen = valveOpen;
         this.heatRate = heatRate;
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: getCurrentPressure.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
     public double getCurrentPressure() {
         return currentPressureDiff;
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: startAnimation.
+     * Призначення: Запускає цикл анімації та процес візуалізації.
+     */
     private void startAnimation() {
         timer = new AnimationTimer() {
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: handle.
+     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+     */
             @Override
             public void handle(long now) {
                 double diff = targetPressureDiff - currentPressureDiff;
@@ -49,10 +83,20 @@ public class ThermodynamicsCanvas extends Canvas {
         timer.start();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: stopAnimation.
+     * Призначення: Зупиняє цикл анімації.
+     */
     public void stopAnimation() {
         if (timer != null) timer.stop();
     }
 
+    /*
+     * Лабораторна робота № 7-1 "Теплоємність газу".
+     * Функція: drawFrame.
+     * Призначення: Відмальовує графічні компоненти та стан симуляції на полотні.
+     */
     private void drawFrame() {
         GraphicsContext gc = getGraphicsContext2D();
         double w = getWidth();

@@ -36,19 +36,19 @@ public class LabController33 extends BaseLabController {
     private TextField turnsField;
     private TextField lengthField;
     private TextField voltageField;
+    private Slider currentSlider;
     private Button startBtn;
+    private Button saveBtn;
     private Button autoBtn;
     private Button clearBtn;
     private Label liveStatusLabel;
     private Label liveTimeLabel;
     private Label liveCurrentLabel;
-    private AnimationTimer measurementTimer;
+    private AnimationTimer autoTimer;
     private long startTime;
-    private double targetTime = 3.0;
-    private double currentSimI = 0;
+    private final double targetTime = 3.0;
     private Queue<Double> autoQueue = new LinkedList<>();
     private boolean isAutoRunning = false;
-
     private final double MU_0 = 4 * Math.PI * 1e-7;
     private final double EM_THEORY = 1.7588e11;
 
@@ -65,12 +65,12 @@ public class LabController33 extends BaseLabController {
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: shutdown.
-     * Призначення: Зупиняє анімацію при закритті модуля.
+     * Призначення: Зупиняє всі процеси при закритті модуля.
      */
     @Override
     public void shutdown() {
         if (canvas != null) canvas.stopAnimation();
-        if (measurementTimer != null) measurementTimer.stop();
+        if (autoTimer != null) autoTimer.stop();
         isAutoRunning = false;
         autoQueue.clear();
     }
@@ -78,7 +78,7 @@ public class LabController33 extends BaseLabController {
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: initUI.
-     * Призначення: Створює графічний інтерфейс: панель параметрів, таблицю та полотно симуляції фокусування пучка.
+     * Призначення: Створює графічний інтерфейс користувача.
      */
     private void initUI() {
         leftPanel = new VBox(8);
@@ -101,22 +101,45 @@ public class LabController33 extends BaseLabController {
         lengthField = new TextField("0.15");
         voltageField = new TextField("1000");
 
+        currentSlider = new Slider(0.0, 5.0, 0.0);
+        currentSlider.setShowTickMarks(true);
+        currentSlider.setShowTickLabels(true);
+        currentSlider.setMajorTickUnit(1.0);
+        currentSlider.setMinorTickCount(4);
+        currentSlider.setBlockIncrement(0.01);
+        currentSlider.setDisable(true);
+
+        currentSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (!currentSlider.isDisabled()) {
+                updateManualCanvas(newVal.doubleValue());
+            }
+        });
+
+        VBox sliderBox = new VBox(5, new Label("Реостат (Струм соленоїда I, А):"), currentSlider);
+
         paramsBox.getChildren().addAll(
                 createInputGroup("Кількість витків соленоїда n (1/м):", turnsField),
                 createInputGroup("Відстань до екрану l (м):", lengthField),
-                createInputGroup("Анодна напруга U (В):", voltageField)
+                createInputGroup("Анодна напруга U (В):", voltageField),
+                sliderBox
         );
 
         ScrollPane scrollParams = new ScrollPane(paramsBox);
         scrollParams.setFitToWidth(true);
-        scrollParams.setPrefViewportHeight(200);
+        scrollParams.setPrefViewportHeight(240);
         scrollParams.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         labPane.setContent(scrollParams);
 
-        startBtn = new Button("▶ ФОКУСУВАТИ (РУЧНИЙ)");
+        startBtn = new Button("▶ ПОЧАТИ ДОСЛІД");
         startBtn.setStyle("-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold;");
         startBtn.setMaxWidth(Double.MAX_VALUE);
         startBtn.setOnAction(e -> startManual());
+
+        saveBtn = new Button("✍ ЗАФІКСУВАТИ ФОКУС");
+        saveBtn.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold;");
+        saveBtn.setMaxWidth(Double.MAX_VALUE);
+        saveBtn.setDisable(true);
+        saveBtn.setOnAction(e -> saveManualMeasurement());
 
         autoBtn = new Button("⚙ АВТОПРОХОДЖЕННЯ ЛАБИ");
         autoBtn.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold;");
@@ -133,9 +156,10 @@ public class LabController33 extends BaseLabController {
             liveTimeLabel.setText("t = 0.00 с");
             liveCurrentLabel.setText("I = 0.000 А");
             canvas.setPhysicsParameters(1000, 0, 2000, 0.15);
+            currentSlider.setValue(0.0);
         });
 
-        leftPanel.getChildren().addAll(title, labPane, startBtn, autoBtn, clearBtn);
+        leftPanel.getChildren().addAll(title, labPane, startBtn, saveBtn, autoBtn, clearBtn);
 
         canvas = new FocusingCanvas(600, 440);
 
@@ -200,7 +224,7 @@ public class LabController33 extends BaseLabController {
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: applyPhysicsSettings.
-     * Призначення: Передає актуальну анодну напругу до візуальної моделі.
+     * Призначення: Передає початкові параметри до візуальної моделі.
      */
     private void applyPhysicsSettings() {
         try {
@@ -214,36 +238,92 @@ public class LabController33 extends BaseLabController {
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: setControlsDisable.
-     * Призначення: Керує доступністю полів введення під час вимірювання.
+     * Призначення: Блокує поля вводу під час вимірювання.
      */
     private void setControlsDisable(boolean disable) {
+        voltageField.setDisable(disable);
+        turnsField.setDisable(disable);
+        lengthField.setDisable(disable);
         startBtn.setDisable(disable);
         autoBtn.setDisable(disable);
         clearBtn.setDisable(disable);
-        turnsField.setDisable(disable);
-        lengthField.setDisable(disable);
-        voltageField.setDisable(disable);
     }
 
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: startManual.
-     * Призначення: Запускає поодиноке вимірювання струму фокусування для заданої напруги.
+     * Призначення: Розблоковує повзунок для підбору струму користувачем.
      */
     private void startManual() {
         try {
-            double u = Double.parseDouble(voltageField.getText());
+            Double.parseDouble(voltageField.getText());
+            Double.parseDouble(turnsField.getText());
+            Double.parseDouble(lengthField.getText());
+
             isAutoRunning = false;
-            runMeasurement(u);
+            setControlsDisable(true);
+
+            currentSlider.setValue(0.0);
+            currentSlider.setDisable(false);
+            saveBtn.setDisable(false);
+
+            liveStatusLabel.setText("Статус: РУЧНЕ ФОКУСУВАННЯ");
+            liveStatusLabel.setStyle("-fx-text-fill: orange;");
+
+            updateManualCanvas(0.0);
+
         } catch (Exception e) {
-            showAlert("Помилка", "Введіть коректні числа в поля.");
+            showAlert("Помилка", "Введіть коректні числа в поля параметрів установки.");
+        }
+    }
+
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: updateManualCanvas.
+     * Призначення: Миттєво передає поточне значення повзунка в симуляцію.
+     */
+    private void updateManualCanvas(double currentAmps) {
+        try {
+            double u = Double.parseDouble(voltageField.getText());
+            double n = Double.parseDouble(turnsField.getText());
+            double l = Double.parseDouble(lengthField.getText());
+
+            liveCurrentLabel.setText(String.format("I = %.3f А", currentAmps));
+            canvas.setPhysicsParameters(u, currentAmps, n, l);
+        } catch (NumberFormatException ignored) {}
+    }
+
+    /*
+     * Лабораторна робота № 3-3 "Питомий заряд електрона".
+     * Функція: saveManualMeasurement.
+     * Призначення: Зберігає обране на повзунку значення в таблицю.
+     */
+    private void saveManualMeasurement() {
+        try {
+            double u = Double.parseDouble(voltageField.getText());
+            double n = Double.parseDouble(turnsField.getText());
+            double l = Double.parseDouble(lengthField.getText());
+            double finalCurrent = currentSlider.getValue();
+
+            if (finalCurrent <= 0.01) {
+                showAlert("Увага", "Встановіть значення струму більше нуля.");
+                return;
+            }
+
+            currentSlider.setDisable(true);
+            saveBtn.setDisable(true);
+
+            finishMeasurement(u, finalCurrent, n, l);
+
+        } catch (Exception e) {
+            showAlert("Помилка", "Помилка фіксації результату.");
         }
     }
 
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: startAuto.
-     * Призначення: Ініціює автоматичну серію вимірювань для діапазону напруг.
+     * Призначення: Запускає автоматичний режим підбору струму для серії напруг.
      */
     private void startAuto() {
         data.clear();
@@ -263,7 +343,7 @@ public class LabController33 extends BaseLabController {
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: processNextAuto.
-     * Призначення: Виконує наступний крок в автоматичному режимі.
+     * Призначення: Опрацьовує наступне значення напруги в автоматичній черзі.
      */
     private void processNextAuto() {
         if (autoQueue.isEmpty()) {
@@ -276,17 +356,20 @@ public class LabController33 extends BaseLabController {
 
         double nextVoltage = autoQueue.poll();
         voltageField.setText(String.valueOf(nextVoltage));
-        runMeasurement(nextVoltage);
+        runAutoMeasurement(nextVoltage);
     }
 
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
-     * Функція: runMeasurement.
-     * Призначення: Симулює плавне регулювання струму в соленоїді для отримання чіткої плями на екрані.
+     * Функція: runAutoMeasurement.
+     * Призначення: Анімація підбору струму для автоматичного режиму.
      */
-    private void runMeasurement(double voltage) {
+    private void runAutoMeasurement(double voltage) {
         setControlsDisable(true);
-        liveStatusLabel.setText("Статус: ПІДБІР СТРУМУ");
+        currentSlider.setDisable(true);
+        saveBtn.setDisable(true);
+
+        liveStatusLabel.setText("Статус: ПІДБІР СТРУМУ (АВТО)");
         liveStatusLabel.setStyle("-fx-text-fill: red;");
 
         double n = Double.parseDouble(turnsField.getText());
@@ -297,20 +380,21 @@ public class LabController33 extends BaseLabController {
         double exactI = Math.sqrt(exactISquared);
 
         final double finalTargetI = exactI * (1.0 + (Math.random() - 0.5) * 0.03);
-
         startTime = System.nanoTime();
 
-        measurementTimer = new AnimationTimer() {
+        autoTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 double elapsed = (now - startTime) / 1_000_000_000.0;
-
                 double progress = Math.min(elapsed / targetTime, 1.0);
-                currentSimI = finalTargetI * progress;
+
+                double smoothProgress = progress * progress * (3 - 2 * progress);
+                double currentSimI = finalTargetI * smoothProgress;
 
                 liveTimeLabel.setText(String.format("t = %.2f с", elapsed));
                 liveCurrentLabel.setText(String.format("I = %.3f А", currentSimI));
 
+                currentSlider.setValue(currentSimI);
                 canvas.setPhysicsParameters(voltage, currentSimI, n, l);
 
                 if (elapsed >= targetTime) {
@@ -319,13 +403,13 @@ public class LabController33 extends BaseLabController {
                 }
             }
         };
-        measurementTimer.start();
+        autoTimer.start();
     }
 
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: finishMeasurement.
-     * Призначення: Фіксує результати вимірювання (U, I) та додає запис до таблиці.
+     * Призначення: Записує результати вимірювання до таблиці та оновлює статус.
      */
     private void finishMeasurement(double u, double finalI, double n, double l) {
         liveStatusLabel.setText("Статус: ЗАФОКУСОВАНО");
@@ -356,13 +440,15 @@ public class LabController33 extends BaseLabController {
             }).start();
         } else {
             setControlsDisable(false);
+            liveStatusLabel.setText("Статус: ОЧІКУВАННЯ");
+            liveStatusLabel.setStyle("-fx-text-fill: yellow;");
         }
     }
 
     /*
      * Лабораторна робота № 3-3 "Питомий заряд електрона".
      * Функція: updateStats.
-     * Призначення: Розраховує питомий заряд електрона (e/m) та проводить статистичну обробку.
+     * Призначення: Перераховує загальну статистику вимірювань та виводить висновок.
      */
     private void updateStats() {
         if (data.isEmpty()) {
@@ -387,8 +473,7 @@ public class LabController33 extends BaseLabController {
                         "2. Середнє експериментальне значення: e/m = %.4e Кл/кг.\n" +
                         "3. Теоретичне значення (табличне): e/m = %.4e Кл/кг.\n" +
                         "4. Середня відносна похибка: ε = %.2f %%.\n" +
-                        "ВИСНОВОК: За допомогою методу магнетного фокусування успішно визначено питомий заряд електрона. " +
-                        "Результати співпадають з теоретичними в межах похибки.",
+                        "ВИСНОВОК: За допомогою методу магнетного фокусування успішно визначено питомий заряд електрона.",
                 data.size(), avgExp, EM_THEORY, totalError
         );
 

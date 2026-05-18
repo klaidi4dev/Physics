@@ -1,0 +1,49 @@
+========================================================================
+                      COPYRIGHT AND TERMS OF USE
+========================================================================
+
+Copyright (c) 2026 Maksym Ostapenko (_Klaidi4_).
+All Rights Reserved.
+
+This project contains a collection of software applications developed
+for a physics laboratory practicum. All source code, graphical user
+interfaces, architectural solutions, and algorithms are the intellectual
+property of the author.
+
+1. RESTRICTIONS
+Any unauthorized copying, modification, distribution, publication,
+compilation, or use of this software (in whole or in part) for
+commercial, academic, or any other purposes without the prior written
+consent of the author is strictly prohibited.
+
+2. PURPOSE
+The source code is provided exclusively for review, grading by academic
+instructors, and official copyright registration procedures.
+
+Author: Maksym Ostapenko
+Year: 2026
+
+========================================================================
+                 АВТОРСЬКІ ПРАВА ТА УМОВИ ВИКОРИСТАННЯ
+========================================================================
+
+Copyright (c) 2026 Максим Остапенко (_Klaidi4_).
+Всі права захищені.
+
+Цей проект містить набір програмного забезпечення, розробленого для
+лабораторного практикуму з фізики. Весь вихідний код, графічний
+інтерфейс, архітектурні рішення та алгоритми є інтелектуальною
+власністю автора.
+
+1. ОБМЕЖЕННЯ ПРАВ
+Будь-яке несанкціоноване копіювання, модифікація, поширення, публікація,
+компіляція або використання цього програмного забезпечення (повністю
+або частково) у комерційних, академічних чи будь-яких інших цілях без
+попередньої письмової згоди автора суворо заборонено.
+
+2. ПРИЗНАЧЕННЯ
+Вихідний код надається виключно для ознайомлення, оцінювання викладачами
+та процедури офіційної реєстрації авторських прав на комп'ютерну програму.
+
+Автор: Максим Остапенко
+Рік: 2026

@@ -19,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -29,40 +30,106 @@ public class DocumentationManager {
     private static final String DOCS_TABLE_CSV_URL =
             "https://docs.google.com/spreadsheets/d/1S_KFKmbLnZJ9RoNiwH97MyFv2RO_W-OzopiwIQoywM0/export?format=csv";
 
-    public static void openInstruction(String labId) {
-        if (labId == null || labId.trim().isEmpty()) return;
+    private static final long CACHE_LIFETIME_MS = 10 * 60 * 1000;
+
+    private static final Object CACHE_LOCK = new Object();
+
+    private static Map<String, OnlineInstruction> cachedInstructions = Collections.emptyMap();
+    private static long lastCacheUpdateTime = 0;
+    private static boolean loadingNow = false;
+
+    public static void preloadInstructionsAsync() {
+        synchronized (CACHE_LOCK) {
+            if (loadingNow || isCacheFresh()) {
+                return;
+            }
+
+            loadingNow = true;
+        }
 
         Thread thread = new Thread(() -> {
             try {
-                Map<String, OnlineInstruction> instructions = loadInstructionsFromGoogleTable();
+                Map<String, OnlineInstruction> loaded = loadInstructionsFromGoogleTable();
 
-                OnlineInstruction instruction = instructions.get(labId.trim());
+                synchronized (CACHE_LOCK) {
+                    cachedInstructions = loaded;
+                    lastCacheUpdateTime = System.currentTimeMillis();
+                    loadingNow = false;
+                }
+            } catch (Exception e) {
+                synchronized (CACHE_LOCK) {
+                    loadingNow = false;
+                }
 
-                if (instruction == null) {
-                    Platform.runLater(() -> showInstructionNotFoundAlert(labId));
+                e.printStackTrace();
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    public static void openInstruction(String labId) {
+        if (labId == null || labId.trim().isEmpty()) return;
+
+        String cleanLabId = labId.trim();
+
+        OnlineInstruction cachedInstruction;
+
+        synchronized (CACHE_LOCK) {
+            cachedInstruction = cachedInstructions.get(cleanLabId);
+        }
+
+        if (cachedInstruction != null && !isBlank(cachedInstruction.url)) {
+            openInstructionWindow(cleanLabId, cachedInstruction);
+            return;
+        }
+
+        Thread thread = new Thread(() -> {
+            try {
+                Map<String, OnlineInstruction> instructions;
+
+                synchronized (CACHE_LOCK) {
+                    if (isCacheFresh() && !cachedInstructions.isEmpty()) {
+                        instructions = cachedInstructions;
+                    } else {
+                        instructions = null;
+                        loadingNow = true;
+                    }
+                }
+
+                if (instructions == null) {
+                    instructions = loadInstructionsFromGoogleTable();
+
+                    synchronized (CACHE_LOCK) {
+                        cachedInstructions = instructions;
+                        lastCacheUpdateTime = System.currentTimeMillis();
+                        loadingNow = false;
+                    }
+                }
+
+                OnlineInstruction instruction = instructions.get(cleanLabId);
+
+                if (instruction == null || isBlank(instruction.url)) {
+                    Platform.runLater(() -> showInstructionNotFoundAlert(cleanLabId));
                     return;
                 }
 
-                if (isBlank(instruction.url)) {
-                    Platform.runLater(() -> showInstructionNotFoundAlert(labId));
-                    return;
-                }
-
-                String title = "Інструкція: Лабораторна робота № " + labId;
-
-                if (!isBlank(instruction.title)) {
-                    title += " — " + instruction.title;
-                }
-
-                String finalTitle = title;
-                String finalUrl = normalizeGoogleDriveUrl(instruction.url);
-
-                Platform.runLater(() -> WebInstructionWindow.showUrl(finalTitle, finalUrl));
+                Platform.runLater(() -> openInstructionWindow(cleanLabId, instruction));
 
             } catch (IOException e) {
+                synchronized (CACHE_LOCK) {
+                    loadingNow = false;
+                }
+
                 Platform.runLater(DocumentationManager::showNoInternetAlert);
             } catch (Exception e) {
+                synchronized (CACHE_LOCK) {
+                    loadingNow = false;
+                }
+
                 e.printStackTrace();
+
                 Platform.runLater(() -> showErrorAlert(
                         "Помилка документації",
                         "Не вдалося прочитати Google Таблицю. Перевірте структуру таблиці."
@@ -72,6 +139,44 @@ public class DocumentationManager {
 
         thread.setDaemon(true);
         thread.start();
+    }
+
+    public static void refreshInstructionsAsync() {
+        Thread thread = new Thread(() -> {
+            try {
+                Map<String, OnlineInstruction> loaded = loadInstructionsFromGoogleTable();
+
+                synchronized (CACHE_LOCK) {
+                    cachedInstructions = loaded;
+                    lastCacheUpdateTime = System.currentTimeMillis();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private static void openInstructionWindow(String labId, OnlineInstruction instruction) {
+        String title = "Інструкція: Лабораторна робота № " + labId;
+
+        if (!isBlank(instruction.title)) {
+            title += " — " + instruction.title;
+        }
+
+        String finalUrl = normalizeGoogleDriveUrl(instruction.url);
+        WebInstructionWindow.showUrl(title, finalUrl);
+    }
+
+    private static boolean isCacheFresh() {
+        if (cachedInstructions == null || cachedInstructions.isEmpty()) {
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+        return now - lastCacheUpdateTime <= CACHE_LIFETIME_MS;
     }
 
     private static Map<String, OnlineInstruction> loadInstructionsFromGoogleTable() throws IOException {
@@ -112,9 +217,10 @@ public class DocumentationManager {
         HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
 
         connection.setRequestMethod("GET");
-        connection.setConnectTimeout(6000);
-        connection.setReadTimeout(6000);
+        connection.setConnectTimeout(3500);
+        connection.setReadTimeout(3500);
         connection.setInstanceFollowRedirects(true);
+        connection.setUseCaches(true);
         connection.setRequestProperty("User-Agent", "PhysicsPractice/1.0");
 
         int code = connection.getResponseCode();
@@ -312,7 +418,13 @@ public class DocumentationManager {
         alert.setHeaderText(content);
         alert.showAndWait();
     }
-
+    public static void clearCache() {
+        synchronized (CACHE_LOCK) {
+            cachedInstructions = Collections.emptyMap();
+            lastCacheUpdateTime = 0;
+            loadingNow = false;
+        }
+    }
     private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

@@ -305,23 +305,28 @@ public class LabController51 extends BaseLabController {
         if (!isIlluminatorOn) return;
 
         double d = xScr - xSrc;
-        if (d < 4 * f) {
-            liveSharpnessLabel.setText("Різкість: НЕМОЖЛИВО (D < 4F)");
+        if (d <= 4 * f) {
+            liveSharpnessLabel.setText("Різкість: НЕМОЖЛИВО (D ≤ 4F)");
             liveSharpnessLabel.setStyle("-fx-text-fill: red;");
             return;
         }
 
         double error = canvas.getSharpnessError();
-        if (error < 0.5) {
-            liveSharpnessLabel.setText("Різкість: ІДЕАЛЬНО (100%)");
+        double percent = Math.max(0.0, 100.0 - (error * 5.0));
+        if (percent > 100.0) percent = 100.0;
+
+        if (percent >= 95.0) {
+            liveSharpnessLabel.setText(String.format(Locale.US, "Різкість: ІДЕАЛЬНО (%.1f%%)", percent));
             liveSharpnessLabel.setStyle("-fx-text-fill: #00ff00; -fx-font-weight: bold;");
-        } else if (error < 2.0) {
-            double percent = 100.0 - (error * 10);
-            liveSharpnessLabel.setText(String.format(Locale.US, "Різкість: ДОБРЕ (%.0f%%)", percent));
+        } else if (percent >= 75.0) {
+            liveSharpnessLabel.setText(String.format(Locale.US, "Різкість: ДОБРЕ (%.1f%%)", percent));
             liveSharpnessLabel.setStyle("-fx-text-fill: #a3e635;");
+        } else if (percent > 0.0) {
+            liveSharpnessLabel.setText(String.format(Locale.US, "Різкість: НАВЕДЕННЯ (%.1f%%)", percent));
+            liveSharpnessLabel.setStyle("-fx-text-fill: #ffeb3b;");
         } else {
-            liveSharpnessLabel.setText("Різкість: РОЗМИТО");
-            liveSharpnessLabel.setStyle("-fx-text-fill: yellow;");
+            liveSharpnessLabel.setText("Різкість: РОЗМИТО (0.0%)");
+            liveSharpnessLabel.setStyle("-fx-text-fill: gray;");
         }
     }
 
@@ -359,8 +364,8 @@ public class LabController51 extends BaseLabController {
             return;
         }
 
-        if (canvas.getSharpnessError() > 1.5) {
-            showAlert("Помилка", "Зображення розмите! Знайдіть точний фокус на екрані.");
+        if (canvas.getSharpnessError() > 5.0) {
+            showAlert("Помилка", "Зображення ще розмите! Наведіть різкість хоча б до 75%.");
             return;
         }
 

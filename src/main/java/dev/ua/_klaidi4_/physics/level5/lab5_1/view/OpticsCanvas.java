@@ -163,7 +163,7 @@ public class OpticsCanvas extends Canvas {
         }
 
         gc.setFill(Color.web("#e2e8f0"));
-        gc.fillRect(pxScr - 3, centerY - 80, 6, 160);
+        gc.fillRect(pxScr - 3, centerY - 250, 6, 500);
 
         gc.setStroke(Color.web("#A155FF"));
         gc.setLineWidth(3.0);
@@ -201,7 +201,7 @@ public class OpticsCanvas extends Canvas {
                 gc.setLineDashes(null);
             }
 
-            if (sharpnessError < 2.0) {
+            if (sharpnessError < 5.0) {
                 gc.setStroke(Color.web("#00ffcc"));
                 gc.setLineWidth(3.0);
                 gc.strokeLine(pxScr, centerY, pxScr, imgY);
@@ -209,8 +209,8 @@ public class OpticsCanvas extends Canvas {
                 gc.fillOval(pxScr - 4, imgY - 4, 8, 8);
             } else {
                 double spread = Math.abs(screenY1 - screenY2);
-                if (spread < 80) {
-                    double opacity = Math.max(0.1, 1.0 - (spread / 80.0));
+                if (spread < 500) {
+                    double opacity = Math.max(0.05, 1.0 - (spread / 500.0));
                     gc.setFill(Color.web("#00e5ff", opacity * 0.6));
                     double midY = (screenY1 + screenY2) / 2.0;
                     gc.fillOval(pxScr - 3, midY - spread / 2.0, 6, spread);

@@ -74,11 +74,11 @@ public class MariotteCanvas extends Canvas {
     public void startAnimation() {
         if (timer != null) timer.stop();
         timer = new AnimationTimer() {
-    /*
-     * Лабораторна робота № 7-2 "В'язкість газів".
-     * Функція: handle.
-     * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
-     */
+            /*
+             * Лабораторна робота № 7-2 "В'язкість газів".
+             * Функція: handle.
+             * Призначення: Допоміжний метод для обробки логіки або внутрішнього стану компонента.
+             */
             @Override
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
@@ -86,8 +86,8 @@ public class MariotteCanvas extends Canvas {
                 lastTime = now;
 
                 if (isMeasuring) {
-                    dropY += dt * 300;
-                    if (dropY > 80) dropY = 0;
+                    dropY += dt * 180;
+                    if (dropY > 35) dropY = 0;
                 }
                 draw();
             }
@@ -107,36 +107,43 @@ public class MariotteCanvas extends Canvas {
 
         gc.setFill(Color.web("#e0e0e0"));
         gc.fillRect(0, 0, w, h);
+
+        double tableY = h - 60;
         gc.setFill(Color.web("#b0bec5"));
-        gc.fillRect(0, h - 80, w, 80);
+        gc.fillRect(0, tableY, w, 60);
 
         double centerX = w / 2;
 
         gc.setFill(Color.web("#37474f"));
-        gc.fillRect(centerX - 90, 40, 10, h - 120);
-        gc.fillRect(centerX - 130, h - 80, 90, 15);
-        gc.fillRect(centerX - 90, 150, 45, 10);
+        gc.fillRect(centerX - 100, 40, 10, tableY - 40);
+        gc.fillRect(centerX - 140, tableY, 90, 15);
 
         double flaskW = 90;
-        double flaskH = 220;
+        double flaskH = 180;
         double flaskX = centerX - flaskW / 2;
-        double flaskY = 60;
+        double flaskY = 40;
+
+        gc.fillRect(centerX - 100, flaskY + flaskH / 2 - 10, 55, 10);
+
         double currentLvl = startWaterLevel - (progress * (startWaterLevel - endWaterLevel));
         double waterY = flaskY + flaskH * (1.0 - currentLvl);
         double waterH = flaskH * currentLvl;
 
         LinearGradient waterGrad = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
                 new Stop(0, Color.web("#4fc3f7", 0.8)), new Stop(1, Color.web("#0288d1", 0.8)));
+
         gc.setFill(waterGrad);
         gc.fillRoundRect(flaskX, waterY, flaskW, waterH, 10, 10);
 
         gc.setFill(Color.web("#ffffff", 0.3));
         gc.fillRoundRect(flaskX + 5, waterY + 5, 15, waterH - 10, 5, 5);
+
         gc.setStroke(Color.web("#90a4ae", 0.8));
         gc.setLineWidth(3);
         gc.strokeRoundRect(flaskX, flaskY, flaskW, flaskH, 10, 10);
         gc.setFill(Color.web("#ffffff", 0.15));
         gc.fillRoundRect(flaskX, flaskY, flaskW, flaskH, 10, 10);
+
         gc.setStroke(Color.web("#000000", 0.6));
         gc.setLineWidth(1);
         for (int i = 0; i <= 10; i++) {
@@ -147,27 +154,33 @@ public class MariotteCanvas extends Canvas {
         gc.setFill(Color.web("#8d6e63"));
         gc.fillRect(centerX - 15, flaskY - 15, 30, 15);
         gc.setFill(Color.web("#cfd8dc"));
-        gc.fillRect(centerX - 2, flaskY - 40, 4, 80);
+        gc.fillRect(centerX - 2, flaskY - 40, 4, 120);
+
+        double tubeY = flaskY + flaskH;
+        double tubeH = 20;
         gc.setFill(Color.web("#78909c"));
-        gc.fillRect(centerX - 5, flaskY + flaskH, 10, 20);
+        gc.fillRect(centerX - 5, tubeY, 10, tubeH);
         gc.setFill(Color.web("#d32f2f"));
-        gc.fillOval(centerX + 5, flaskY + flaskH + 2, 15, 15);
+        gc.fillOval(centerX + 5, tubeY + 2, 15, 15);
 
         double beakerW = 50;
         double beakerH = 60;
         double beakerX = centerX - beakerW / 2;
-        double beakerY = h - 80 - beakerH;
+        double beakerY = tableY - beakerH;
+
         double collectedWaterH = (beakerH * 0.8) * progress;
         gc.setFill(waterGrad);
         gc.fillRect(beakerX, beakerY + beakerH - collectedWaterH, beakerW, collectedWaterH);
+
         gc.setStroke(Color.web("#cfd8dc", 0.8));
         gc.setLineWidth(2);
         gc.strokeRect(beakerX, beakerY, beakerW, beakerH);
         gc.setFill(Color.web("#ffffff", 0.2));
         gc.fillRect(beakerX, beakerY, beakerW, beakerH);
+
         if (isMeasuring) {
             gc.setFill(Color.web("#29b6f6"));
-            gc.fillOval(centerX - 3, flaskY + flaskH + 20 + dropY, 6, 10);
+            gc.fillOval(centerX - 3, tubeY + tubeH + dropY, 6, 10);
         }
 
         gc.setFill(Color.web("#212121"));

@@ -78,6 +78,8 @@ import dev.ua._klaidi4_.physics.level8.lab8_4.controller.LabController84;
 import dev.ua._klaidi4_.physics.level8.lab8_5.controller.LabController85;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -137,21 +139,13 @@ public class DashboardController extends BorderPane {
         HBox navBar = new HBox(14);
         navBar.setPadding(new Insets(12, 24, 12, 24));
         navBar.setAlignment(Pos.CENTER_LEFT);
-        navBar.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.96);" +
-                        "-fx-border-color: #dbeafe;" +
-                        "-fx-border-width: 0 0 1 0;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.08), 14, 0, 0, 4);"
-        );
+        navBar.getStyleClass().add("top-navbar");
 
         Button homeBtn = new Button("🏠 Головне меню");
         homeBtn.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
         homeBtn.setCursor(Cursor.HAND);
-        homeBtn.setStyle(getPrimaryButtonStyle("#3b82f6"));
+        homeBtn.getStyleClass().add("primary-btn");
         homeBtn.setOnAction(e -> openMainMenu());
-
-        homeBtn.setOnMouseEntered(e -> homeBtn.setStyle(getPrimaryButtonStyle("#2563eb")));
-        homeBtn.setOnMouseExited(e -> homeBtn.setStyle(getPrimaryButtonStyle("#3b82f6")));
 
         Label appTitle = new Label("Фізика • " + currentBrigade);
         appTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
@@ -165,16 +159,14 @@ public class DashboardController extends BorderPane {
         instructionBtn.setCursor(Cursor.HAND);
         instructionBtn.setVisible(false);
         instructionBtn.setManaged(false);
-        instructionBtn.setStyle(getSoftButtonStyle("#ecfdf5", "#059669", "#a7f3d0"));
+        instructionBtn.getStyleClass().add("soft-green-btn");
 
-        instructionBtn.setOnMouseEntered(e -> instructionBtn.setStyle(getSolidButtonStyle("#10b981")));
-        instructionBtn.setOnMouseExited(e -> instructionBtn.setStyle(getSoftButtonStyle("#ecfdf5", "#059669", "#a7f3d0")));
         instructionBtn.setOnAction(e -> DocumentationManager.openInstruction(currentLabId));
 
         Button changeBrigadeBtn = new Button("🔄 Змінити бригаду");
         changeBrigadeBtn.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
         changeBrigadeBtn.setCursor(Cursor.HAND);
-        changeBrigadeBtn.setStyle(getSoftButtonStyle("#fef2f2", "#dc2626", "#fecaca"));
+        changeBrigadeBtn.getStyleClass().add("soft-red-btn");
 
         changeBrigadeBtn.setOnAction(e -> {
             FadeTransition fadeOut = new FadeTransition(Duration.millis(300), this);
@@ -184,24 +176,16 @@ public class DashboardController extends BorderPane {
             fadeOut.play();
         });
 
-        changeBrigadeBtn.setOnMouseEntered(e -> changeBrigadeBtn.setStyle(getSolidButtonStyle("#ef4444")));
-        changeBrigadeBtn.setOnMouseExited(e -> changeBrigadeBtn.setStyle(getSoftButtonStyle("#fef2f2", "#dc2626", "#fecaca")));
-
         navBar.getChildren().addAll(homeBtn, appTitle, spacer, instructionBtn, changeBrigadeBtn);
         this.setTop(navBar);
 
         mainDashboardView = new BorderPane();
-        mainDashboardView.setStyle("-fx-background-color: linear-gradient(to bottom right, #f8fafc, #eaf6ff);");
+        mainDashboardView.getStyleClass().add("main-background");
 
         sidebar = new VBox(10);
         sidebar.setPadding(new Insets(22, 12, 18, 12));
         sidebar.setPrefWidth(260);
-        sidebar.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.96);" +
-                        "-fx-border-color: #dbeafe;" +
-                        "-fx-border-width: 0 1 0 0;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.06), 12, 0, 4, 0);"
-        );
+        sidebar.getStyleClass().add("sidebar");
 
         Label sidebarTitle = new Label("Розділи");
         sidebarTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 17));
@@ -215,11 +199,7 @@ public class DashboardController extends BorderPane {
         contentScrollPane = new ScrollPane(contentArea);
         contentScrollPane.setFitToWidth(true);
         contentScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        contentScrollPane.setStyle(
-                "-fx-background-color: transparent;" +
-                        "-fx-control-inner-background: transparent;" +
-                        "-fx-background: transparent;"
-        );
+        contentScrollPane.getStyleClass().add("content-scroll-pane");
 
         mainDashboardView.setLeft(sidebar);
         mainDashboardView.setCenter(contentScrollPane);
@@ -311,12 +291,7 @@ public class DashboardController extends BorderPane {
 
         Label authorsLabel = new Label("Created by _Klaidi4_, Ankai, 7ei");
         authorsLabel.setFont(Font.font("Segoe UI", 12));
-        authorsLabel.setStyle(
-                "-fx-text-fill: #94a3b8;" +
-                        "-fx-background-color: #f8fafc;" +
-                        "-fx-background-radius: 12;" +
-                        "-fx-padding: 10 12 10 12;"
-        );
+        authorsLabel.getStyleClass().add("authors-label");
         authorsLabel.setWrapText(true);
         authorsLabel.setAlignment(Pos.CENTER);
         authorsLabel.setMaxWidth(Double.MAX_VALUE);
@@ -353,7 +328,7 @@ public class DashboardController extends BorderPane {
         navButton.setPadding(new Insets(11, 14, 11, 14));
         navButton.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 14));
         navButton.setCursor(Cursor.HAND);
-        navButton.setStyle(getDefaultCategoryButtonStyle());
+        navButton.getStyleClass().add("category-btn");
 
         navButton.setOnAction(e -> {
             setActiveCategoryButton(navButton);
@@ -361,15 +336,9 @@ public class DashboardController extends BorderPane {
         });
 
         navButton.setOnMouseEntered(e -> {
-            if (!navButton.getStyleClass().contains("active-btn")) {
-                navButton.setStyle(getHoverCategoryButtonStyle());
-            }
         });
 
         navButton.setOnMouseExited(e -> {
-            if (!navButton.getStyleClass().contains("active-btn")) {
-                navButton.setStyle(getDefaultCategoryButtonStyle());
-            }
         });
 
         categoryButtons.add(navButton);
@@ -379,17 +348,9 @@ public class DashboardController extends BorderPane {
     private void setActiveCategoryButton(Button activeBtn) {
         for (Button btn : categoryButtons) {
             btn.getStyleClass().remove("active-btn");
-            btn.setStyle(getDefaultCategoryButtonStyle());
         }
 
         activeBtn.getStyleClass().add("active-btn");
-        activeBtn.setStyle(
-                "-fx-background-color: #dbeafe;" +
-                        "-fx-text-fill: #1d4ed8;" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.16), 10, 0, 0, 4);"
-        );
     }
 
     private void showCategoryContent(String title, List<VBox> cards) {
@@ -424,13 +385,7 @@ public class DashboardController extends BorderPane {
         VBox emptyBox = new VBox(10);
         emptyBox.setAlignment(Pos.CENTER);
         emptyBox.setPadding(new Insets(45));
-        emptyBox.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.96);" +
-                        "-fx-background-radius: 18;" +
-                        "-fx-border-color: #dbeafe;" +
-                        "-fx-border-radius: 18;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.08), 18, 0, 0, 8);"
-        );
+        emptyBox.getStyleClass().add("empty-box");
 
         Label emptyTitle = new Label("Немає доступних робіт");
         emptyTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 20));
@@ -455,16 +410,11 @@ public class DashboardController extends BorderPane {
         card.setMinSize(320, 205);
         card.setAlignment(Pos.TOP_CENTER);
         card.setCursor(Cursor.HAND);
-        card.setStyle(getDefaultCardStyle());
+        card.getStyleClass().add("lab-card");
 
         Label numLabel = new Label("№ " + number);
         numLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
-        numLabel.setStyle(
-                "-fx-text-fill: #2563eb;" +
-                        "-fx-background-color: #eff6ff;" +
-                        "-fx-padding: 5 13 5 13;" +
-                        "-fx-background-radius: 20;"
-        );
+        numLabel.getStyleClass().add("lab-card-num");
 
         Label titleLabel = new Label(title);
         titleLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 16));
@@ -485,14 +435,28 @@ public class DashboardController extends BorderPane {
 
         card.getChildren().addAll(numLabel, titleLabel, descLabel, openLabel);
 
+        TranslateTransition cardHoverUp = new TranslateTransition(Duration.millis(200), card);
+        cardHoverUp.setToY(-5);
+
+        TranslateTransition cardHoverDown = new TranslateTransition(Duration.millis(200), card);
+        cardHoverDown.setToY(0);
+
+        ScaleTransition cardScaleUp = new ScaleTransition(Duration.millis(200), card);
+        cardScaleUp.setToX(1.02);
+        cardScaleUp.setToY(1.02);
+
+        ScaleTransition cardScaleDown = new ScaleTransition(Duration.millis(200), card);
+        cardScaleDown.setToX(1.0);
+        cardScaleDown.setToY(1.0);
+
         card.setOnMouseEntered(e -> {
-            card.setTranslateY(-3);
-            card.setStyle(getHoverCardStyle());
+            cardHoverUp.playFromStart();
+            cardScaleUp.playFromStart();
         });
 
         card.setOnMouseExited(e -> {
-            card.setTranslateY(0);
-            card.setStyle(getDefaultCardStyle());
+            cardHoverDown.playFromStart();
+            cardScaleDown.playFromStart();
         });
 
         card.setOnMouseClicked(e -> {
@@ -536,64 +500,5 @@ public class DashboardController extends BorderPane {
 
         this.setCenter(lab.getRoot());
         fadeIn.play();
-    }
-
-    private String getPrimaryButtonStyle(String color) {
-        return "-fx-background-color: " + color + ";" +
-                "-fx-text-fill: white;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 9 17 9 17;" +
-                "-fx-cursor: hand;" +
-                "-fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.25), 10, 0, 0, 4);";
-    }
-
-    private String getSoftButtonStyle(String background, String text, String border) {
-        return "-fx-background-color: " + background + ";" +
-                "-fx-text-fill: " + text + ";" +
-                "-fx-background-radius: 10;" +
-                "-fx-border-color: " + border + ";" +
-                "-fx-border-radius: 10;" +
-                "-fx-padding: 8 15 8 15;" +
-                "-fx-cursor: hand;";
-    }
-
-    private String getSolidButtonStyle(String color) {
-        return "-fx-background-color: " + color + ";" +
-                "-fx-text-fill: white;" +
-                "-fx-background-radius: 10;" +
-                "-fx-border-color: " + color + ";" +
-                "-fx-border-radius: 10;" +
-                "-fx-padding: 8 15 8 15;" +
-                "-fx-cursor: hand;";
-    }
-
-    private String getDefaultCategoryButtonStyle() {
-        return "-fx-background-color: transparent;" +
-                "-fx-text-fill: #334155;" +
-                "-fx-background-radius: 10;";
-    }
-
-    private String getHoverCategoryButtonStyle() {
-        return "-fx-background-color: #eff6ff;" +
-                "-fx-text-fill: #1d4ed8;" +
-                "-fx-background-radius: 10;";
-    }
-
-    private String getDefaultCardStyle() {
-        return "-fx-background-color: rgba(255,255,255,0.97);" +
-                "-fx-background-radius: 18;" +
-                "-fx-border-color: #dbeafe;" +
-                "-fx-border-radius: 18;" +
-                "-fx-border-width: 1;" +
-                "-fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.09), 18, 0, 0, 7);";
-    }
-
-    private String getHoverCardStyle() {
-        return "-fx-background-color: white;" +
-                "-fx-background-radius: 18;" +
-                "-fx-border-color: #93c5fd;" +
-                "-fx-border-radius: 18;" +
-                "-fx-border-width: 1;" +
-                "-fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.22), 22, 0, 0, 9);";
     }
 }

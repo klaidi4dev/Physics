@@ -35,9 +35,9 @@ public class Main {
             rootPane = new StackPane();
 
             showBrigadeSelection();
-
             Scene scene = new Scene(rootPane, 1150, 750);
-
+            String css = getClass().getResource("/css/styles.css").toExternalForm();
+            scene.getStylesheets().add(css);
             setAppIcon(primaryStage);
 
             primaryStage.setTitle("Лабораторний практикум - Фізика");

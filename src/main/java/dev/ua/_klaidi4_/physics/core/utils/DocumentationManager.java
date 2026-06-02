@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DocumentationManager {
 
@@ -38,6 +40,8 @@ public class DocumentationManager {
     private static long lastCacheUpdateTime = 0;
     private static boolean loadingNow = false;
 
+    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+
     public static void preloadInstructionsAsync() {
         synchronized (CACHE_LOCK) {
             if (loadingNow || isCacheFresh()) {
@@ -47,7 +51,7 @@ public class DocumentationManager {
             loadingNow = true;
         }
 
-        Thread thread = new Thread(() -> {
+        EXECUTOR.submit(() -> {
             try {
                 Map<String, OnlineInstruction> loaded = loadInstructionsFromGoogleTable();
 
@@ -64,9 +68,6 @@ public class DocumentationManager {
                 e.printStackTrace();
             }
         });
-
-        thread.setDaemon(true);
-        thread.start();
     }
 
     public static void openInstruction(String labId) {
@@ -85,7 +86,7 @@ public class DocumentationManager {
             return;
         }
 
-        Thread thread = new Thread(() -> {
+        EXECUTOR.submit(() -> {
             try {
                 Map<String, OnlineInstruction> instructions;
 
@@ -136,13 +137,10 @@ public class DocumentationManager {
                 ));
             }
         });
-
-        thread.setDaemon(true);
-        thread.start();
     }
 
     public static void refreshInstructionsAsync() {
-        Thread thread = new Thread(() -> {
+        EXECUTOR.submit(() -> {
             try {
                 Map<String, OnlineInstruction> loaded = loadInstructionsFromGoogleTable();
 
@@ -154,9 +152,6 @@ public class DocumentationManager {
                 e.printStackTrace();
             }
         });
-
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private static void openInstructionWindow(String labId, OnlineInstruction instruction) {
@@ -396,11 +391,24 @@ public class DocumentationManager {
         return "";
     }
 
+    private static void applyAlertStyle(Alert alert) {
+        try {
+            String css = DocumentationManager.class.getResource("/css/styles.css").toExternalForm();
+            alert.getDialogPane().getStylesheets().add(css);
+            alert.getDialogPane().getStyleClass().add("empty-box");
+        } catch (Exception ignored) {}
+    }
+
     private static void showNoInternetAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Немає підключення");
         alert.setHeaderText("Немає підключення до інтернету.");
-        alert.setContentText("Інструкцію неможливо відкрити, тому що програма не може отримати дані з Google Таблиці.");
+        
+        javafx.scene.control.Label label = new javafx.scene.control.Label("Інструкцію неможливо відкрити, тому що програма не може отримати дані з Google Таблиці.");
+        label.setWrapText(true);
+        alert.getDialogPane().setContent(label);
+        
+        applyAlertStyle(alert);
         alert.showAndWait();
     }
 
@@ -408,14 +416,25 @@ public class DocumentationManager {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Документація відсутня");
         alert.setHeaderText("Інструкція для лабораторної роботи № " + labId + " не знайдена.");
-        alert.setContentText("Перевірте, чи є цей labId у Google Таблиці та чи заповнена колонка url.");
+        
+        javafx.scene.control.Label label = new javafx.scene.control.Label("Перевірте, чи є цей labId у Google Таблиці та чи заповнена колонка url.");
+        label.setWrapText(true);
+        alert.getDialogPane().setContent(label);
+        
+        applyAlertStyle(alert);
         alert.showAndWait();
     }
 
     private static void showErrorAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
-        alert.setHeaderText(content);
+        alert.setHeaderText(title);
+        
+        javafx.scene.control.Label label = new javafx.scene.control.Label(content);
+        label.setWrapText(true);
+        alert.getDialogPane().setContent(label);
+        
+        applyAlertStyle(alert);
         alert.showAndWait();
     }
     public static void clearCache() {

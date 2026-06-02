@@ -1,0 +1,208 @@
+/* Загальні стилі та фони */
+.main-background {
+    -fx-background-color: linear-gradient(to bottom right, #f8fafc, #eaf6ff);
+}
+
+.top-navbar {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-border-color: #dbeafe;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.08), 14, 0, 0, 4);
+}
+
+.sidebar {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-border-color: #dbeafe;
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.06), 12, 0, 4, 0);
+}
+
+.content-scroll-pane,
+.content-scroll-pane .viewport {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-background: transparent;
+}
+
+/* Кнопки загальні */
+.primary-btn {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 9 17 9 17;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.25), 10, 0, 0, 4);
+}
+.primary-btn:hover {
+    -fx-background-color: #2563eb;
+    -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.34), 14, 0, 0, 6);
+}
+.primary-btn:disabled {
+    -fx-background-color: #bfdbfe;
+    -fx-opacity: 0.75;
+    -fx-cursor: default;
+    -fx-effect: none;
+}
+
+.soft-green-btn {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #059669;
+    -fx-background-radius: 10;
+    -fx-border-color: #a7f3d0;
+    -fx-border-radius: 10;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+}
+.soft-green-btn:hover {
+    -fx-background-color: #10b981;
+    -fx-text-fill: white;
+    -fx-border-color: #10b981;
+}
+
+.soft-red-btn {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #dc2626;
+    -fx-background-radius: 10;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 10;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+}
+.soft-red-btn:hover {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-border-color: #ef4444;
+}
+
+/* Категорії (бокове меню) */
+.category-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-background-radius: 8;
+    -fx-font-weight: normal;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 8;
+    -fx-alignment: center-left;
+}
+.category-btn:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+}
+.category-btn.active-btn {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #2563eb;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 8;
+}
+
+/* Картки лабораторних робіт */
+.lab-card {
+    -fx-background-color: rgba(255,255,255,0.97);
+    -fx-background-radius: 18;
+    -fx-border-color: #dbeafe;
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.09), 18, 0, 0, 7);
+}
+.lab-card:hover {
+    -fx-background-color: white;
+    -fx-border-color: #93c5fd;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.22), 22, 0, 0, 9);
+}
+
+.lab-card-num {
+    -fx-text-fill: #2563eb;
+    -fx-background-color: #eff6ff;
+    -fx-padding: 5 13 5 13;
+    -fx-background-radius: 20;
+}
+
+/* Інші елементы Dashboard */
+.authors-label {
+    -fx-text-fill: #94a3b8;
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12;
+    -fx-padding: 10 12 10 12;
+}
+
+.empty-box {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-background-radius: 18;
+    -fx-border-color: #dbeafe;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.08), 18, 0, 0, 8);
+}
+
+/* Екран авторизації (BrigadeSelectionScreen) */
+.login-box {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(203,213,225,0.85);
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.13), 24, 0, 0, 10);
+}
+
+.badge-label {
+    -fx-text-fill: #2563eb;
+    -fx-background-color: #eff6ff;
+    -fx-background-radius: 20;
+    -fx-padding: 6 15 6 15;
+}
+
+.icon-box {
+    -fx-background-color: linear-gradient(to bottom right, #f8fafc, #eff6ff);
+    -fx-background-radius: 24;
+    -fx-border-color: #dbeafe;
+    -fx-border-radius: 24;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.18), 18, 0, 0, 7);
+}
+
+.bg-circle-1 { -fx-fill: rgba(59, 130, 246, 0.07); }
+.bg-circle-2 { -fx-fill: rgba(14, 165, 233, 0.06); }
+.bg-circle-3 { -fx-fill: rgba(37, 99, 235, 0.055); }
+.bg-circle-4 { -fx-fill: rgba(59, 130, 246, 0.045); }
+
+.combo-box-custom {
+    -fx-font-family: 'Segoe UI';
+    -fx-font-size: 14px;
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 3 8 3 8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.05), 10, 0, 0, 4);
+}
+
+.combo-box-custom .list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.16), 16, 0, 0, 8);
+}
+
+.combo-box-custom .list-view .list-cell {
+    -fx-background-color: white;
+    -fx-text-fill: #334155;
+    -fx-background-radius: 8;
+    -fx-padding: 9 12 9 12;
+}
+
+.combo-box-custom .list-view .list-cell:hover {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #0f172a;
+}
+
+.combo-box-custom .list-view .list-cell:selected {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1d4ed8;
+    -fx-font-weight: bold;
+}

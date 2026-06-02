@@ -9,7 +9,12 @@
 package dev.ua._klaidi4_.physics.core.brigade;
 
 import dev.ua._klaidi4_.physics.core.DashboardController;
+import javafx.animation.Animation;
+import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
+import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -22,12 +27,17 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.FontPosture;
+import javafx.scene.CacheHint;
 import javafx.util.Duration;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class BrigadeSelectionScreen extends BorderPane {
 
@@ -39,7 +49,7 @@ public class BrigadeSelectionScreen extends BorderPane {
     }
 
     private void initUI() {
-        setStyle("-fx-background-color: linear-gradient(to bottom right, #f8fafc, #eaf6ff);");
+        getStyleClass().add("main-background");
 
         StackPane rootPane = new StackPane();
         rootPane.setAlignment(Pos.CENTER);
@@ -48,27 +58,7 @@ public class BrigadeSelectionScreen extends BorderPane {
         Pane backgroundPane = new Pane();
         backgroundPane.setMouseTransparent(true);
 
-        Circle circleLeft = new Circle(120);
-        circleLeft.setStyle("-fx-fill: rgba(59, 130, 246, 0.07);");
-        circleLeft.setLayoutX(170);
-        circleLeft.setLayoutY(145);
-
-        Circle circleRight = new Circle(165);
-        circleRight.setStyle("-fx-fill: rgba(14, 165, 233, 0.06);");
-        circleRight.setLayoutX(1120);
-        circleRight.setLayoutY(690);
-
-        Circle circleSmall = new Circle(55);
-        circleSmall.setStyle("-fx-fill: rgba(37, 99, 235, 0.055);");
-        circleSmall.setLayoutX(950);
-        circleSmall.setLayoutY(125);
-
-        Circle circleSoft = new Circle(38);
-        circleSoft.setStyle("-fx-fill: rgba(59, 130, 246, 0.045);");
-        circleSoft.setLayoutX(735);
-        circleSoft.setLayoutY(580);
-
-        backgroundPane.getChildren().addAll(circleLeft, circleRight, circleSmall, circleSoft);
+        spawnFloatingFormulas(backgroundPane);
 
         VBox centerBox = new VBox(13);
         centerBox.setAlignment(Pos.CENTER);
@@ -77,23 +67,11 @@ public class BrigadeSelectionScreen extends BorderPane {
         centerBox.setMaxHeight(500);
         centerBox.setPrefHeight(500);
         centerBox.setPadding(new Insets(32, 46, 32, 46));
-        centerBox.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.96);" +
-                        "-fx-background-radius: 18;" +
-                        "-fx-border-color: rgba(203,213,225,0.85);" +
-                        "-fx-border-radius: 18;" +
-                        "-fx-border-width: 1;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.13), 24, 0, 0, 10);"
-        );
+        centerBox.getStyleClass().add("login-box");
 
         Label topLabel = new Label("Віртуальна лабораторія");
         topLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 11));
-        topLabel.setStyle(
-                "-fx-text-fill: #2563eb;" +
-                        "-fx-background-color: #eff6ff;" +
-                        "-fx-background-radius: 20;" +
-                        "-fx-padding: 6 15 6 15;"
-        );
+        topLabel.getStyleClass().add("badge-label");
 
         ImageView physicsIcon = createImage("/images/physics-icon.png", 72);
         physicsIcon.setOpacity(0.98);
@@ -102,14 +80,7 @@ public class BrigadeSelectionScreen extends BorderPane {
         iconBox.setPrefSize(100, 100);
         iconBox.setMaxSize(100, 100);
         iconBox.setAlignment(Pos.CENTER);
-        iconBox.setStyle(
-                "-fx-background-color: linear-gradient(to bottom right, #f8fafc, #eff6ff);" +
-                        "-fx-background-radius: 24;" +
-                        "-fx-border-color: #dbeafe;" +
-                        "-fx-border-radius: 24;" +
-                        "-fx-border-width: 1;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.18), 18, 0, 0, 7);"
-        );
+        iconBox.getStyleClass().add("icon-box");
 
         Label titleLabel = new Label("Лабораторний Практикум");
         titleLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 27));
@@ -131,17 +102,7 @@ public class BrigadeSelectionScreen extends BorderPane {
         brigadeComboBox.setPrefWidth(320);
         brigadeComboBox.setPrefHeight(45);
         brigadeComboBox.setVisibleRowCount(7);
-        brigadeComboBox.setStyle(
-                "-fx-font-family: 'Segoe UI';" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-background-color: #f8fafc;" +
-                        "-fx-border-color: #cbd5e1;" +
-                        "-fx-border-radius: 10;" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-padding: 4 8 4 8;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(15,23,42,0.05), 10, 0, 0, 4);"
-        );
+        brigadeComboBox.getStyleClass().add("combo-box-custom");
 
         brigadeComboBox.setButtonCell(new ListCell<>() {
             @Override
@@ -226,12 +187,7 @@ public class BrigadeSelectionScreen extends BorderPane {
         continueBtn.setPrefHeight(43);
         continueBtn.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
         continueBtn.setDisable(true);
-        continueBtn.setStyle(
-                "-fx-background-color: #bfdbfe;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-opacity: 0.75;"
-        );
+        continueBtn.getStyleClass().add("primary-btn");
 
         Label hintLabel = new Label("Після вибору бригади відкриється головне меню");
         hintLabel.setFont(Font.font("Segoe UI", 11));
@@ -240,46 +196,25 @@ public class BrigadeSelectionScreen extends BorderPane {
         brigadeComboBox.setOnAction(e -> {
             boolean isSelected = brigadeComboBox.getValue() != null;
             continueBtn.setDisable(!isSelected);
-
-            if (isSelected) {
-                continueBtn.setStyle(
-                        "-fx-background-color: #3b82f6;" +
-                                "-fx-text-fill: white;" +
-                                "-fx-background-radius: 10;" +
-                                "-fx-cursor: hand;" +
-                                "-fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.28), 12, 0, 0, 5);"
-                );
-            } else {
-                continueBtn.setStyle(
-                        "-fx-background-color: #bfdbfe;" +
-                                "-fx-text-fill: white;" +
-                                "-fx-background-radius: 10;" +
-                                "-fx-opacity: 0.75;"
-                );
-            }
         });
+
+        ScaleTransition btnScaleUp = new ScaleTransition(Duration.millis(150), continueBtn);
+        btnScaleUp.setToX(1.02);
+        btnScaleUp.setToY(1.02);
+
+        ScaleTransition btnScaleDown = new ScaleTransition(Duration.millis(150), continueBtn);
+        btnScaleDown.setToX(1.0);
+        btnScaleDown.setToY(1.0);
 
         continueBtn.setOnMouseEntered(e -> {
             if (!continueBtn.isDisabled()) {
-                continueBtn.setStyle(
-                        "-fx-background-color: #2563eb;" +
-                                "-fx-text-fill: white;" +
-                                "-fx-background-radius: 10;" +
-                                "-fx-cursor: hand;" +
-                                "-fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.34), 14, 0, 0, 6);"
-                );
+                btnScaleUp.playFromStart();
             }
         });
 
         continueBtn.setOnMouseExited(e -> {
             if (!continueBtn.isDisabled()) {
-                continueBtn.setStyle(
-                        "-fx-background-color: #3b82f6;" +
-                                "-fx-text-fill: white;" +
-                                "-fx-background-radius: 10;" +
-                                "-fx-cursor: hand;" +
-                                "-fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.28), 12, 0, 0, 5);"
-                );
+                btnScaleDown.playFromStart();
             }
         });
 
@@ -307,6 +242,71 @@ public class BrigadeSelectionScreen extends BorderPane {
 
         rootPane.getChildren().addAll(backgroundPane, centerBox);
         setCenter(rootPane);
+    }
+
+    private void spawnFloatingFormulas(Pane pane) {
+        String[] formulas = {
+                "E = mc²", "F = m⋅a", "pV = νRT", "λ = h / p", 
+                "ΔxΔp ≥ ℏ/2", "T = 2π√(l/g)", "F = G(m₁m₂)/r²", 
+                "U = q + A", "I = U/R", "Φ = B⋅S⋅cosα"
+        };
+        Random random = new Random();
+        List<Text> nodes = new ArrayList<>();
+        double[] speedsX = new double[16];
+        double[] speedsY = new double[16];
+
+        for (int i = 0; i < 16; i++) {
+            Text text = new Text(formulas[random.nextInt(formulas.length)]);
+            text.setFont(Font.font("Times New Roman", FontPosture.ITALIC, 26 + random.nextInt(26))); 
+            text.setStyle("-fx-fill: rgba(59, 130, 246, 0." + (10 + random.nextInt(15)) + ");");
+            text.setCache(true);
+            text.setCacheHint(CacheHint.SPEED);
+            
+            text.setX(random.nextDouble() * 1200);
+            text.setY(random.nextDouble() * 800);
+            
+            pane.getChildren().add(text);
+            nodes.add(text);
+            
+            speedsX[i] = (random.nextDouble() - 0.5) * 45; 
+            speedsY[i] = (random.nextDouble() - 0.5) * 45; 
+
+            RotateTransition rt = new RotateTransition(Duration.seconds(25 + random.nextInt(30)), text);
+            rt.setByAngle((random.nextBoolean() ? 1 : -1) * 360);
+            rt.setCycleCount(Animation.INDEFINITE);
+            rt.setInterpolator(Interpolator.LINEAR);
+            rt.play();
+        }
+
+        AnimationTimer timer = new AnimationTimer() {
+            private long lastUpdate = 0;
+
+            @Override
+            public void handle(long now) {
+                if (lastUpdate == 0) {
+                    lastUpdate = now;
+                    return;
+                }
+
+                double elapsedSeconds = (now - lastUpdate) / 1_000_000_000.0;
+                lastUpdate = now;
+
+                for (int i = 0; i < nodes.size(); i++) {
+                    Text text = nodes.get(i);
+                    double nx = text.getX() + speedsX[i] * elapsedSeconds;
+                    double ny = text.getY() + speedsY[i] * elapsedSeconds;
+                    
+                    if (nx > 1250) nx = -100;
+                    if (nx < -100) nx = 1250;
+                    if (ny > 850) ny = -50;
+                    if (ny < -50) ny = 850;
+                    
+                    text.setX(nx);
+                    text.setY(ny);
+                }
+            }
+        };
+        timer.start();
     }
 
     private ImageView createImage(String path, double size) {

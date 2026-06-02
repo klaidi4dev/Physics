@@ -285,16 +285,13 @@ public class LabController72 extends BaseLabController {
             double rho = getDoubleValue(fieldRho, 1000.0);
             double g = getDoubleValue(fieldG, 9.81);
             double S = getDoubleValue(fieldS, 0.005);
-
             double r_m = getDoubleValue(fieldRadius, 0.20) * 1e-3;
             double L_m = getDoubleValue(fieldLength, 10.0) * 1e-2;
             double T = getDoubleValue(fieldTemp, 293.0);
             double V_m3 = v_cm3 * 1e-6;
-
             double h1 = 0.25;
             double h2 = h1 - (V_m3 / S);
             double deltaP = rho * g * ((h1 + h2) / 2.0);
-
             double eta_true = 1.7e-5 * Math.pow(T / 273.15, 0.76);
             double exactTau = (8.0 * eta_true * V_m3 * L_m) / (Math.PI * Math.pow(r_m, 4) * deltaP);
             measuredTau = exactTau + (Math.random() - 0.5) * 0.5;

@@ -30,16 +30,13 @@ import java.util.concurrent.Executors;
 public class DocumentationManager {
 
     private static final String DOCS_TABLE_CSV_URL =
-            "https://docs.google.com/spreadsheets/d/1S_KFKmbLnZJ9RoNiwH97MyFv2RO_W-OzopiwIQoywM0/export?format=csv";
+            "https://docs.google.com/spreadsheets/d/1YxLNlZHgMiPqup4W_h86cOSQ1ceDYRl3-KQOgLmGAUg/export?format=csv";
 
     private static final long CACHE_LIFETIME_MS = 10 * 60 * 1000;
-
     private static final Object CACHE_LOCK = new Object();
-
     private static Map<String, OnlineInstruction> cachedInstructions = Collections.emptyMap();
     private static long lastCacheUpdateTime = 0;
     private static boolean loadingNow = false;
-
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
     public static void preloadInstructionsAsync() {
@@ -135,21 +132,6 @@ public class DocumentationManager {
                         "Помилка документації",
                         "Не вдалося прочитати Google Таблицю. Перевірте структуру таблиці."
                 ));
-            }
-        });
-    }
-
-    public static void refreshInstructionsAsync() {
-        EXECUTOR.submit(() -> {
-            try {
-                Map<String, OnlineInstruction> loaded = loadInstructionsFromGoogleTable();
-
-                synchronized (CACHE_LOCK) {
-                    cachedInstructions = loaded;
-                    lastCacheUpdateTime = System.currentTimeMillis();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         });
     }
